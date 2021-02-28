@@ -34,6 +34,8 @@ class SpecialBreedingParents extends SpecialPage {
 			$this->getOutput(),
 		);
 
+		$this->debugOutput("TEST");
+
 		//$callbackResult = $callbackHandler->callbackMain();
 		
 		//add svg tag, add $svgStructure, add frontendStuff.js
@@ -53,11 +55,8 @@ class SpecialBreedingParents extends SpecialPage {
 		$form->setSubmitText('do it');//todo text not final
 		$form->prepareForm();
 
-		if (empty($_GET)) {
-			$form->displayForm('');
-		} else {
-			$form->displayForm($form->trySubmit());
-		}
+		$form->displayForm('');
+		$form->trySubmit();
 	}
 	
 	//has to be public
@@ -68,6 +67,7 @@ class SpecialBreedingParents extends SpecialPage {
 	
 		$regex = '/[^a-zA-Zßäéü\-♂♀2:]/';//these are all characters that are used in pkmn names
 		if (preg_match($regex, $value)) {
+			$this->debugOutput("pkmn name is evil >:(");
 			return 'Invalid character in the Pokémon name';
 		}
 	
@@ -82,6 +82,7 @@ class SpecialBreedingParents extends SpecialPage {
 
 		$regex = '/[^a-zA-ZÜßäöü\- 2]/';//these are all characters that are used in move names
 		if (preg_match($regex, $value)) {
+			$this->debugOutput("move name is evil >:(");
 			return 'Invalid character in the move name';
 		}
 		
