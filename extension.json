@@ -3,7 +3,7 @@
     "version" : "0.1.0",
     "author" : "DeXter",
     "descriptionmsg" : "breedingparents-desc",
-    "license-name" : "keineAhnung",
+    "license-name" : "MIT",
     "type" : "specialpage",
     "SpecialPages" : {
         "BreedingParents" : "SpecialBreedingParents"
@@ -17,6 +17,6 @@
         "SpecialBreedingParents": "includes/SpecialBreedingParents.php"
     },
     "ExtensionMessagesFiles": {
-        "BreedingParentsAlias": "i18n/BreedingParents.alias.php"
+        "BreedingParentsAlias": "BreedingParents.alias.php"
     }
 }
