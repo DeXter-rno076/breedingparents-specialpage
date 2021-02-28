@@ -1,0 +1,22 @@
+{
+    "name" : "BreedingParents",
+    "version" : "0.1.0",
+    "author" : "DeXter",
+    "descriptionmsg" : "breedingparents-desc",
+    "license-name" : "keineAhnung",
+    "type" : "specialpage",
+    "SpecialPages" : {
+        "BreedingParents" : "SpecialBreedingParents"
+    },
+    "MessageDirs" : {
+        "BreedingParents" : [
+            "i18n"
+        ]
+    },
+    "AutoloadClasses": {
+        "SpecialBreedingParents": "includes/SpecialBreedingParents.php"
+    },
+    "ExtensionMessagesFiles": {
+        "BreedingParentsAlias": "i18n/BreedingParents.alias.php"
+    }
+}
