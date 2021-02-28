@@ -8,7 +8,7 @@
     "SpecialPages" : {
         "BreedingParents" : "SpecialBreedingParents"
     },
-    "MessageDirs" : {
+    "MessagesDirs" : {
         "BreedingParents" : [
             "i18n"
         ]
@@ -18,5 +18,9 @@
     },
     "ExtensionMessagesFiles": {
         "BreedingParentsAlias": "BreedingParents.alias.php"
+    },
+    "manifest_version": 1,
+    "requires": {
+        "MediaWiki": ">= 1.25"
     }
 }
