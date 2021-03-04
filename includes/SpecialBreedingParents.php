@@ -1,5 +1,6 @@
 <?php 
-require "CallbackHandler.php";
+require 'BackendHandler.php';
+require 'FrontendHandler.php';
 
 class SpecialBreedingParents extends SpecialPage {
 	private $pkmnData = null;
@@ -25,7 +26,7 @@ class SpecialBreedingParents extends SpecialPage {
 
 		$this->getData($targetGen);
 		
-		$callbackHandler = new CallbackHandler(
+		$backendHandler = new BackendHandler(
 			$this->pkmnData,
 			$this->eggGroups,
 			$this->unbreedable,
@@ -34,14 +35,10 @@ class SpecialBreedingParents extends SpecialPage {
 			$this->getOutput(),
 		);
 
-		$this->debugOutput("TEST");
-
-		//$callbackResult = $callbackHandler->callbackMain();
+		$breedingTree = $backendHandler->createBreedingTree();
 		
-		//add svg tag, add $svgStructure, add frontendStuff.js
-
-		//$this->debugOutput($callbackResult);
-		//$this->debugConsole($callbackResult);
+		$frontendHandler = new FrontendHandler($breedingTree);
+		$frontendHandler->addSVG($this->getOutput());
 
 		return Status::newGood();
 	}

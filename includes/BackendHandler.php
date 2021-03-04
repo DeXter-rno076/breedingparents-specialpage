@@ -1,8 +1,7 @@
 <?php
-require "FrontendPreparator.php";
 //todo handle optionally pkmn from previous generations (would include checking more learnsets per pkmn)
 
-class CallbackHandler {
+class BackendHandler {
 	private $pkmnData = null;
 	private $eggGroups = null;
 	private $unbreedable = null;
@@ -20,7 +19,7 @@ class CallbackHandler {
 		$this->pageOutput = $pageOutput;
 	}
 
-	public function callbackMain () {
+	public function createBreedingTree () {
 		$timeStart = hrtime(true);
 
 		$pkmn = $this->targetPkmn;
@@ -32,10 +31,7 @@ class CallbackHandler {
 		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
 		$this->out("needed ".$timeDiff." seconds");
 
-		$frontendPreparator = new FrontendPreparator($this->pkmnData);
-		$svgObjectTree = $frontendPreparator->prepareForFrontend($breedingTree);
-
-		return json_encode($svgObjectTree);
+		return $breedingTree;
 	}
 
 	//todo split this up
