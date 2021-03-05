@@ -2,7 +2,7 @@
 class FrontendPreparator {
 	private $breedingTreeDeepness = -1;
 	private $pkmnData = null;
-	private final $PKMN_ICON_HEIGHT = 10;
+	private $PKMN_ICON_HEIGHT = 10;
 
 	public function __construct ($pkmnData) {
 		$this->pkmnData = $pkmnData;
@@ -14,7 +14,9 @@ class FrontendPreparator {
 	 */
 	public function prepareForFrontend ($breedingTree) {
 		//todo mark pkmn that have learnsByEvent set to true
-		$this->setHeight($breedingTree);
+		$this->setHeight($breedingTree, 1);
+
+		$breedingTree->treeYOffset = 0;
 		$this->setOffset($breedingTree);
 
 		$finalObjectTree = $this->buildFinalObjectTree($breedingTree);
@@ -23,14 +25,14 @@ class FrontendPreparator {
 
 		return $finalObjectTree;
 	}
-	
+
 	/**
 	 * runs recursively over the object tree and sets all heights
 	 * an object's height is the sum of its successors' heights or $PKMN_ICON_HEIGHT if it has no successors
 	 */
 	private function setHeight ($chainNode, $deepness) {
 		if ($this->breedingTreeDeepness < $deepness) {
-			$this->breedingTreeDeepness = $deepness);
+			$this->breedingTreeDeepness = $deepness;
 		}
 
 		if (count($chainNode->getSuccessors()) == 0) {
@@ -59,7 +61,7 @@ class FrontendPreparator {
 		foreach ($chainNode->getSuccessors() as $successor) {
 			$offset = $chainNode->treeYOffset + $takenSpace;
 			$successor->treeYOffset = $offset;
-			$takenSpace += $successor->$treeSectionHeight;
+			$takenSpace += $successor->treeSectionHeight;
 			$this->setOffset($successor);
 		}
 	}
@@ -76,7 +78,9 @@ class FrontendPreparator {
 	 * creates new object for the final svg object structure
 	 */
 	private function handleChainNode ($breedingChainNode, $currentDeepness) {
-		$pkmnId = $this->pkmnData->$breedingChainNode->name->id;
+		$pkmnName = $breedingChainNode->name;
+		$pkmnData = $this->pkmnData->$pkmnName;
+		$pkmnId = $pkmnData->id;
 		$pkmnX = $currentDeepness * (100 / $this->breedingTreeDeepness);
 		$pkmnY = $breedingChainNode->treeYOffset + ($breedingChainNode->treeSectionHeight / 2);
 		$pkmnObj = new FrontendPkmnObj($pkmnId, $pkmnX, $pkmnY);
@@ -100,6 +104,7 @@ class FrontendPkmnObj {
 		$this->pkmnid = $pkmnid;
 		$this->x = $x;
 		$this->y = $y;
+		$this->successors = [];
 	}
 
 	public function addSuccessor ($successor) {
