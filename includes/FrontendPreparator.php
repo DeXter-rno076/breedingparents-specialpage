@@ -2,10 +2,11 @@
 class FrontendPreparator {
 	private $breedingTreeDeepness = -1;
 	private $pkmnData = null;
-	private $PKMN_ICON_HEIGHT = 10;
+	private $PKMN_ICON_HEIGHT = -1;
 
-	public function __construct ($pkmnData) {
+	public function __construct ($pkmnData, $PKMN_ICON_HEIGHT) {
 		$this->pkmnData = $pkmnData;
+		$this->PKMN_ICON_HEIGHT = $PKMN_ICON_HEIGHT;
 	}
 
 	/**
@@ -82,7 +83,12 @@ class FrontendPreparator {
 		$pkmnData = $this->pkmnData->$pkmnName;
 		$pkmnId = $pkmnData->id;
 		$pkmnX = $currentDeepness * (100 / $this->breedingTreeDeepness);
-		$pkmnY = $breedingChainNode->treeYOffset + ($breedingChainNode->treeSectionHeight / 2);
+		$pkmnY = $breedingChainNode->treeYOffset;
+		if ($breedingChainNode->treeSectionHeight > $this->PKMN_ICON_HEIGHT) {
+			//this is only needed for pkmn with successors
+			$pkmnY += ($breedingChainNode->treeSectionHeight / 2);
+		}
+
 		$pkmnObj = new FrontendPkmnObj($pkmnId, $pkmnX, $pkmnY);
 
 		foreach ($breedingChainNode->getSuccessors() as $successor) {
@@ -95,6 +101,7 @@ class FrontendPreparator {
 }
 
 class FrontendPkmnObj {
+	//todo change access rights
 	public $pkmnid;
 	public $x;
 	public $y;
@@ -109,6 +116,10 @@ class FrontendPkmnObj {
 
 	public function addSuccessor ($successor) {
 		array_push($this->successors, $successor);
+	}
+
+	public function getSuccessors () {
+		return $this->successors;
 	}
 }
 ?>
