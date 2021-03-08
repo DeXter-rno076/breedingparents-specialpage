@@ -34,7 +34,8 @@ $formDescriptor = [
 			'4' => 4,
 			'3' => 3,
 			'2' => 2,
-		]
+		],
+		'validation-callback' => [ $this, 'validateGen' ]
 	]
 ];
 ?>

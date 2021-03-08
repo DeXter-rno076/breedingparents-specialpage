@@ -1,4 +1,6 @@
-<?php 
+<?php
+//todo find a solution for output of validation methods
+
 require 'BackendHandler.php';
 require 'FrontendHandler.php';
 
@@ -36,8 +38,8 @@ class SpecialBreedingParents extends SpecialPage {
 		);
 
 		$breedingTree = $backendHandler->createBreedingTree();
-		
-		$frontendHandler = new FrontendHandler($breedingTree);
+
+		$frontendHandler = new FrontendHandler($breedingTree, $this->pkmnData);
 		$frontendHandler->addSVG($this->getOutput());
 
 		return Status::newGood();
@@ -83,6 +85,15 @@ class SpecialBreedingParents extends SpecialPage {
 			return 'Invalid character in the move name';
 		}
 		
+		return true;
+	}
+
+	//has to be public
+	public function validateGen ($value, $allData) {
+		if (gettype($value) !== 'integer') {
+			return 'Invalid gen input';
+		}
+
 		return true;
 	}
 
@@ -134,5 +145,4 @@ class SpecialBreedingParents extends SpecialPage {
 		echo '<script>console.log("'.$msg.'")</script>';
 	}
 }
-
 ?>
