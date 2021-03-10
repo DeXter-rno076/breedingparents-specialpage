@@ -39,6 +39,26 @@ class SpecialBreedingParents extends SpecialPage {
 
 		$breedingTree = $backendHandler->createBreedingTree();
 
+		if (is_null($breedingTree)) {
+			return Status::newFatal('breeding tree empty');
+		}
+
+		/* $fileRepo = new FileRepo([
+			'descBaseUrl' => 'https://www.pokewiki.de/Datei:',
+			'scriptDirUrl' => 'https://www.pokewiki.de/',
+			'articleUrl' => 'https://www.pokewiki.de/$1'
+
+		]);
+		$pkmnicon = new LocalFile('Datei:Pokémon-Icon 150.png', $fileRepo);
+		$iconurl = $pkmnicon->getUrl();
+		$this->debugOutput($iconurl); */
+
+		/* $filetest = fopen('testOutput.json', 'r');
+		fclose($filetest); */
+
+		/* $test_fileAccessTime = fileatime('testOutput.json');
+		$this->debugOutput(json_encode($test_fileAccessTime)); */
+
 		$frontendHandler = new FrontendHandler($breedingTree, $this->pkmnData);
 		$frontendHandler->addSVG($this->getOutput());
 
@@ -66,7 +86,7 @@ class SpecialBreedingParents extends SpecialPage {
 	
 		$regex = '/[^a-zA-Zßäéü\-♂♀2:]/';//these are all characters that are used in pkmn names
 		if (preg_match($regex, $value)) {
-			$this->debugOutput("pkmn name is evil >:(");
+			$this->debugOutput('pkmn name is evil >:(');
 			return 'Invalid character in the Pokémon name';
 		}
 	
@@ -81,7 +101,7 @@ class SpecialBreedingParents extends SpecialPage {
 
 		$regex = '/[^a-zA-ZÜßäöü\- 2]/';//these are all characters that are used in move names
 		if (preg_match($regex, $value)) {
-			$this->debugOutput("move name is evil >:(");
+			$this->debugOutput('move name is evil >:(');
 			return 'Invalid character in the move name';
 		}
 		
@@ -90,7 +110,8 @@ class SpecialBreedingParents extends SpecialPage {
 
 	//has to be public
 	public function validateGen ($value, $allData) {
-		if (gettype($value) !== 'integer') {
+		if (!is_numeric($value)) {
+			$this->debugOutput('gen is evil >:(');
 			return 'Invalid gen input';
 		}
 
