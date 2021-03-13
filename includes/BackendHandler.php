@@ -1,4 +1,5 @@
 <?php
+//schnickschnack-Idee: button for converting svg graphic into an image and download it
 //todo handle optionally pkmn from previous generations (would include checking more learnsets per pkmn)
 
 class BackendHandler {
@@ -25,17 +26,18 @@ class BackendHandler {
 		$pkmn = $this->targetPkmn;
 		$targetPkmnData = $this->pkmnData->$pkmn;
 
-		$breedingTree = $this->createBreedingChainNode($targetPkmnData, [$pkmn], [], 'root');
+		$pkmnBlacklist = [$pkmn];
+		$breedingTree = $this->createBreedingChainNode($targetPkmnData, $pkmnBlacklist, [], 'root');
 
 		$timeEnd = hrtime(true);
 		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
-		$this->out("needed ".$timeDiff." seconds");
+		$this->out("backend needed ".$timeDiff." seconds");
 
 		return $breedingTree;
 	}
 
 	//todo split this up
-	private function createBreedingChainNode ($pkmn, $pkmnBlacklist, $eggGroupBlacklist) {
+	private function createBreedingChainNode ($pkmn, &$pkmnBlacklist, $eggGroupBlacklist) {
 		//todo form change moves (e. g. Rotom) should count as normal 
 		//todo (check if there are breedable pkmn that have those form change learnsets)
 
@@ -54,6 +56,7 @@ class BackendHandler {
 			}
 		}
 
+		//todo the mass of "$eventLearnsets is undefined" debug messages sucks, find a way to avoid it
 		if ($this->checkLearnsetType($pkmn->eventLearnsets)) {
 			$chainNode = new BreedingChainNode($pkmn->name);
 			$chainNode->setLearnsByEvent();
@@ -63,7 +66,7 @@ class BackendHandler {
 		return null;
 	}
 
-	private function setPossibleParents ($eggGroup1, $eggGroup2, $pkmnObj, $pkmnBlacklist, $eggGroupBlacklist) {		
+	private function setPossibleParents ($eggGroup1, $eggGroup2, $pkmnObj, &$pkmnBlacklist, $eggGroupBlacklist) {		
 		if (!in_array($eggGroup1, $eggGroupBlacklist, true)) {
 			$this->setSuccessors($eggGroup1, $pkmnObj, $eggGroup2, $pkmnBlacklist, $eggGroupBlacklist);
 		}
@@ -73,7 +76,7 @@ class BackendHandler {
 		}
 	}
 
-	private function setSuccessors ($eggGroup, $pkmnObj, $otherEggGroup, $pkmnBlacklist, $eggGroupBlacklist) {
+	private function setSuccessors ($eggGroup, $pkmnObj, $otherEggGroup, &$pkmnBlacklist, $eggGroupBlacklist) {
 		$eggGroupData = $this->eggGroups->$eggGroup;
 
 		foreach ($eggGroupData as $pkmnName) {
@@ -83,7 +86,7 @@ class BackendHandler {
 				//todo this can be removed, when the pkmn data program removes pkmn that are not in the handled gen
 				continue;
 			}
-			if (in_array($pkmnName, $pkmnBlacklist, true)) {
+			if (in_array($pkmnName, $pkmnBlacklist)) {
 				continue;
 			}
 
