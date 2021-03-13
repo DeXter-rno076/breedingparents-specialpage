@@ -110,6 +110,10 @@ class SpecialBreedingParents extends SpecialPage {
 
 	//has to be public
 	public function validateGen ($value, $allData) {
+		if ($value === '' || $value === null) {
+			return true;
+		}
+		
 		if (!is_numeric($value)) {
 			$this->debugOutput('gen is evil >:(');
 			return 'Invalid gen input';
