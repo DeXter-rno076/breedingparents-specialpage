@@ -1,8 +1,8 @@
 <?php
 class FrontendPreparator {
-	private $breedingTreeDeepness = -1;
 	private $pkmnData = null;
 	private $PKMN_ICON_HEIGHT = -1;
+	private $PKMN_MARGIN = 200;
 
 	public function __construct ($pkmnData, $PKMN_ICON_HEIGHT) {
 		$this->pkmnData = $pkmnData;
@@ -22,7 +22,6 @@ class FrontendPreparator {
 
 		$finalObjectTree = $this->buildFinalObjectTree($breedingTree);
 		$finalObjectTree->generalHeight = $breedingTree->treeSectionHeight;
-		$finalObjectTree->maxDeepness = $this->breedingTreeDeepness;
 
 		return $finalObjectTree;
 	}
@@ -32,10 +31,6 @@ class FrontendPreparator {
 	 * an object's height is the sum of its successors' heights or $PKMN_ICON_HEIGHT if it has no successors
 	 */
 	private function setHeight ($chainNode, $deepness) {
-		if ($this->breedingTreeDeepness < $deepness) {
-			$this->breedingTreeDeepness = $deepness;
-		}
-
 		if (count($chainNode->getSuccessors()) == 0) {
 			$chainNode->treeSectionHeight = $this->PKMN_ICON_HEIGHT;
 			return $this->PKMN_ICON_HEIGHT;
@@ -82,7 +77,7 @@ class FrontendPreparator {
 		$pkmnName = $breedingChainNode->name;
 		$pkmnData = $this->pkmnData->$pkmnName;
 		$pkmnId = $pkmnData->id;
-		$pkmnX = $currentDeepness * (100 / $this->breedingTreeDeepness);
+		$pkmnX = $currentDeepness * $this->PKMN_MARGIN;
 		$pkmnY = $breedingChainNode->treeYOffset;
 		if ($breedingChainNode->treeSectionHeight > $this->PKMN_ICON_HEIGHT) {
 			//this is only needed for pkmn with successors

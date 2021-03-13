@@ -16,10 +16,9 @@ class FrontendHandler {
 		$preparator = new FrontendPreparator($this->pkmnData, $this->PKMN_ICON_HEIGHT);
 		$svgObjectStructure = $preparator->prepareForFrontend($this->breedingTree);
 
-		$maxDeepness = $svgObjectStructure->maxDeepness;
 		$generalHeight = $svgObjectStructure->generalHeight;
-		$svgHandler = new SVGHandler($svgObjectStructure, $maxDeepness, $generalHeight, $this->PKMN_ICON_HEIGHT);
-		$svgHandler->createSVG($output);
+		$svgHandler = new SVGHandler($svgObjectStructure, $generalHeight, $this->PKMN_ICON_HEIGHT);
+		$svgHandler->addOutput($output);
 	}
 }
 ?>

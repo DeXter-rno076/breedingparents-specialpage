@@ -1,0 +1,8 @@
+#breedingParentsSVG line { 
+	stroke: black; 
+	stroke-width: 2; 
+}
+#breedingParentsSVGContainer {
+	width: 100%;
+	overflow: scroll;
+}
