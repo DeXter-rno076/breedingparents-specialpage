@@ -1,11 +1,14 @@
 <?php
 //schnickschnack-Idee: button for converting svg graphic into an image and download it
 //todo handle optionally pkmn from previous generations (would include checking more learnsets per pkmn)
+//todo optionally handle blacklists more or less stricter
 
 class BackendHandler {
+	//contain the data of the external wiki pages
 	private $pkmnData = null;
 	private $eggGroups = null;
 	private $unbreedable = null;
+
 	private $targetPkmn = '';
 	private $targetMove = '';
 
@@ -15,19 +18,29 @@ class BackendHandler {
 		$this->pkmnData = $pkmnData;
 		$this->eggGroups = $eggGroups;
 		$this->unbreedable = $unbreedable;
+
 		$this->targetPkmn = $targetPkmn;
 		$this->targetMove = $targetMove;
+
 		$this->pageOutput = $pageOutput;
 	}
 
+	/**
+	 * main function that creates and returns the breeding tree
+	 */
 	public function createBreedingTree () {
+		//for performance measuring
 		$timeStart = hrtime(true);
 
-		$pkmn = $this->targetPkmn;
-		$targetPkmnData = $this->pkmnData->$pkmn;
+		$targetPkmnName = $this->targetPkmn;
+		//contains the pkmn object from the external JSON data
+		$targetPkmnData = $this->pkmnData->$targetPkmnName;
 
+		//needed for preventing infinite recursion
+		//a pkmn may only occur once in a branch, otherwise you would get an infinite loop
 		$pkmnBlacklist = [$pkmn];
-		$breedingTree = $this->createBreedingChainNode($targetPkmnData, $pkmnBlacklist, [], 'root');
+		$eggGroupBlacklist = [];
+		$breedingTree = $this->createBreedingChainNode($targetPkmnData, $pkmnBlacklist, $eggGroupBlacklist);
 
 		$timeEnd = hrtime(true);
 		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
@@ -36,29 +49,47 @@ class BackendHandler {
 		return $breedingTree;
 	}
 
-	//todo split this up
+	/**
+	 * recursive function that builds up the breeding chain nodes
+	 * 
+	 * depending on strictness pkmnBlacklist should use 
+	 * pass by reference (stricter, faster, inaccurate) or 
+	 * pass by value (looser, slower (in extreme cases more then 200 times slower), more accurate)
+	 * 
+	 * returns a BreedingChainNode objetc if pkmn can learn/inherit the move
+	 * returns null if not
+	 */
 	private function createBreedingChainNode ($pkmn, &$pkmnBlacklist, $eggGroupBlacklist) {
 		//todo form change moves (e. g. Rotom) should count as normal 
 		//todo (check if there are breedable pkmn that have those form change learnsets)
+		$chainNode = new BreedingChainNode($pkmn->name);
 
 		if ($this->canLearnNormally($pkmn)) {
-			$chainNode = new BreedingChainNode($pkmn->name);
+			//if a pkmn can learn the targeted move directly without breeding no possible successors are needed/wanted
+			//this happens at the end of a tree branch
 			return $chainNode;
 		}
 
 		if ($this->canInherit($pkmn)) {
-			$chainNode = new BreedingChainNode($pkmn->name);
-
+			//calls createBreedingChainNode(...) for all suiting parents (i. e. not in any blacklist)
+			//and adds them as a successor to chainNode if they can learn the move in some way
 			$this->setPossibleParents($pkmn->eggGroup1, $pkmn->eggGroup2, $chainNode, $pkmnBlacklist, $eggGroupBlacklist);
 
 			if (count($chainNode->getSuccessors()) > 0) {
+				//todo this explanation is not the yellow from the egg
+				//if a pkmn has no successors that can learn the targeted move (with the corresponding blacklists for the branch)
+				//it hasn't anyone to inherit the move from --> branch doesn't get added to existing tree structure
+				//because there is no 'successful' end
 				return $chainNode;
 			}
 		}
 
 		//todo the mass of "$eventLearnsets is undefined" debug messages sucks, find a way to avoid it
-		if ($this->checkLearnsetType($pkmn->eventLearnsets)) {
-			$chainNode = new BreedingChainNode($pkmn->name);
+		if ($this->canLearnViaEvent($pkmn)) {
+			//similar to the canLearnNormally section a few lines before this
+			//event learnsets can however be hard or impossible to get so they only checked when there is no other way
+			
+			//marks that the chain node can only learn the move via event learnsets (needed for frontend) 
 			$chainNode->setLearnsByEvent();
 			return $chainNode;
 		}
@@ -66,12 +97,18 @@ class BackendHandler {
 		return null;
 	}
 
+	/**
+	 * calls setSuccessors for every eggGroup that's not been added to eggGroupBlacklist
+	 * 
+	 * pass by stuff for pkmnBlacklist is the same as in createBreedingChainNode
+	 */
 	private function setPossibleParents ($eggGroup1, $eggGroup2, $pkmnObj, &$pkmnBlacklist, $eggGroupBlacklist) {		
-		if (!in_array($eggGroup1, $eggGroupBlacklist, true)) {
+		if (!in_array($eggGroup1, $eggGroupBlacklist)) {
 			$this->setSuccessors($eggGroup1, $pkmnObj, $eggGroup2, $pkmnBlacklist, $eggGroupBlacklist);
 		}
 
-		if (!is_null($eggGroup2) && !in_array($eggGroup2, $eggGroupBlacklist, true)) {
+		//some pkmn only have one egg group --> has to get checked via is_null()
+		if (!is_null($eggGroup2) && !in_array($eggGroup2, $eggGroupBlacklist)) {
 			$this->setSuccessors($eggGroup2, $pkmnObj, $eggGroup1, $pkmnBlacklist, $eggGroupBlacklist);
 		}
 	}
@@ -92,9 +129,9 @@ class BackendHandler {
 
 			//* this handling of the blacklists is more inaccurate but creates less large amounts of results
 			$newEggGroupBlacklist = array_merge($eggGroupBlacklist, [$eggGroup]);
-			if (!is_null($otherEggGroup)) {
+			/* if (!is_null($otherEggGroup)) {
 				$newEggGroupBlacklist = array_merge($newEggGroupBlacklist, [$otherEggGroup]);
-			}
+			} */
 
 			$pkmnBlacklist[] = $pkmnName;
 
@@ -129,6 +166,10 @@ class BackendHandler {
 
 	private function canInherit ($pkmn) {
 		return $this->checkLearnsetType($pkmn->breedingLearnsets);
+	}
+
+	private function canLearnViaEvent ($pkmn) {
+		return $this->checkLearnsetType($pkmn->eventLearnsets);
 	}
 
 	private function checkLearnsetType ($learnset) {
