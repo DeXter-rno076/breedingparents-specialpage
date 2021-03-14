@@ -47,38 +47,45 @@ class SVGHandler {
 	}
 
 	private function addLine ($startX, $startY, $endX, $endY) {
-		$svgLine = '<line x1="'.$startX.'" y1="'.$startY.'" x2="'.$endX.'" y2="'.$endY.'" />';
+		//safety margin of 10px to upper and left border
+		$svgLine = '<line x1="'.($startX + 10).'" y1="'.($startY + 10).'" x2="'.($endX + 10).'" y2="'.($endY + 10).'" />';
 		$this->svgTag .= $svgLine;
 	}
 
 	private function createSVGElements ($node) {
-		//todo pkmn icon size values have to be used at this point
-		//todo replace 60 with pkmn icon width
-		$startX = $node->x + 60;
-
 		$this->addPkmnIcon($node);
 
 		foreach ($node->getSuccessors() as $successor) {
 			//coordinates give position of the top left corner -> Icon height / 2 has to be added/subtracted
-			//this can be omitted for x coordinates (can be compensated with margin)
-			// explain this ^ better
 
-			//todo left margin of pkmn icons not final
-			$endX = $successor->x - 10;
+			//slope (dt.: Steigung) doesn't need centered coordinates
+			$m = ($successor->y - $node->y) / ($successor->x - $node->x);
+
+			$length = 0;
+			$dx = 0;
+			$dy = 0;
+			//todo margin is far too low (temporary value for testing)
+			$MARGIN = 5;
+
+			for (; $length < $MARGIN; $dx++) {
+				$dy = $m * $dx;
+				$length = sqrt($dx ** 2 + $dy ** 2);
+			}
+
+			//todo centering of coordinates needs icon heights/widths
+			$startX = $node->x + 13.5 + $dx;
+			$startY = ($node->y - 10) + $dy;
+			$endX = $successor->x + 13.5 - $dx;
+			$endY = ($successor->y - 10) - $dy;
+
 			if ($endX > $this->highestXCoordinate) {
 				//highest x coordinate is needed for setting the width of the svg tag
 				$this->highestXCoordinate = $endX;
 			}
 
-			//slope (dt.: Steigung) doesn't need centered coordinates
-			$m = ($successor->y - $node->y) / ($successor->x - $node->x);
-			//basic y = mx + t structure
-			$startY = $m * ($startX - $node->x) + ($node->y + $this->PKMN_ICON_HEIGHT / 2);
-			$endY = $m * ($endX - $node->x) + ($node->y + $this->PKMN_ICON_HEIGHT / 2);
-
 			$this->addLine($startX, $startY, $endX, $endY);
 
-			$this->createSVGElements($successor);
+			$this->createSVGElements($successor, $output);
 		}
 	}
 
@@ -96,9 +103,16 @@ class SVGHandler {
 
 		$pkmnId = $pkmn->pkmnid;
 		$fileLink = $temp_fileLinkList[$pkmnId];
-		$icon = '<image x="'.$pkmn->x.'" y="'.$pkmn->y.'"'; 
-		$icon = $icon.'width="'.$this->PKMN_ICON_HEIGHT.'" height="'.$this->PKMN_ICON_HEIGHT.'" xlink:href="'.$fileLink.'" />';
-		$this->svgTag .= $icon;
+		if (!is_null($fileLink)) {
+			//safety margin to upper and left border
+			$icon = '<image pkmnId="'.$pkmnId.'" x="'.($pkmn->x + 10).'" y="'.($pkmn->y + 10).'"'; 
+			$icon = $icon.'width="'.$this->PKMN_ICON_HEIGHT.'" height="'.$this->PKMN_ICON_HEIGHT.'" xlink:href="'.$fileLink.'" />';
+			$this->svgTag .= $icon;
+		} else {
+			//temporary
+			$text = '<text x="'.($pkmn->x + 10).'" y="'.($pkmn->y + 10).'">'.$pkmnId.'</text>';
+			$this->svgTag .= $text;
+		}
 	}
 }
 ?>
