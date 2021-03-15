@@ -25,6 +25,12 @@ class SVGHandler {
 
 		$this->addCSS($output);
 		$output->addHTML($svgContainer);
+		$this->addJS($output);
+	}
+
+	private function addJS ($output) {
+		//todo change this link into a relative one
+		$output->addScriptFile('http://localhost/localwiki/extensions/BreedingParents/includes/svgScroller.js');
 	}
 
 	private function addCSS ($output) {
