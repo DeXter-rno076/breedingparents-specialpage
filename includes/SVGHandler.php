@@ -1,6 +1,8 @@
 <?php
 //todo <desc> for eventlearnset pkmn
 //todo add links to pkmn icons
+use MediaWiki\MediaWikiServices;
+
 class SVGHandler {
 	private $objData = null;
 	private $PKMN_ICON_HEIGHT = -1;//temporary
@@ -85,34 +87,35 @@ class SVGHandler {
 
 			$this->addLine($startX, $startY, $endX, $endY);
 
-			$this->createSVGElements($successor, $output);
+			$this->createSVGElements($successor);
 		}
 	}
 
 	private function addPkmnIcon ($pkmn) {
-		$temp_fileLinkList = [
-			610 => 'https://www.pokewiki.de/images/9/93/Pok%C3%A9mon-Icon_610.png',
-			713 => 'https://www.pokewiki.de/images/c/c6/Pok%C3%A9mon-Icon_713.png',
-			712 => 'https://www.pokewiki.de/images/5/5f/Pok%C3%A9mon-Icon_712.png',
-			306 => 'https://www.pokewiki.de/images/7/77/Pok%C3%A9mon-Icon_306.png',
-			305 => 'https://www.pokewiki.de/images/6/62/Pok%C3%A9mon-Icon_305.png',
-			304 => 'https://www.pokewiki.de/images/4/48/Pok%C3%A9mon-Icon_304.png',
-			611 => 'https://www.pokewiki.de/images/8/82/Pok%C3%A9mon-Icon_611.png',
-			612 => 'https://www.pokewiki.de/images/a/a2/Pok%C3%A9mon-Icon_612.png'
-		];
-
-		$pkmnId = $pkmn->pkmnid;
-		$fileLink = $temp_fileLinkList[$pkmnId];
-		if (!is_null($fileLink)) {
+		try {
+			$iconUrl = $this->getIconUrl($pkmn->pkmnid);
 			//safety margin to upper and left border
-			$icon = '<image pkmnId="'.$pkmnId.'" x="'.($pkmn->x + 10).'" y="'.($pkmn->y + 10).'"'; 
-			$icon = $icon.'width="'.$this->PKMN_ICON_HEIGHT.'" height="'.$this->PKMN_ICON_HEIGHT.'" xlink:href="'.$fileLink.'" />';
+			$icon = '<image x="'.($pkmn->x + 10).'" y="'.($pkmn->y + 10).'"'; 
+			$icon = $icon.'width="'.$this->PKMN_ICON_HEIGHT.'" height="'.$this->PKMN_ICON_HEIGHT.'" xlink:href="'.$iconUrl.'" />';
 			$this->svgTag .= $icon;
-		} else {
+		} catch (Exception $e) {
 			//temporary
-			$text = '<text x="'.($pkmn->x + 10).'" y="'.($pkmn->y + 10).'">'.$pkmnId.'</text>';
+			$text = '<text x="'.($pkmn->x + 10).'" y="'.($pkmn->y + 10).'">'.$pkmn->pkmnid.'</text>';
 			$this->svgTag .= $text;
 		}
+	}
+
+	private function getIconUrl ($pkmnId) {
+		if ($pkmnId < 100) $pkmnId = '0'.$pkmnId;
+
+		$fileName = 'Pokémon-Icon '.$pkmnId.'.png';
+		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
+
+		if ($fileObj === false) {
+			throw new Exception('pkmn icon not found');
+		}
+
+		return $fileObj->getUrl();
 	}
 }
 ?>
