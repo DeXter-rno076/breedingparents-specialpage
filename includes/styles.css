@@ -4,12 +4,19 @@
 }
 #breedingParentsSVGContainer {
 	width: 100%;
-	max-height: 750px;
-	overflow: scroll;
+	height: 750px;
+	overflow: hidden;
 	box-shadow: inset 5px 5px 5px 0 gray;
 	cursor: grab;
+	position: relative;
 }
 
 #breedingParentsSVGContainer:active {
 	cursor: grabbing;
+}
+
+#breedingParentsSVG {
+	position: absolute;
+	top: 0px;
+	left: 0px;
 }
