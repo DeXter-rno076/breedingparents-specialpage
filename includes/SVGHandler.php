@@ -114,6 +114,7 @@ class SVGHandler {
 
 	private function getIconUrl ($pkmnId) {
 		if ($pkmnId < 100) $pkmnId = '0'.$pkmnId;
+		if ($pkmnId < 10) $pkmnId = '0'.$pkmnId;
 
 		$fileName = 'Pokémon-Icon '.$pkmnId.'.png';
 		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
