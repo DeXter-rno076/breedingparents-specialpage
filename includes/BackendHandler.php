@@ -38,7 +38,7 @@ class BackendHandler {
 
 		//needed for preventing infinite recursion
 		//a pkmn may only occur once in a branch, otherwise you would get an infinite loop
-		$pkmnBlacklist = [$pkmn];
+		$pkmnBlacklist = [$targetPkmnData];
 		$eggGroupBlacklist = [];
 		$breedingTree = $this->createBreedingChainNode($targetPkmnData, $pkmnBlacklist, $eggGroupBlacklist);
 
@@ -165,19 +165,24 @@ class BackendHandler {
 	}
 
 	private function canInherit ($pkmn) {
+		//not necessarily needed but it prevents masses of debug logs
+		if (!isset($pkmn->breedingLearnsets)) return false;		
+
 		return $this->checkLearnsetType($pkmn->breedingLearnsets);
 	}
 
 	private function canLearnViaEvent ($pkmn) {
+		//not necessarily needed but it prevents masses of debug logs
+		if (!isset($pkmn->eventLearnsets)) return false;
+
 		return $this->checkLearnsetType($pkmn->eventLearnsets);
 	}
 
 	private function checkLearnsetType ($learnset) {
-		//this method is called for a couple learnset types without checking if the pkmn has these learnsets
 		if (is_null($learnset)) {
 			return false;
 		}
-
+		
 		foreach ($learnset as $item) {
 			if ($item === $this->targetMove) {
 				return true;
