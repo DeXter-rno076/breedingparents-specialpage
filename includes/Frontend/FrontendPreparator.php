@@ -17,11 +17,11 @@ class FrontendPreparator {
 		//todo mark pkmn that have learnsByEvent set to true
 		$this->setHeight($breedingTree, 1);
 
-		$breedingTree->treeYOffset = 0;
+		$breedingTree->setTreeYOffset(0);
 		$this->setOffset($breedingTree);
 
 		$finalObjectTree = $this->buildFinalObjectTree($breedingTree);
-		$finalObjectTree->generalHeight = $breedingTree->treeSectionHeight;
+		$finalObjectTree->generalHeight = $breedingTree->getTreeSectionHeight();
 
 		return $finalObjectTree;
 	}
@@ -32,7 +32,7 @@ class FrontendPreparator {
 	 */
 	private function setHeight ($chainNode, $deepness) {
 		if (count($chainNode->getSuccessors()) == 0) {
-			$chainNode->treeSectionHeight = $this->PKMN_ICON_HEIGHT;
+			$chainNode->setTreeSectionHeight($this->PKMN_ICON_HEIGHT);
 			return $this->PKMN_ICON_HEIGHT;
 		}
 
@@ -42,7 +42,7 @@ class FrontendPreparator {
 			$height += $this->setHeight($successor, $deepness + 1);
 		}
 
-		$chainNode->treeSectionHeight = $height;
+		$chainNode->setTreeSectionHeight($height);
 		return $height;
 	}
 
@@ -55,9 +55,9 @@ class FrontendPreparator {
 		$takenSpace = 0;
 
 		foreach ($chainNode->getSuccessors() as $successor) {
-			$offset = $chainNode->treeYOffset + $takenSpace;
-			$successor->treeYOffset = $offset;
-			$takenSpace += $successor->treeSectionHeight;
+			$offset = $chainNode->getTreeYOffset() + $takenSpace;
+			$successor->setTreeYOffset($offset);
+			$takenSpace += $successor->getTreeSectionHeight();
 			$this->setOffset($successor);
 		}
 	}
@@ -74,14 +74,14 @@ class FrontendPreparator {
 	 * creates new object for the final svg object structure
 	 */
 	private function handleChainNode ($breedingChainNode, $currentDeepness) {
-		$pkmnName = $breedingChainNode->name;
+		$pkmnName = $breedingChainNode->getName();
 		$pkmnData = $this->pkmnData->$pkmnName;
 		$pkmnId = $pkmnData->id;
 		$pkmnX = $currentDeepness * $this->PKMN_MARGIN;
-		$pkmnY = $breedingChainNode->treeYOffset;
-		if ($breedingChainNode->treeSectionHeight > $this->PKMN_ICON_HEIGHT) {
+		$pkmnY = $breedingChainNode->getTreeYOffset();
+		if ($breedingChainNode->getTreeSectionHeight() > $this->PKMN_ICON_HEIGHT) {
 			//this is only needed for pkmn with successors
-			$pkmnY += ($breedingChainNode->treeSectionHeight / 2);
+			$pkmnY += ($breedingChainNode->getTreeSectionHeight() / 2);
 		}
 
 		$pkmnObj = new FrontendPkmnObj($pkmnId, $pkmnX, $pkmnY);
