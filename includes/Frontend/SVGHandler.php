@@ -68,7 +68,7 @@ class SVGHandler {
 			//coordinates give position of the top left corner -> Icon height / 2 has to be added/subtracted
 
 			//slope (dt.: Steigung) doesn't need centered coordinates
-			$m = ($successor->y - $node->y) / ($successor->x - $node->x);
+			$m = ($successor->getY() - $node->getY()) / ($successor->getX() - $node->getX());
 
 			$length = 0;
 			$dx = 0;
@@ -82,10 +82,10 @@ class SVGHandler {
 			}
 
 			//todo centering of coordinates needs icon heights/widths
-			$startX = $node->x + 13.5 + $dx;
-			$startY = ($node->y - 10) + $dy;
-			$endX = $successor->x + 13.5 - $dx;
-			$endY = ($successor->y - 10) - $dy;
+			$startX = $node->getX() + 13.5 + $dx;
+			$startY = ($node->getY() - 10) + $dy;
+			$endX = $successor->getX() + 13.5 - $dx;
+			$endY = ($successor->getY() - 10) - $dy;
 
 			if ($endX > $this->highestXCoordinate) {
 				//highest x coordinate is needed for setting the width of the svg tag
@@ -100,9 +100,9 @@ class SVGHandler {
 
 	private function addPkmnIcon ($pkmn) {
 		try {
-			$iconUrl = $this->getIconUrl($pkmn->pkmnid);
+			$iconUrl = $this->getIconUrl($pkmn->getPkmnId());
 			//safety margin to upper and left border
-			$icon = '<image x="'.($pkmn->x + 10).'" y="'.($pkmn->y + 10).'"'; 
+			$icon = '<image x="'.($pkmn->getX() + 10).'" y="'.($pkmn->getY() + 10).'"'; 
 			$icon = $icon.'width="'.$this->PKMN_ICON_HEIGHT.'" height="'.$this->PKMN_ICON_HEIGHT.'" xlink:href="'.$iconUrl.'" />';
 			$this->svgTag .= $icon;
 		} catch (Exception $e) {
