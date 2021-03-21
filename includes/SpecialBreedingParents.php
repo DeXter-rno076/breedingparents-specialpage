@@ -1,7 +1,7 @@
 <?php
 //todo find a solution for output of validation methods
 
-require 'BackendHandler.php';
+require 'Backend/Gen7Handler.php';
 require 'FrontendHandler.php';
 
 class SpecialBreedingParents extends SpecialPage {
@@ -28,7 +28,7 @@ class SpecialBreedingParents extends SpecialPage {
 
 		$this->getData($targetGen);
 		
-		$backendHandler = new BackendHandler(
+		$backendHandler = new Gen7Handler(
 			$this->pkmnData,
 			$this->eggGroups,
 			$this->unbreedable,

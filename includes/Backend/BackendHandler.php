@@ -1,18 +1,15 @@
 <?php
-//schnickschnack-Idee: button for converting svg graphic into an image and download it
-//todo handle optionally pkmn from previous generations (would include checking more learnsets per pkmn)
-//todo optionally handle blacklists more or less stricter
-
-class BackendHandler {
+require 'BreedingChainNode.php';
+abstract class BackendHandler {
 	//contain the data of the external wiki pages
-	private $pkmnData = null;
-	private $eggGroups = null;
-	private $unbreedable = null;
+	protected $pkmnData = null;
+	protected $eggGroups = null;
+	protected $unbreedable = null;
 
-	private $targetPkmn = '';
-	private $targetMove = '';
+	protected $targetPkmn = '';
+	protected $targetMove = '';
 
-	private $pageOutput = null;
+	protected $pageOutput = null;
 
 	public function __construct ($pkmnData, $eggGroups, $unbreedable, $targetPkmn, $targetMove, $pageOutput) {
 		$this->pkmnData = $pkmnData;
@@ -50,59 +47,11 @@ class BackendHandler {
 	}
 
 	/**
-	 * recursive function that builds up the breeding chain nodes
-	 * 
-	 * depending on strictness pkmnBlacklist should use 
-	 * pass by reference (stricter, faster, inaccurate) or 
-	 * pass by value (looser, slower (in extreme cases more then 200 times slower), more accurate)
-	 * 
-	 * returns a BreedingChainNode objetc if pkmn can learn/inherit the move
-	 * returns null if not
-	 */
-	private function createBreedingChainNode ($pkmn, &$pkmnBlacklist, $eggGroupBlacklist) {
-		//todo form change moves (e. g. Rotom) should count as normal 
-		//todo (check if there are breedable pkmn that have those form change learnsets)
-		$chainNode = new BreedingChainNode($pkmn->name);
-
-		if ($this->canLearnNormally($pkmn)) {
-			//if a pkmn can learn the targeted move directly without breeding no possible successors are needed/wanted
-			//this happens at the end of a tree branch
-			return $chainNode;
-		}
-
-		if ($this->canInherit($pkmn)) {
-			//calls createBreedingChainNode(...) for all suiting parents (i. e. not in any blacklist)
-			//and adds them as a successor to chainNode if they can learn the move in some way
-			$this->setPossibleParents($pkmn->eggGroup1, $pkmn->eggGroup2, $chainNode, $pkmnBlacklist, $eggGroupBlacklist);
-
-			if (count($chainNode->getSuccessors()) > 0) {
-				//todo this explanation is not the yellow from the egg
-				//if a pkmn has no successors that can learn the targeted move (with the corresponding blacklists for the branch)
-				//it hasn't anyone to inherit the move from --> branch doesn't get added to existing tree structure
-				//because there is no 'successful' end
-				return $chainNode;
-			}
-		}
-
-		//todo the mass of "$eventLearnsets is undefined" debug messages sucks, find a way to avoid it
-		if ($this->canLearnViaEvent($pkmn)) {
-			//similar to the canLearnNormally section a few lines before this
-			//event learnsets can however be hard or impossible to get so they only checked when there is no other way
-			
-			//marks that the chain node can only learn the move via event learnsets (needed for frontend) 
-			$chainNode->setLearnsByEvent();
-			return $chainNode;
-		}
-
-		return null;
-	}
-
-	/**
 	 * calls setSuccessors for every eggGroup that's not been added to eggGroupBlacklist
 	 * 
 	 * pass by stuff for pkmnBlacklist is the same as in createBreedingChainNode
 	 */
-	private function setPossibleParents ($eggGroup1, $eggGroup2, $pkmnObj, &$pkmnBlacklist, $eggGroupBlacklist) {		
+	protected function setPossibleParents ($eggGroup1, $eggGroup2, $pkmnObj, &$pkmnBlacklist, $eggGroupBlacklist) {		
 		if (!in_array($eggGroup1, $eggGroupBlacklist)) {
 			$this->setSuccessors($eggGroup1, $pkmnObj, $eggGroup2, $pkmnBlacklist, $eggGroupBlacklist);
 		}
@@ -113,7 +62,7 @@ class BackendHandler {
 		}
 	}
 
-	private function setSuccessors ($eggGroup, $pkmnObj, $otherEggGroup, &$pkmnBlacklist, $eggGroupBlacklist) {
+	protected function setSuccessors ($eggGroup, $pkmnObj, $otherEggGroup, &$pkmnBlacklist, $eggGroupBlacklist) {
 		$eggGroupData = $this->eggGroups->$eggGroup;
 
 		foreach ($eggGroupData as $pkmnName) {
@@ -145,7 +94,7 @@ class BackendHandler {
 	//==================================================================
 	//learnability checks
 	
-	private function canLearnNormally ($pkmn) {
+	protected function canLearnNormally ($pkmn) {
 		$levelLearnability = $this->checkLearnsetType($pkmn->levelLearnsets);
 		if ($levelLearnability) {
 			return true;
@@ -164,25 +113,25 @@ class BackendHandler {
 		return false;
 	}
 
-	private function canInherit ($pkmn) {
+	protected function canInherit ($pkmn) {
 		//not necessarily needed but it prevents masses of debug logs
 		if (!isset($pkmn->breedingLearnsets)) return false;		
 
 		return $this->checkLearnsetType($pkmn->breedingLearnsets);
 	}
 
-	private function canLearnViaEvent ($pkmn) {
+	protected function canLearnViaEvent ($pkmn) {
 		//not necessarily needed but it prevents masses of debug logs
 		if (!isset($pkmn->eventLearnsets)) return false;
 
 		return $this->checkLearnsetType($pkmn->eventLearnsets);
 	}
 
-	private function checkLearnsetType ($learnset) {
+	protected function checkLearnsetType ($learnset) {
 		if (is_null($learnset)) {
 			return false;
 		}
-		
+
 		foreach ($learnset as $item) {
 			if ($item === $this->targetMove) {
 				return true;
@@ -195,37 +144,8 @@ class BackendHandler {
 	//==================================================================
 	//output stuff for debugging
 
-	private function out ($msg) {
+	protected function out ($msg) {
 		$this->pageOutput->addHTML($msg."<br />");
 	}
-}
-
-class BreedingChainNode {
-    //todo change access rights after implementing frontend
-    public $name;
-    public $successors = [];
-    public $treeSectionHeight;
-    public $treeYOffset;
-    private $learnsByEvent = false;
-    
-    public function __construct ($name) {
-        $this->name = $name;
-    }
-
-    public function addSuccessor ($successor) {
-        array_push($this->successors, $successor);
-    }
-
-    public function getSuccessors () {
-        return $this->successors;
-    }
-
-    public function setLearnsByEvent () {
-        $this->learnsByEvent = true;
-    }
-
-    public function getLearnsByEvent () {
-        return $this->learnsByEvent;
-    }
 }
 ?>
