@@ -31,12 +31,12 @@ class SVGHandler {
 
 	private function addJS ($output) {
 		//todo change this link into a relative one
-		$output->addScriptFile('http://localhost/localwiki/extensions/BreedingParents/includes/svgMover.js');
+		$output->addScriptFile('http://localhost/localwiki/extensions/BreedingParents/includes/Frontend/svgMover.js');
 	}
 
 	private function addCSS ($output) {
 		//todo add error handling (something like "fopen(...) or doStuff(...)")
-		$filePath = 'extensions/BreedingParents/includes/styles.css';
+		$filePath = 'extensions/BreedingParents/includes/Frontend/styles.css';
 		$cssFile = fopen($filePath, 'r');
 		$css = fread($cssFile, filesize($filePath));
 		fclose($cssFile);

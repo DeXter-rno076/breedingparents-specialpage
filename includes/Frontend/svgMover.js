@@ -1,4 +1,6 @@
 'use strict';
+//todo x y input with button (move around more quickly on big svgs)
+//todo (idea) if the user moves the svg out of the visible area, highlight the reset button
 
 const svgContainer = document.getElementById('breedingParentsSVGContainer');
 const svgTag = document.getElementById('breedingParentsSVG');

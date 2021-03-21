@@ -2,7 +2,7 @@
 //todo find a solution for output of validation methods
 
 require 'Backend/Gen7Handler.php';
-require 'FrontendHandler.php';
+require 'Frontend/FrontendHandler.php';
 
 class SpecialBreedingParents extends SpecialPage {
 	private $pkmnData = null;
