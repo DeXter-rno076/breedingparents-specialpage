@@ -1,10 +1,13 @@
 <?php
 class BreedingChainNode {
-	//todo change access rights after implementing frontend
 	private $name;
 	private $successors = [];
+
+	//how much space the tree branch of this pkmn takes vertically
 	private $treeSectionHeight;
+	//offset of the tree branch on the y axis
 	private $treeYOffset;
+
 	private $learnsByEvent = false;
 	
 	public function __construct ($name) {

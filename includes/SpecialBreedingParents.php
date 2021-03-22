@@ -28,6 +28,7 @@ class SpecialBreedingParents extends SpecialPage {
 
 		$this->getData($targetGen);
 		
+		//todo select gen handler class accordingly to targetGen
 		$backendHandler = new Gen7Handler(
 			$this->pkmnData,
 			$this->eggGroups,

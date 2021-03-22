@@ -49,7 +49,9 @@ abstract class BackendHandler {
 	/**
 	 * calls setSuccessors for every eggGroup that's not been added to eggGroupBlacklist
 	 * 
-	 * pass by stuff for pkmnBlacklist is the same as in createBreedingChainNode
+	 * depending on strictness pkmnBlacklist should use 
+	 * pass by reference (stricter, faster, inaccurate) or 
+	 * pass by value (looser, slower (in extreme cases more then 200 times slower), more accurate)
 	 */
 	protected function setPossibleParents ($eggGroup1, $eggGroup2, $pkmnObj, &$pkmnBlacklist, $eggGroupBlacklist) {		
 		if (!in_array($eggGroup1, $eggGroupBlacklist)) {
@@ -62,17 +64,22 @@ abstract class BackendHandler {
 		}
 	}
 
+	/**
+	 * calls createBreedingChainNode() for every successor that is not in pkmnBlacklist
+	 * adds eggGroup(s) and the successor to blackLists
+	 * if the successor can learn the move it is added to pkmnObj's successors
+	 */
 	protected function setSuccessors ($eggGroup, $pkmnObj, $otherEggGroup, &$pkmnBlacklist, $eggGroupBlacklist) {
 		$eggGroupData = $this->eggGroups->$eggGroup;
 
-		foreach ($eggGroupData as $pkmnName) {
-			$pkmnData = $this->pkmnData->$pkmnName;
+		foreach ($eggGroupData as $potSuccessorName) {
+			$potSuccessorData = $this->pkmnData->$potSuccessorName;
 
-			if (is_null($pkmnData)) {
+			if (is_null($potSuccessorData)) {
 				//todo this can be removed, when the pkmn data program removes pkmn that are not in the handled gen
 				continue;
 			}
-			if (in_array($pkmnName, $pkmnBlacklist)) {
+			if (in_array($potSuccessorName, $pkmnBlacklist)) {
 				continue;
 			}
 
@@ -82,10 +89,11 @@ abstract class BackendHandler {
 				$newEggGroupBlacklist = array_merge($newEggGroupBlacklist, [$otherEggGroup]);
 			} */
 
-			$pkmnBlacklist[] = $pkmnName;
+			$pkmnBlacklist[] = $potSuccessorName;
 
-			$successor = $this->createBreedingChainNode($pkmnData, $pkmnBlacklist, $newEggGroupBlacklist);
+			$successor = $this->createBreedingChainNode($potSuccessorData, $pkmnBlacklist, $newEggGroupBlacklist);
 			if ($successor !== null) {
+				//this is called when successor is able to learn targetMove
 				$pkmnObj->addSuccessor($successor);
 			}
 		}
@@ -94,6 +102,9 @@ abstract class BackendHandler {
 	//==================================================================
 	//learnability checks
 	
+	/**
+	 * checks whether the pkmn can learn targetMove via level, tmtr or tutor
+	 */
 	protected function canLearnNormally ($pkmn) {
 		$levelLearnability = $this->checkLearnsetType($pkmn->levelLearnsets);
 		if ($levelLearnability) {

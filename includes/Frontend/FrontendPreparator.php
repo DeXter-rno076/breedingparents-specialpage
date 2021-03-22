@@ -2,7 +2,11 @@
 require 'FrontendPkmnObj.php';
 class FrontendPreparator {
 	private $pkmnData = null;
+
+	//temporary
 	private $PKMN_ICON_HEIGHT = -1;
+	
+	//space between each pkmn 'column'
 	private $PKMN_MARGIN = 200;
 
 	public function __construct ($pkmnData, $PKMN_ICON_HEIGHT) {
@@ -18,11 +22,12 @@ class FrontendPreparator {
 		//todo mark pkmn that have learnsByEvent set to true
 		$this->setHeight($breedingTree, 1);
 
+		//the whole tree obviously starts at the top
 		$breedingTree->setTreeYOffset(0);
 		$this->setOffset($breedingTree);
 
 		$finalObjectTree = $this->buildFinalObjectTree($breedingTree);
-		$finalObjectTree->generalHeight = $breedingTree->getTreeSectionHeight();
+		$finalObjectTree->svgTagHeight = $breedingTree->getTreeSectionHeight();
 
 		return $finalObjectTree;
 	}
@@ -33,6 +38,7 @@ class FrontendPreparator {
 	 */
 	private function setHeight ($chainNode, $deepness) {
 		if (count($chainNode->getSuccessors()) == 0) {
+			//executed if chainNode has no successors
 			$chainNode->setTreeSectionHeight($this->PKMN_ICON_HEIGHT);
 			return $this->PKMN_ICON_HEIGHT;
 		}
@@ -50,7 +56,7 @@ class FrontendPreparator {
 	/**
 	 * runs recursively over the object tree and sets all y offsets
 	 * in one function call the offsets for chainNode's successors are set by saving 
-	 * the - by the previous succesors - already taken space and adding the successor's height afterwards
+	 * the - by the previous successors - already taken space and adding the successor's height afterwards
 	 */
 	private function setOffset ($chainNode) {
 		$takenSpace = 0;
@@ -70,8 +76,7 @@ class FrontendPreparator {
 	}
 
 	/**
-	 * calculates the node's x coordinate in %
-	 * calculates the node's y coordinate in pixel
+	 * calculates the node's coordinates in pixels
 	 * creates new object for the final svg object structure
 	 */
 	private function handleChainNode ($breedingChainNode, $currentDeepness) {
@@ -82,6 +87,8 @@ class FrontendPreparator {
 		$pkmnY = $breedingChainNode->getTreeYOffset();
 		if ($breedingChainNode->getTreeSectionHeight() > $this->PKMN_ICON_HEIGHT) {
 			//this is only needed for pkmn with successors
+			//a pkmn icon should appear in the middle (concerning height) of its tree branch
+			//without this it would be set at the top of its branch
 			$pkmnY += ($breedingChainNode->getTreeSectionHeight() / 2);
 		}
 
