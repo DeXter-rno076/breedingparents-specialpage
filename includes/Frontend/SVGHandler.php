@@ -34,12 +34,12 @@ class SVGHandler {
 	private function addJS ($output) {
 		//todo change this link into a relative one
 		//todo sometimes the file isn't fully added to the output page even though this function is called
-		$output->addScriptFile('http://localhost/localwiki/extensions/BreedingParents/includes/Frontend/svgMover.js');
+		$output->addScriptFile('http://localhost/localwiki/extensions/BreedingParents/modules/svgMover.js');
 	}
 
 	private function addCSS ($output) {
 		//todo change to link into a relative one if possible
-		$output->addStyle('http://localhost/localwiki/extensions/BreedingParents/includes/Frontend/styles.css');
+		$output->addStyle('http://localhost/localwiki/extensions/BreedingParents/modules/styles.css');
 	}
 
 	private function setSVGWidth () {
@@ -121,8 +121,12 @@ class SVGHandler {
 	}
 
 	private function getIconUrl ($pkmnId) {
-		if ($pkmnId < 100) $pkmnId = '0'.$pkmnId;
-		if ($pkmnId < 10) $pkmnId = '0'.$pkmnId;
+		if ($pkmnId < 100) {
+			$pkmnId = '0'.$pkmnId;
+			if ($pkmnId < 10) {
+				$pkmnId = '0'.$pkmnId;
+			}
+		}
 
 		$fileName = 'Pokémon-Icon '.$pkmnId.'.png';
 		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
