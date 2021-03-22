@@ -4,16 +4,17 @@
 use MediaWiki\MediaWikiServices;
 
 class SVGHandler {
-	private $objData = null;
+	private $frontendBreedingTree = null;
 	private $PKMN_ICON_HEIGHT = -1;//temporary
 	
+	//needed for setting the width of the svg tag
 	private $highestXCoordinate = -1;
 
 	private $svgTag = '';
 
-	public function __construct ($objData, $svgHeight, $PKMN_ICON_HEIGHT) {
-		$this->objData = $objData;
-		$this->svgTag = '<svg id="breedingParentsSVG" width="TEMP_WIDTH_PLACEHOLDER" height="'.($svgHeight + 100).'">';
+	public function __construct ($frontendBreedingTree, $svgTagHeight, $PKMN_ICON_HEIGHT) {
+		$this->frontendBreedingTree = $frontendBreedingTree;
+		$this->svgTag = '<svg id="breedingParentsSVG" width="TEMP_WIDTH_PLACEHOLDER" height="'.($svgTagHeight + 100).'">';
 		$this->PKMN_ICON_HEIGHT = $PKMN_ICON_HEIGHT;
 	}
 
@@ -25,22 +26,20 @@ class SVGHandler {
 
 		$this->addCSS($output);
 		$output->addHTML($svgContainer);
+		//adding button that resets the svg to the starting position
 		$output->addHTML('<input type="button" id="breedingParentsSVGResetButton" value="Position zurücksetzen" />');
 		$this->addJS($output);
 	}
 
 	private function addJS ($output) {
 		//todo change this link into a relative one
+		//todo sometimes the file isn't fully added to the output page even though this function is called
 		$output->addScriptFile('http://localhost/localwiki/extensions/BreedingParents/includes/Frontend/svgMover.js');
 	}
 
 	private function addCSS ($output) {
-		//todo add error handling (something like "fopen(...) or doStuff(...)")
-		$filePath = 'extensions/BreedingParents/includes/Frontend/styles.css';
-		$cssFile = fopen($filePath, 'r');
-		$css = fread($cssFile, filesize($filePath));
-		fclose($cssFile);
-		$output->addInlineStyle($css);
+		//todo change to link into a relative one if possible
+		$output->addStyle('http://localhost/localwiki/extensions/BreedingParents/includes/Frontend/styles.css');
 	}
 
 	private function setSVGWidth () {
@@ -50,7 +49,7 @@ class SVGHandler {
 	}
 
 	private function createSVG () {
-		$this->createSVGElements($this->objData);
+		$this->createSVGElements($this->frontendBreedingTree);
 
 		$this->svgTag .= '</svg>';
 	}
@@ -64,21 +63,25 @@ class SVGHandler {
 	private function createSVGElements ($node) {
 		$this->addPkmnIcon($node);
 
+		//todo maybe outsource some stuff into a separate method
 		foreach ($node->getSuccessors() as $successor) {
 			//coordinates give position of the top left corner -> Icon height / 2 has to be added/subtracted
 
 			//slope (dt.: Steigung) doesn't need centered coordinates
 			$m = ($successor->getY() - $node->getY()) / ($successor->getX() - $node->getX());
 
-			$length = 0;
+			$curCircMargin = 0;
 			$dx = 0;
 			$dy = 0;
 			//todo margin is far too low (temporary value for testing)
+			//how long the distance between starting/ending point of the connection line to the corresponding icon shall be
 			$MARGIN = 5;
 
-			for (; $length < $MARGIN; $dx++) {
+			//tries x coordinates until it reaches a suiting margin to the icon
+			for (; $curCircMargin < $MARGIN; $dx++) {
+				//basic y = mx + t structure (but t = 0)
 				$dy = $m * $dx;
-				$length = sqrt($dx ** 2 + $dy ** 2);
+				$curCircMargin = sqrt($dx ** 2 + $dy ** 2);
 			}
 
 			//todo centering of coordinates needs icon heights/widths
@@ -106,8 +109,13 @@ class SVGHandler {
 			$icon = $icon.'width="'.$this->PKMN_ICON_HEIGHT.'" height="'.$this->PKMN_ICON_HEIGHT.'" xlink:href="'.$iconUrl.'" />';
 			$this->svgTag .= $icon;
 		} catch (Exception $e) {
-			//temporary
-			$text = '<text x="'.($pkmn->x + 10).'" y="'.($pkmn->y + 10).'">'.$pkmn->pkmnid.'</text>';
+			$x = $pkmn->getX() + 10;
+			$y = $pkmn->getY() + 10; 
+			$text = '<text x="'.$x.'" y="'.$y.'">';	
+			$text .= '<tspan x="'.$x.'" y="'.$y.'">Oh, das hätte nicht passieren sollen.</tspan>';
+			$text .= '<tspan x="'.$x.'" y="'.($y + 20).'">Melde das bitte auf unserem</tspan>';
+			$text .= '<tspan x="'.$x.'" y="'.($y + 40).'">Discordserver oder in der <a href="https://www.pokewiki.de/Pok%C3%A9Wiki:Auskunft">Auskunft</a></tspan>';
+			$text .= '<tspan x="'.$x.'" y="'.($y + 60).'">Fehler beim Laden von "'.$pkmn->getPkmnId().'"</tspan></text>';
 			$this->svgTag .= $text;
 		}
 	}
@@ -118,6 +126,7 @@ class SVGHandler {
 
 		$fileName = 'Pokémon-Icon '.$pkmnId.'.png';
 		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
+		//fileObj->getHeight(); fileObj->getWidth()
 
 		if ($fileObj === false) {
 			throw new Exception('pkmn icon not found');
