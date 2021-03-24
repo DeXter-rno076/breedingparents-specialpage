@@ -22,5 +22,15 @@
     "manifest_version": 1,
     "requires": {
         "MediaWiki": ">= 1.25"
+    },
+    "ResourceModules": {
+        "breedingParentsModules": {
+            "scripts": "svgMover.js",
+            "styles": "styles.css"
+        }
+    },
+    "ResourceFileModulePaths": {
+        "localBasePath": "modules",
+        "remoteExtPath": "BreedingParents/modules"
     }
 }

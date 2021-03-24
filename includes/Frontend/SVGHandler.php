@@ -23,28 +23,16 @@ class SVGHandler {
 		$this->createSVG();
 		$this->setSVGWidth();
 
-		$svgContainer = '<div id="breedingParentsSVGContainer">'.$this->svgTag.'</div>';
+		//style tag is set in order to hide the overflown pkmn icons
+		//		before styles.css is fully loaded
+		$svgContainer = '<div id="breedingParentsSVGContainer"'.
+			' style="overflow: hidden;">'.$this->svgTag.'</div>';
 
-		$this->addCSS($output);
+		$output->addModules('breedingParentsModules');
 		$output->addHTML($svgContainer);
 		//adding button that resets the svg to the starting position
 		$output->addHTML('<input type="button" id="breedingParentsSVGResetButton"'.
 			' value="Position zurücksetzen" />');
-		$this->addJS($output);
-	}
-
-	private function addJS ($output) {
-		//todo change this link into a relative one
-		//todo sometimes the file isn't fully added to the output page 
-		//	even though this function is called
-		$fileLink = 'http://localhost/localwiki/extensions/BreedingParents/modules/svgMover.js';
-		$output->addModules($fileLink);
-	}
-
-	private function addCSS ($output) {
-		//todo change to link into a relative one if possible
-		$fileLink = 'http://localhost/localwiki/extensions/BreedingParents/modules/styles.css';
-		$output->addStyle($fileLink);
 	}
 
 	private function setSVGWidth () {
