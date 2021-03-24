@@ -1,14 +1,17 @@
 import fs from 'fs';
 
 const GEN = 7;
-let pkmnData = JSON.parse(fs.readFileSync('dataStuff/pkmnDataGen' + GEN + '_1.json', {encoding: 'utf8'}));
+let pkmnData = JSON.parse(fs.readFileSync('dataStuff/pkmnDataGen'
+	+ GEN + '_1.json', {encoding: 'utf8'}));
 
 const eggGroupData = {};
 
 let indexCounter = 2;
 while (pkmnData.continue !== undefined) {
 	delete pkmnData.continue;
-	let additionalPkmnData = JSON.parse(fs.readFileSync('dataStuff/pkmnDataGen' + GEN + '_' + indexCounter + '.json'));
+	let additionalPkmnData = JSON.parse(
+		fs.readFileSync('dataStuff/pkmnDataGen' + GEN + '_' + indexCounter + '.json')
+	);
 	Object.assign(pkmnData, additionalPkmnData);
 	indexCounter++;
 }
@@ -21,7 +24,10 @@ for (let pkmn in pkmnData) {
 	handleEggGroup(eggGroup2, pkmn);
 }
 
-fs.writeFileSync('dataStuff/eggGroupDataGen' + GEN + '.json', JSON.stringify(eggGroupData));
+fs.writeFileSync(
+	'dataStuff/eggGroupDataGen' + GEN + '.json',
+	JSON.stringify(eggGroupData)
+);
 
 function handleEggGroup (eggGroup, pkmn) {
 	if (eggGroup === null) {

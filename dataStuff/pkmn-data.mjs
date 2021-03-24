@@ -1,4 +1,6 @@
 import { Bot } from '/home/pg/Code/JS/backend/mediawiki-bot/index.mjs';
+//todo turn bot into a public bot npm module and import that
+
 import fs from 'fs';
 
 //!what to remember:
@@ -9,20 +11,24 @@ import fs from 'fs';
 //todo make sure that game differences in a gen don't cause problems
 
 const GEN = 7;
-const FILE_SIZE_CAP = 300000;//adding whitespace about doubles the file length
+
+//adding whitespace about doubles the file length
+const FILE_SIZE_CAP = 300000;
 let dataObj = {};
 
 const bot = new Bot({
 	username: 'DeXtron',
 	password: 'thisshouldntbeneeded',
 	url: 'https://www.pokewiki.de/api.php',
+	noLogs: true
 });
 
 class PkmnObj {
 	constructor (name, id, eggGroup1) {
 		this.name = name.trim();
 
-		if (!id) {//check if id is NaN
+		if (!id) {
+			//check if id is NaN
 			throw 'error in id: ' + id;
 		}
 		this.id = id;
@@ -30,7 +36,10 @@ class PkmnObj {
 	}
 
 	setEggGroup2 (eggGroup) {
-		if (eggGroup.trim() === '') return;//skip empty parameter value
+		//skip empty parameter value
+		if (eggGroup.trim() === '') {
+			return;
+		}
 		this.eggGroup2 = eggGroup.trim();
 	}
 
@@ -54,8 +63,13 @@ class PkmnObj {
 				learnsetType = 'eventLearnsets';
 				break;
 		}
-		if (this[learnsetType] === undefined) this[learnsetType] = [];
-		if (this[learnsetType].includes(move)) return;//skip multiple occurances of a move
+		if (this[learnsetType] === undefined) {
+			this[learnsetType] = [];
+		}
+		//skip multiple occurances of a move
+		if (this[learnsetType].includes(move)) {
+			return;
+		}
 		this[learnsetType].push(move);
 	}
 }
@@ -66,24 +80,31 @@ class PkmnObj {
 	let skip = true;
 	let pageIndex = 1;
 	for (let pkmn of pkmnList) {
-		if (pkmn === 'Aalabyss') skip = false;
-		if (skip) continue;
+		if (pkmn === 'Aalabyss') {
+			skip = false;
+		}
+		if (skip) {
+			continue;
+		}
 
 		await handlePkmn(pkmn);
 
 		console.log(pkmn + ' done');
 		
-		//split the data into multiple files in order to prevent db errors caused by too large strings
+		//split the data into multiple files 
+		//in order to prevent db errors caused by too large strings
 		if (JSON.stringify(dataObj).length > FILE_SIZE_CAP) {
 			dataObj.continue = 'dasMussHierStehen';
-			fs.writeFileSync('dataStuff/pkmnDataGen' + GEN + '_' + pageIndex + '.json', JSON.stringify(dataObj));
+			fs.writeFileSync('dataStuff/pkmnDataGen' + GEN + '_' + 
+				pageIndex + '.json', JSON.stringify(dataObj));
 			console.log('file ' + pageIndex + ' saved');
 			pageIndex++;
 			dataObj = {};
 		}
 	}
 
-	fs.writeFileSync('dataStuff/pkmnDataGen' + GEN + '_' + pageIndex + '.json', JSON.stringify(dataObj));
+	fs.writeFileSync('dataStuff/pkmnDataGen' + GEN + 
+		'_' + pageIndex + '.json', JSON.stringify(dataObj));
 })();
 
 async function handlePkmn (pkmn) {
@@ -98,9 +119,15 @@ async function handlePkmn (pkmn) {
 		return;
 	}
 
-	const pkmnObj = new PkmnObj(pkmn, Number(pkmnInfobox.Nr.text), pkmnInfobox['Ei-Gruppe'].text);
+	const pkmnObj = new PkmnObj(
+		pkmn,
+		Number(pkmnInfobox.Nr.text),
+		pkmnInfobox['Ei-Gruppe'].text
+	);
 
-	if (pkmnInfobox['Ei-Gruppe2'] !== undefined) pkmnObj.setEggGroup2(pkmnInfobox['Ei-Gruppe2'].text);
+	if (pkmnInfobox['Ei-Gruppe2'] !== undefined) {
+		pkmnObj.setEggGroup2(pkmnInfobox['Ei-Gruppe2'].text);
+	}
 
 	let available = await handleLearnsets(pkmn, pkmnObj);
 	if (!available) {
@@ -134,7 +161,10 @@ async function handleLearnsets (pkmn, pkmnObj) {
 		return item.title === 'Atk-Table' && item.g.text == GEN;
 		//the == is intended (item.g.text is a string, GEN is a Number)
 	});
-	if (targetedLearnsets.length === 0) return false;//handle pkmn that don't exist in the targeted gen
+	//handle pkmn that don't exist in the targeted gen
+	if (targetedLearnsets.length === 0) {
+		return false;
+	}
 
 	handleBreedingLearnset(pkmnObj, targetedLearnsets);
 	handleLevelLearnset(pkmnObj, targetedLearnsets);
@@ -171,14 +201,17 @@ function handleLearnset (pkmnObj, learnsets, learnsetType) {
 		return item.Art.text === learnsetType;
 	});
 
-	if (template === undefined) return;
+	if (template === undefined) {
+		return;
+	}
 
 	const atkRows = template['1'].templates;
 
 	for (let row of atkRows) {
 		const moveName = row['2'].text;
 		if (moveName.includes('{')) {
-			console.warn('{ in name of ' + moveName + ' in ' + learnsetType + ' moves of ' + pkmnObj.name + ' detected');
+			console.warn('{ in name of ' + moveName + ' in ' + 
+				learnsetType + ' moves of ' + pkmnObj.name + ' detected');
 		}
 		pkmnObj.addLearnset(learnsetType, moveName);
 	}
