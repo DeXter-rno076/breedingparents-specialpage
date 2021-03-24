@@ -1,6 +1,7 @@
 <?php
 require 'BackendHandler.php';
-class Gen7Handler extends BackendHandler {
+require 'GenHandlerInterface.php';
+class Gen7Handler extends BackendHandler implements GenHandlerInterface {
 	/** 
 	 * depending on strictness pkmnBlacklist should use 
 	 * 		pass by reference (stricter, faster, inaccurate) or 
@@ -39,7 +40,7 @@ class Gen7Handler extends BackendHandler {
 		return null;
 	}
 
-	private function handleDirectLearnability ($chainNode) {
+	public function handleDirectLearnability ($chainNode) {
 		//if a pkmn can learn the targeted move directly without breeding
 		//		no possible successors are needed/wanted
 		//this happens at the end of a tree branch
@@ -49,7 +50,7 @@ class Gen7Handler extends BackendHandler {
 		return $chainNode;
 	}
 
-	private function handleInheritance ($params, &$pkmnBlacklist) {
+	public function handleInheritance ($params, &$pkmnBlacklist) {
 		//calls createBreedingChainNode(...) for all suiting parents
 		//		(i. e. not in any blacklist)
 		//		and adds them as a successor to chainNode
@@ -83,7 +84,7 @@ class Gen7Handler extends BackendHandler {
 		return null;
 	}
 
-	private function handleSpecialLearnability ($chainNode) {
+	public function handleSpecialLearnability ($chainNode) {
 		//similar to the canLearnNormally section a few lines before this
 		//event learnsets can however be hard or impossible to get
 		//		 so they only checked when there is no other way
