@@ -16,7 +16,8 @@ class FrontendPreparator {
 
 	/**
 	 * sets heights and y offsets for all pkmn nodes
-	 * in the end it creates a new tree structure with objects that have only the least possible data needed for the SVG elements
+	 * in the end it creates a new tree structure with objects 
+	 * 		that have only the least possible data needed for the SVG elements
 	 */
 	public function prepareForFrontend ($breedingTree) {
 		//todo mark pkmn that have learnsByEvent set to true
@@ -34,7 +35,8 @@ class FrontendPreparator {
 
 	/**
 	 * runs recursively over the object tree and sets all heights
-	 * an object's height is the sum of its successors' heights or $PKMN_ICON_HEIGHT if it has no successors
+	 * an object's height is the sum of its successors' heights
+	 * 		or $PKMN_ICON_HEIGHT if it has no successors
 	 */
 	private function setHeight ($chainNode, $deepness) {
 		if (count($chainNode->getSuccessors()) == 0) {
@@ -55,8 +57,9 @@ class FrontendPreparator {
 
 	/**
 	 * runs recursively over the object tree and sets all y offsets
-	 * in one function call the offsets for chainNode's successors are set by saving 
-	 * the - by the previous successors - already taken space and adding the successor's height afterwards
+	 * in one function call the offsets for chainNode's successors are set by saving
+	 * 		the - by the previous successors - already taken space and
+	 * 		adding the successor's height afterwards
 	 */
 	private function setOffset ($chainNode) {
 		$takenSpace = 0;
@@ -87,7 +90,8 @@ class FrontendPreparator {
 		$pkmnY = $breedingChainNode->getTreeYOffset();
 		if ($breedingChainNode->getTreeSectionHeight() > $this->PKMN_ICON_HEIGHT) {
 			//this is only needed for pkmn with successors
-			//a pkmn icon should appear in the middle (concerning height) of its tree branch
+			//a pkmn icon should appear in the middle
+			//		(concerning height) of its tree branch
 			//without this it would be set at the top of its branch
 			$pkmnY += ($breedingChainNode->getTreeSectionHeight() / 2);
 		}

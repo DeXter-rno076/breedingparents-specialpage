@@ -14,7 +14,8 @@ class SVGHandler {
 
 	public function __construct ($frontendBreedingTree, $svgTagHeight, $PKMN_ICON_HEIGHT) {
 		$this->frontendBreedingTree = $frontendBreedingTree;
-		$this->svgTag = '<svg id="breedingParentsSVG" width="TEMP_WIDTH_PLACEHOLDER" height="'.($svgTagHeight + 100).'">';
+		$this->svgTag = '<svg id="breedingParentsSVG" width="TEMP_WIDTH_PLACEHOLDER"'.
+			' height="'.($svgTagHeight + 100).'">';
 		$this->PKMN_ICON_HEIGHT = $PKMN_ICON_HEIGHT;
 	}
 
@@ -27,19 +28,23 @@ class SVGHandler {
 		$this->addCSS($output);
 		$output->addHTML($svgContainer);
 		//adding button that resets the svg to the starting position
-		$output->addHTML('<input type="button" id="breedingParentsSVGResetButton" value="Position zurücksetzen" />');
+		$output->addHTML('<input type="button" id="breedingParentsSVGResetButton"'.
+			' value="Position zurücksetzen" />');
 		$this->addJS($output);
 	}
 
 	private function addJS ($output) {
 		//todo change this link into a relative one
-		//todo sometimes the file isn't fully added to the output page even though this function is called
-		$output->addScriptFile('http://localhost/localwiki/extensions/BreedingParents/modules/svgMover.js');
+		//todo sometimes the file isn't fully added to the output page 
+		//	even though this function is called
+		$fileLink = 'http://localhost/localwiki/extensions/BreedingParents/modules/svgMover.js';
+		$output->addModules($fileLink);
 	}
 
 	private function addCSS ($output) {
 		//todo change to link into a relative one if possible
-		$output->addStyle('http://localhost/localwiki/extensions/BreedingParents/modules/styles.css');
+		$fileLink = 'http://localhost/localwiki/extensions/BreedingParents/modules/styles.css';
+		$output->addStyle($fileLink);
 	}
 
 	private function setSVGWidth () {
@@ -56,7 +61,8 @@ class SVGHandler {
 
 	private function addLine ($startX, $startY, $endX, $endY) {
 		//safety margin of 10px to upper and left border
-		$svgLine = '<line x1="'.($startX + 10).'" y1="'.($startY + 10).'" x2="'.($endX + 10).'" y2="'.($endY + 10).'" />';
+		$svgLine = '<line x1="'.($startX + 10).'" y1="'.($startY + 10).'"'.
+			' x2="'.($endX + 10).'" y2="'.($endY + 10).'" />';
 		$this->svgTag .= $svgLine;
 	}
 
@@ -65,7 +71,8 @@ class SVGHandler {
 
 		//todo maybe outsource some stuff into a separate method
 		foreach ($node->getSuccessors() as $successor) {
-			//coordinates give position of the top left corner -> Icon height / 2 has to be added/subtracted
+			//coordinates give position of the top left corner 
+			//	-> Icon height / 2 has to be added/subtracted
 
 			//slope (dt.: Steigung) doesn't need centered coordinates
 			$m = ($successor->getY() - $node->getY()) / ($successor->getX() - $node->getX());
@@ -74,7 +81,8 @@ class SVGHandler {
 			$dx = 0;
 			$dy = 0;
 			//todo margin is far too low (temporary value for testing)
-			//how long the distance between starting/ending point of the connection line to the corresponding icon shall be
+			//how long the distance between starting/ending point 
+			//	of the connection line to the corresponding icon shall be
 			$MARGIN = 5;
 
 			//tries x coordinates until it reaches a suiting margin to the icon
@@ -105,17 +113,20 @@ class SVGHandler {
 		try {
 			$iconUrl = $this->getIconUrl($pkmn->getPkmnId());
 			//safety margin to upper and left border
-			$icon = '<image x="'.($pkmn->getX() + 10).'" y="'.($pkmn->getY() + 10).'"'; 
-			$icon = $icon.'width="'.$this->PKMN_ICON_HEIGHT.'" height="'.$this->PKMN_ICON_HEIGHT.'" xlink:href="'.$iconUrl.'" />';
+			$icon = '<image x="'.($pkmn->getX() + 10).'" y="'.($pkmn->getY() + 10).'"'. 
+				' width="'.$this->PKMN_ICON_HEIGHT.'"'.
+				' height="'.$this->PKMN_ICON_HEIGHT.'" xlink:href="'.$iconUrl.'" />';
 			$this->svgTag .= $icon;
 		} catch (Exception $e) {
 			$x = $pkmn->getX() + 10;
 			$y = $pkmn->getY() + 10; 
-			$text = '<text x="'.$x.'" y="'.$y.'">';	
-			$text .= '<tspan x="'.$x.'" y="'.$y.'">Oh, das hätte nicht passieren sollen.</tspan>';
-			$text .= '<tspan x="'.$x.'" y="'.($y + 20).'">Melde das bitte auf unserem</tspan>';
-			$text .= '<tspan x="'.$x.'" y="'.($y + 40).'">Discordserver oder in der <a href="https://www.pokewiki.de/Pok%C3%A9Wiki:Auskunft">Auskunft</a></tspan>';
-			$text .= '<tspan x="'.$x.'" y="'.($y + 60).'">Fehler beim Laden von "'.$pkmn->getPkmnId().'"</tspan></text>';
+			$text = '<text x="'.$x.'" y="'.$y.'">'.	
+				'<tspan x="'.$x.'" y="'.$y.'">Oh, das hätte nicht passieren sollen.</tspan>'.
+				'<tspan x="'.$x.'" y="'.($y + 20).'">Melde das bitte auf unserem</tspan>'.
+				'<tspan x="'.$x.'" y="'.($y + 40).'">Discordserver oder in der'.
+				' <a href="https://www.pokewiki.de/Pok%C3%A9Wiki:Auskunft">Auskunft</a></tspan>'.
+				'<tspan x="'.$x.'" y="'.($y + 60).'">Fehler beim Laden'.
+				' von "'.$pkmn->getPkmnId().'"</tspan></text>';
 			$this->svgTag .= $text;
 		}
 	}

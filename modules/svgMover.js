@@ -1,7 +1,9 @@
 'use strict';
 //todo x y input with button (move around more quickly on big svgs)
 //todo (idea) if the user moves the svg out of the visible area, highlight the reset button
-//todo maybe it's needed to load only the visible svg elements when using looser blacklist handling (Pikachu and Ausdauer killed the tab multiple times)
+//todo maybe it's needed to load only the visible svg elements
+//todo		when using looser blacklist handling 
+//todo		(Pikachu and Ausdauer killed the tab multiple times)
 
 //todo sometimes this isn't loaded
 

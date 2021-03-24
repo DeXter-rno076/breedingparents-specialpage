@@ -29,36 +29,21 @@ class SpecialBreedingParents extends SpecialPage {
 		$this->getData($targetGen);
 		
 		//todo select gen handler class accordingly to targetGen
-		$backendHandler = new Gen7Handler(
-			$this->pkmnData,
-			$this->eggGroups,
-			$this->unbreedable,
-			$targetPkmn,
-			$targetMove,
-			$this->getOutput(),
-		);
+		$paramList = [
+			'pkmnData' => $this->pkmnData,
+			'eggGroups' => $this->eggGroups,
+			'unbreedable' => $this->unbreedable,
+			'targetPkmn' => $targetPkmn,
+			'targetMove' => $targetMove,
+			'pageOutput' => $this->getOutput()//temporary
+		];
+		$backendHandler = new Gen7Handler($paramList);
 
 		$breedingTree = $backendHandler->createBreedingTree();
 
 		if (is_null($breedingTree)) {
 			return Status::newFatal('breeding tree empty');
 		}
-
-		/* $fileRepo = new FileRepo([
-			'descBaseUrl' => 'https://www.pokewiki.de/Datei:',
-			'scriptDirUrl' => 'https://www.pokewiki.de/',
-			'articleUrl' => 'https://www.pokewiki.de/$1'
-
-		]);
-		$pkmnicon = new LocalFile('Datei:Pokémon-Icon 150.png', $fileRepo);
-		$iconurl = $pkmnicon->getUrl();
-		$this->debugOutput($iconurl); */
-
-		/* $filetest = fopen('testOutput.json', 'r');
-		fclose($filetest); */
-
-		/* $test_fileAccessTime = fileatime('testOutput.json');
-		$this->debugOutput(json_encode($test_fileAccessTime)); */
 
 		$frontendHandler = new FrontendHandler($breedingTree, $this->pkmnData);
 		$frontendHandler->addSVG($this->getOutput());
@@ -84,8 +69,9 @@ class SpecialBreedingParents extends SpecialPage {
 		if ($value === '' || $value === null) {
 			return true;
 		}
-	
-		$regex = '/[^a-zA-Zßäéü\-♂♀2:]/';//these are all characters that are used in pkmn names
+
+		//these are all characters that are used in pkmn names
+		$regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
 		if (preg_match($regex, $value)) {
 			$this->debugOutput('pkmn name is evil >:(');
 			return 'Invalid character in the Pokémon name';
@@ -95,12 +81,13 @@ class SpecialBreedingParents extends SpecialPage {
 	}
 	
 	//has to be public
-	public function validateMove ( $value, $allData ) {
+	public function validateMove ($value, $allData) {
 		if ($value === '' || $value === null) {
 			return true;
 		}
 
-		$regex = '/[^a-zA-ZÜßäöü\- 2]/';//these are all characters that are used in move names
+		//these are all characters that are used in move names
+		$regex = '/[^a-zA-ZÜßäöü\- 2]/';
 		if (preg_match($regex, $value)) {
 			$this->debugOutput('move name is evil >:(');
 			return 'Invalid character in the move name';
@@ -125,8 +112,12 @@ class SpecialBreedingParents extends SpecialPage {
 
 	private function getData ($gen) {
 		$this->pkmnData = $this->getPkmnData($gen);
-		$this->unbreedable = $this->getWikiPageContent('MediaWiki:Zuchteltern/Gen'.$gen.'/pkmn-blacklist.json');
-		$this->eggGroups = $this->getWikiPageContent('MediaWiki:Zuchteltern/Gen'.$gen.'/egg-groups.json');
+
+		$blacklistPageName = 'MediaWiki:Zuchteltern/Gen'.$gen.'/pkmn-blacklist.json';
+		$this->unbreedable = $this->getWikiPageContent($blacklistPageName);
+		
+		$eggGroupPageName = 'MediaWiki:Zuchteltern/Gen'.$gen.'/egg-groups.json';
+		$this->eggGroups = $this->getWikiPageContent($eggGroupPageName);
 	}
 
 	private function getPkmnData ($gen) {
@@ -135,11 +126,14 @@ class SpecialBreedingParents extends SpecialPage {
 		$pageIndex = 1;
 
 		do {
-			$pageData = $this->getWikiPageContent('MediaWiki:Zuchteltern/Gen'.$gen.'/pkmn-data'.$pageIndex.'.json');
+			$pkmnDataPageName = 'MediaWiki:Zuchteltern/Gen'.$gen.'/pkmn-data'.$pageIndex.'.json';
+			$pageData = $this->getWikiPageContent($pkmnDataPageName);
+
 			$pageDataArray = (array) $pageData;
 			$pkmnDataArr = array_merge($pkmnDataArr, $pageDataArray);
+			
 			$pageIndex++;
-		} while (!is_null($pageData->continue));
+		} while (isset($pageData->continue));
 
 		$pkmnDataObj = (object) $pkmnDataArr;
 
@@ -155,9 +149,9 @@ class SpecialBreedingParents extends SpecialPage {
 			throw new Exception('wiki page '.$name.' not found');
 		}
 
-        $data = $rev->getContent()->getNativeData();
+		$data = $rev->getContent()->getNativeData();
 
-        return json_decode($data);
+		return json_decode($data);
 	}
 
 	//===========================================================

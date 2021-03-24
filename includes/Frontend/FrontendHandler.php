@@ -19,12 +19,17 @@ class FrontendHandler {
 		//for performance measuring
 		$timeStart = hrtime(true);
 
-		//preparator creates a tree structure with objects that have only the necessary infos for SVGHandler
+		//preparator creates a tree structure with objects
+		//	that have only the necessary infos for SVGHandler
 		$preparator = new FrontendPreparator($this->pkmnData, $this->PKMN_ICON_HEIGHT);
 		$svgObjectStructure = $preparator->prepareForFrontend($this->breedingTree);
 
 		$svgTagHeight = $svgObjectStructure->svgTagHeight;
-		$svgHandler = new SVGHandler($svgObjectStructure, $svgTagHeight, $this->PKMN_ICON_HEIGHT);
+		$svgHandler = new SVGHandler(
+			$svgObjectStructure,
+			$svgTagHeight,
+			$this->PKMN_ICON_HEIGHT
+		);
 		$svgHandler->addOutput($output);
 
 		$timeEnd = hrtime(true);

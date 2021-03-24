@@ -9,7 +9,7 @@ class BreedingChainNode {
 	private $treeYOffset;
 
 	private $learnsByEvent = false;
-	
+
 	public function __construct ($name) {
 		$this->name = $name;
 	}
@@ -41,7 +41,8 @@ class BreedingChainNode {
 	public function setTreeSectionHeight ($height) {
 		$paramType = gettype($height);
 		if ($paramType !== 'integer' && $paramType !== 'double') {
-			$excMsg = 'setTreeSectionHeight: invalid parameter type; integer or double expected, but got type '.$paramType;
+			$excMsg = 'setTreeSectionHeight: invalid parameter type;'.
+			' integer or double expected, but got type '.$paramType;
 			throw new UnexpectedValueException($excMsg);
 		}
 		$this->treeSectionHeight = $height;
@@ -54,7 +55,8 @@ class BreedingChainNode {
 	public function setTreeYOffset ($offset) {
 		$paramType = gettype($offset);
 		if ($paramType !== 'integer' && $paramType !== 'double') {
-			$excMsg = 'setTreeYOffset: invalid parameter type; integer or double expected, but got type '.$paramType;
+			$excMsg = 'setTreeYOffset: invalid parameter type;'.
+			' integer or double expected, but got type '.$paramType;
 			throw new UnexpectedValueException($excMsg);
 		}
 		$this->treeYOffset = $offset;

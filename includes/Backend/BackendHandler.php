@@ -11,15 +11,15 @@ abstract class BackendHandler {
 
 	protected $pageOutput = null;
 
-	public function __construct ($pkmnData, $eggGroups, $unbreedable, $targetPkmn, $targetMove, $pageOutput) {
-		$this->pkmnData = $pkmnData;
-		$this->eggGroups = $eggGroups;
-		$this->unbreedable = $unbreedable;
+	public function __construct ($params) {
+		$this->pkmnData = $params['pkmnData'];
+		$this->eggGroups = $params['eggGroups'];
+		$this->unbreedable = $params['unbreedable'];
 
-		$this->targetPkmn = $targetPkmn;
-		$this->targetMove = $targetMove;
+		$this->targetPkmn = $params['targetPkmn'];
+		$this->targetMove = $params['targetMove'];
 
-		$this->pageOutput = $pageOutput;
+		$this->pageOutput = $params['pageOutput'];
 	}
 
 	/**
@@ -34,10 +34,15 @@ abstract class BackendHandler {
 		$targetPkmnData = $this->pkmnData->$targetPkmnName;
 
 		//needed for preventing infinite recursion
-		//a pkmn may only occur once in a branch, otherwise you would get an infinite loop
+		//a pkmn may only occur once in a branch,
+		//		otherwise you would get an infinite loop
 		$pkmnBlacklist = [$targetPkmnData];
 		$eggGroupBlacklist = [];
-		$breedingTree = $this->createBreedingChainNode($targetPkmnData, $pkmnBlacklist, $eggGroupBlacklist);
+		$breedingTree = $this->createBreedingChainNode(
+			$targetPkmnData,
+			$pkmnBlacklist,
+			$eggGroupBlacklist
+		);
 
 		$timeEnd = hrtime(true);
 		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
@@ -51,16 +56,28 @@ abstract class BackendHandler {
 	 * 
 	 * depending on strictness pkmnBlacklist should use 
 	 * pass by reference (stricter, faster, inaccurate) or 
-	 * pass by value (looser, slower (in extreme cases more then 200 times slower), more accurate)
+	 * pass by value (looser, 
+	 * 		slower (in extreme cases more then 200 times slower), more accurate)
 	 */
-	protected function setPossibleParents ($eggGroup1, $eggGroup2, $pkmnObj, &$pkmnBlacklist, $eggGroupBlacklist) {		
-		if (!in_array($eggGroup1, $eggGroupBlacklist)) {
-			$this->setSuccessors($eggGroup1, $pkmnObj, $eggGroup2, $pkmnBlacklist, $eggGroupBlacklist);
+	protected function setPossibleParents ($params, &$pkmnBlacklist) {		
+		$paramList = [
+			'pkmnObj' => $params['pkmnObj'],
+			'eggGroupBlacklist' => $params['eggGroupBlacklist']
+		];
+
+		if (!in_array($params['eggGroup1'], $params['eggGroupBlacklist'])) {
+			$paramList['eggGroup'] = $params['eggGroup1'];
+			$paramList['otherEggGroup'] = $params['eggGroup2'];
+			$this->setSuccessors($paramList, $pkmnBlacklist);
 		}
 
 		//some pkmn only have one egg group --> has to get checked via is_null()
-		if (!is_null($eggGroup2) && !in_array($eggGroup2, $eggGroupBlacklist)) {
-			$this->setSuccessors($eggGroup2, $pkmnObj, $eggGroup1, $pkmnBlacklist, $eggGroupBlacklist);
+		if (!is_null($params['eggGroup2'])) { 
+			if(!in_array($params['eggGroup2'], $params['eggGroupBlacklist'])) {
+				$paramList['eggGroup'] = $params['eggGroup2'];
+				$paramList['otherEggGroup'] = $params['eggGroup1'];
+				$this->setSuccessors($paramList, $pkmnBlacklist);
+			}
 		}
 	}
 
@@ -69,39 +86,66 @@ abstract class BackendHandler {
 	 * adds eggGroup(s) and the successor to blackLists
 	 * if the successor can learn the move it is added to pkmnObj's successors
 	 */
-	protected function setSuccessors ($eggGroup, $pkmnObj, $otherEggGroup, &$pkmnBlacklist, $eggGroupBlacklist) {
+	private function setSuccessors ($params, &$pkmnBlacklist) {
+		$eggGroup = $params['eggGroup'];
 		$eggGroupData = $this->eggGroups->$eggGroup;
 
 		foreach ($eggGroupData as $potSuccessorName) {
 			$potSuccessorData = $this->pkmnData->$potSuccessorName;
 
 			if (is_null($potSuccessorData)) {
-				//todo this can be removed, when the pkmn data program removes pkmn that are not in the handled gen
+				//todo this can be removed, 
+				//todo		when the pkmn data program removes pkmn
+				//todo 		that are not in the handled gen
 				continue;
 			}
 			if (in_array($potSuccessorName, $pkmnBlacklist)) {
 				continue;
 			}
 
-			//* this handling of the blacklists is more inaccurate but creates less large amounts of results
-			$newEggGroupBlacklist = array_merge($eggGroupBlacklist, [$eggGroup]);
-			/* if (!is_null($otherEggGroup)) {
-				$newEggGroupBlacklist = array_merge($newEggGroupBlacklist, [$otherEggGroup]);
-			} */
+			$paramList = [
+				'potSuccessorName' => $potSuccessorName,
+				'potSuccessorData' => $potSuccessorData,
+				'eggGroup' => $params['eggGroup'],
+				'pkmnObj' => $params['pkmnObj'],
+				'otherEggGroup' => $params['otherEggGroup'],
+				'eggGroupBlacklist' => $params['eggGroupBlacklist']
+			];
+			$this->addSuccessor($paramList, $pkmnBlacklist);
+		}
+	}
 
-			$pkmnBlacklist[] = $potSuccessorName;
+	//todo name is meh (addSuccessor is already used in BreedingChainNode)
+	private function addSuccessor ($params, &$pkmnBlacklist) {
+		//* this handling of the blacklists is more inaccurate
+		//*		 but creates less large amounts of results
+		$newEggGroupBlacklist = array_merge(
+			$params['eggGroupBlacklist'],
+			[$params['eggGroup']]
+		);
+		/* if (!is_null($params['otherEggGroup'])) {
+			$newEggGroupBlacklist = array_merge(
+				$newEggGroupBlacklist,
+				[$params['otherEggGroup']]
+			);
+		} */
 
-			$successor = $this->createBreedingChainNode($potSuccessorData, $pkmnBlacklist, $newEggGroupBlacklist);
-			if ($successor !== null) {
-				//this is called when successor is able to learn targetMove
-				$pkmnObj->addSuccessor($successor);
-			}
+		$pkmnBlacklist[] = $params['potSuccessorName'];
+
+		$successor = $this->createBreedingChainNode(
+			$params['potSuccessorData'],
+			$pkmnBlacklist,
+			$newEggGroupBlacklist
+		);
+		if ($successor !== null) {
+			//this is called when successor is able to learn targetMove
+			$params['pkmnObj']->addSuccessor($successor);
 		}
 	}
 
 	//==================================================================
 	//learnability checks
-	
+
 	/**
 	 * checks whether the pkmn can learn targetMove via level, tmtr or tutor
 	 */
@@ -111,7 +155,11 @@ abstract class BackendHandler {
 			return true;
 		}
 
-		$tmtrLearnability = $this->checkLearnsetType($pkmn->tmtrLearnsets);
+		$tmtrLearnability = false;
+		if (isset($pkmn->tmtrLearnsets)) {
+			//prevent a couple of debugging messages
+			$tmtrLearnability = $this->checkLearnsetType($pkmn->tmtrLearnsets);
+		}
 		if ($tmtrLearnability) {
 			return true;
 		}
