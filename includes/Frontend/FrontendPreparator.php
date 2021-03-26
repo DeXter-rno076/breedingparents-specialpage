@@ -1,17 +1,16 @@
 <?php
 require 'FrontendPkmnObj.php';
+use MediaWiki\MediaWikiServices;
+
 class FrontendPreparator {
 	private $pkmnData = null;
-
-	//temporary
-	private $PKMN_ICON_HEIGHT = -1;
 	
 	//space between each pkmn 'column'
-	private $PKMN_MARGIN = 200;
+	const PKMN_MARGIN_HORI = 200;
+	const PKMN_MARGIN_BOTTOM = 10;
 
-	public function __construct (StdClass $pkmnData, int $PKMN_ICON_HEIGHT) {
+	public function __construct (StdClass $pkmnData) {
 		$this->pkmnData = $pkmnData;
-		$this->PKMN_ICON_HEIGHT = $PKMN_ICON_HEIGHT;
 	}
 
 	/**
@@ -22,6 +21,9 @@ class FrontendPreparator {
 	public function prepareForFrontend (
 		BreedingChainNode $breedingTree
 	) : FrontendPkmnObj {
+		//this has to get done before setHeight()
+		$this->setIconData($breedingTree);
+
 		//todo mark pkmn that have learnsByEvent set to true
 		$this->setHeight($breedingTree, 1);
 
@@ -38,13 +40,15 @@ class FrontendPreparator {
 	/**
 	 * runs recursively over the object tree and sets all heights
 	 * an object's height is the sum of its successors' heights
-	 * 		or $PKMN_ICON_HEIGHT if it has no successors
+	 * 		or its own if it has no successors
 	 */
 	private function setHeight (BreedingChainNode $chainNode, int $deepness) : int {
 		if (count($chainNode->getSuccessors()) == 0) {
 			//executed if chainNode has no successors
-			$chainNode->setTreeSectionHeight($this->PKMN_ICON_HEIGHT);
-			return $this->PKMN_ICON_HEIGHT;
+			$chainNode->setTreeSectionHeight(
+				$chainNode->getIconHeight() + self::PKMN_MARGIN_BOTTOM
+			);
+			return $chainNode->getIconHeight() + self::PKMN_MARGIN_BOTTOM;
 		}
 
 		$height = 0;
@@ -93,9 +97,9 @@ class FrontendPreparator {
 		$pkmnName = $breedingChainNode->getName();
 		$pkmnData = $this->pkmnData->$pkmnName;
 		$pkmnId = $pkmnData->id;
-		$pkmnX = $currentDeepness * $this->PKMN_MARGIN;
+		$pkmnX = $currentDeepness * self::PKMN_MARGIN_HORI;
 		$pkmnY = $breedingChainNode->getTreeYOffset();
-		if ($breedingChainNode->getTreeSectionHeight() > $this->PKMN_ICON_HEIGHT) {
+		if ($breedingChainNode->getTreeSectionHeight() > $breedingChainNode->getIconHeight()) {
 			//this is only needed for pkmn with successors
 			//a pkmn icon should appear in the middle
 			//		(concerning height) of its tree branch
@@ -104,6 +108,7 @@ class FrontendPreparator {
 		}
 
 		$pkmnObj = new FrontendPkmnObj($pkmnId, $pkmnX, $pkmnY);
+		$this->transferIconData($breedingChainNode, $pkmnObj);
 
 		foreach ($breedingChainNode->getSuccessors() as $successor) {
 			$successorObject = $this->handleChainNode($successor, $currentDeepness + 1);
@@ -111,6 +116,60 @@ class FrontendPreparator {
 		}
 
 		return $pkmnObj;
+	}
+
+	private function transferIconData (
+		BreedingChainNode $breedingChainNode,
+		FrontendPkmnObj $pkmnObj
+	) {
+		if ($breedingChainNode->getFileError() !== '') {
+			$pkmnObj->setFileError($breedingChainNode->getFileError());
+		}
+		$pkmnObj->setIconUrl($breedingChainNode->getIconUrl());
+		$pkmnObj->setIconHeight($breedingChainNode->getIconHeight());
+		$pkmnObj->setIconWidth($breedingChainNode->getIconWidth());
+	}
+
+	private function setIconData (BreedingChainNode $pkmnObj) {
+		try {
+			$pkmnName = $pkmnObj->getName();
+			$pkmnData = $this->pkmnData->$pkmnName;
+			$pkmnId = $pkmnData->id;
+
+			$fileObj = $this->getFile($pkmnId);
+
+			$iconUrl = $fileObj->getUrl();
+			$iconWidth = $fileObj->getWidth();
+			$iconHeight = $fileObj->getHeight();
+
+			$pkmnObj->setIconUrl($iconUrl);
+			$pkmnObj->setIconWidth($iconWidth);
+			$pkmnObj->setIconHeight($iconHeight);
+		} catch (Exception $e) {
+			$pkmnObj->setFileError($e);
+		}
+
+		foreach ($pkmnObj->getSuccessors() as $successor) {
+			$this->setIconData($successor);
+		}
+	}
+
+	private function getFile (int $pkmnId) : File {
+		if ($pkmnId < 100) {
+			$pkmnId = '0'.$pkmnId;
+			if ($pkmnId < 10) {
+				$pkmnId = '0'.$pkmnId;
+			}
+		}
+
+		$fileName = 'Pokémon-Icon '.$pkmnId.'.png';
+		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
+
+		if ($fileObj === false) {
+			throw new Exception('pkmn icon not found');
+		}
+
+		return $fileObj;
 	}
 }
 ?>

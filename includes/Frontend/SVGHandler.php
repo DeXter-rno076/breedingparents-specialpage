@@ -1,11 +1,9 @@
 <?php
 //todo <desc> for eventlearnset pkmn
 //todo add links to pkmn icons
-use MediaWiki\MediaWikiServices;
 
 class SVGHandler {
 	private $frontendBreedingTree = null;
-	private $PKMN_ICON_HEIGHT = -1;//temporary
 	
 	//needed for setting the width of the svg tag
 	private $highestXCoordinate = -1;
@@ -15,12 +13,10 @@ class SVGHandler {
 	public function __construct (
 		FrontendPkmnObj $frontendBreedingTree,
 		int $svgTagHeight,
-		int $PKMN_ICON_HEIGHT
 	) {
 		$this->frontendBreedingTree = $frontendBreedingTree;
 		$this->svgTag = '<svg id="breedingParentsSVG" width="TEMP_WIDTH_PLACEHOLDER"'.
 			' height="'.($svgTagHeight + 100).'">';
-		$this->PKMN_ICON_HEIGHT = $PKMN_ICON_HEIGHT;
 	}
 
 	public function addOutput (OutputPage $output) {
@@ -72,10 +68,10 @@ class SVGHandler {
 			$curCircMargin = 0;
 			$dx = 0;
 			$dy = 0;
-			//todo margin is far too low (temporary value for testing)
 			//how long the distance between starting/ending point 
 			//	of the connection line to the corresponding icon shall be
-			$MARGIN = 5;
+			//todo exact margin is not final
+			$MARGIN = 20;
 
 			//tries x coordinates until it reaches a suiting margin to the icon
 			for (; $curCircMargin < $MARGIN; $dx++) {
@@ -84,11 +80,10 @@ class SVGHandler {
 				$curCircMargin = sqrt($dx ** 2 + $dy ** 2);
 			}
 
-			//todo centering of coordinates needs icon heights/widths
-			$startX = $node->getX() + 13.5 + $dx;
-			$startY = ($node->getY() - 10) + $dy;
-			$endX = $successor->getX() + 13.5 - $dx;
-			$endY = ($successor->getY() - 10) - $dy;
+			$startX = $node->getX() + $dx + $node->getIconWidth() / 2;
+			$startY = $node->getY() + $dy + $node->getIconHeight() / 2;
+			$endX = $successor->getX() - $dx + $successor->getIconWidth() / 2;
+			$endY = $successor->getY() - $dy + $successor->getIconHeight() / 2;
 
 			if ($endX > $this->highestXCoordinate) {
 				//highest x coordinate is needed for setting the width of the svg tag
@@ -102,14 +97,14 @@ class SVGHandler {
 	}
 
 	private function addPkmnIcon (FrontendPkmnObj $pkmn) {
-		try {
-			$iconUrl = $this->getIconUrl($pkmn->getPkmnId());
+		if ($pkmn->getFileError() === '') {
 			//safety margin to upper and left border
 			$icon = '<image x="'.($pkmn->getX() + 10).'" y="'.($pkmn->getY() + 10).'"'. 
-				' width="'.$this->PKMN_ICON_HEIGHT.'"'.
-				' height="'.$this->PKMN_ICON_HEIGHT.'" xlink:href="'.$iconUrl.'" />';
+				' width="'.$pkmn->getIconWidth().'"'.
+				' height="'.$pkmn->getIconHeight().'"'.
+				' xlink:href="'.$pkmn->getIconUrl().'" />';
 			$this->svgTag .= $icon;
-		} catch (Exception $e) {
+		} else {
 			$x = $pkmn->getX() + 10;
 			$y = $pkmn->getY() + 10; 
 			$text = '<text x="'.$x.'" y="'.$y.'">'.	
@@ -121,25 +116,6 @@ class SVGHandler {
 				' von "'.$pkmn->getPkmnId().'"</tspan></text>';
 			$this->svgTag .= $text;
 		}
-	}
-
-	private function getIconUrl (int $pkmnId) : String {
-		if ($pkmnId < 100) {
-			$pkmnId = '0'.$pkmnId;
-			if ($pkmnId < 10) {
-				$pkmnId = '0'.$pkmnId;
-			}
-		}
-
-		$fileName = 'Pokémon-Icon '.$pkmnId.'.png';
-		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
-		//fileObj->getHeight(); fileObj->getWidth()
-
-		if ($fileObj === false) {
-			throw new Exception('pkmn icon not found');
-		}
-
-		return $fileObj->getUrl();
 	}
 }
 ?>

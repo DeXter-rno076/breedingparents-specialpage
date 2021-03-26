@@ -5,9 +5,6 @@ require 'SVGHandler.php';
 class FrontendHandler {
 	private $breedingTree = null;
 	private $pkmnData = null;
-
-	//todo remove this and use indivual icon heights
-	private $PKMN_ICON_HEIGHT = 50;
 	
 	public function __construct (BreedingChainNode $breedingTree, StdClass $pkmnData) {
 		$this->breedingTree = $breedingTree;
@@ -21,14 +18,13 @@ class FrontendHandler {
 
 		//preparator creates a tree structure with objects
 		//	that have only the necessary infos for SVGHandler
-		$preparator = new FrontendPreparator($this->pkmnData, $this->PKMN_ICON_HEIGHT);
+		$preparator = new FrontendPreparator($this->pkmnData);
 		$svgObjectStructure = $preparator->prepareForFrontend($this->breedingTree);
 
 		$svgTagHeight = $svgObjectStructure->svgTagHeight;
 		$svgHandler = new SVGHandler(
 			$svgObjectStructure,
-			$svgTagHeight,
-			$this->PKMN_ICON_HEIGHT
+			$svgTagHeight
 		);
 		$svgHandler->addOutput($output);
 
