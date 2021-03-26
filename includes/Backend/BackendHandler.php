@@ -11,21 +11,28 @@ abstract class BackendHandler {
 
 	protected $pageOutput = null;
 
-	public function __construct ($params) {
-		$this->pkmnData = $params['pkmnData'];
-		$this->eggGroups = $params['eggGroups'];
-		$this->unbreedable = $params['unbreedable'];
+	public function __construct (
+		StdClass $pkmnData,
+		StdClass $eggGroups,
+		StdClass|array $unbreedable,//todo |array is temporary
+		String $targetPkmn,
+		String $targetMove,
+		OutputPage $pageOutput
+	) {
+		$this->pkmnData = $pkmnData;
+		$this->eggGroups = $eggGroups;
+		$this->unbreedable = $unbreedable;
 
-		$this->targetPkmn = $params['targetPkmn'];
-		$this->targetMove = $params['targetMove'];
+		$this->targetPkmn = $targetPkmn;
+		$this->targetMove = $targetMove;
 
-		$this->pageOutput = $params['pageOutput'];
+		$this->pageOutput = $pageOutput;
 	}
 
 	/**
 	 * main function that creates and returns the breeding tree
 	 */
-	public function createBreedingTree () {
+	public function createBreedingTree () : BreedingChainNode {
 		//for performance measuring
 		$timeStart = hrtime(true);
 
@@ -59,24 +66,33 @@ abstract class BackendHandler {
 	 * pass by value (looser, 
 	 * 		slower (in extreme cases more then 200 times slower), more accurate)
 	 */
-	protected function setPossibleParents ($params, &$pkmnBlacklist) {		
-		$paramList = [
-			'pkmnObj' => $params['pkmnObj'],
-			'eggGroupBlacklist' => $params['eggGroupBlacklist']
-		];
-
-		if (!in_array($params['eggGroup1'], $params['eggGroupBlacklist'])) {
-			$paramList['eggGroup'] = $params['eggGroup1'];
-			$paramList['otherEggGroup'] = $params['eggGroup2'];
-			$this->setSuccessors($paramList, $pkmnBlacklist);
+	protected function setPossibleParents (
+		String $eggGroup1,
+		String|null $eggGroup2,
+		BreedingChainNode $pkmnObj,
+		Array &$pkmnBlacklist,
+		Array $eggGroupBlacklist
+	) {		
+		if (!in_array($eggGroup1, $eggGroupBlacklist)) {
+			$this->setSuccessors(
+				$eggGroup1,
+				$pkmnObj,
+				$eggGroup2,
+				$pkmnBlacklist,
+				$eggGroupBlacklist
+			);
 		}
 
 		//some pkmn only have one egg group --> has to get checked via is_null()
-		if (!is_null($params['eggGroup2'])) { 
-			if(!in_array($params['eggGroup2'], $params['eggGroupBlacklist'])) {
-				$paramList['eggGroup'] = $params['eggGroup2'];
-				$paramList['otherEggGroup'] = $params['eggGroup1'];
-				$this->setSuccessors($paramList, $pkmnBlacklist);
+		if (!is_null($eggGroup2)) { 
+			if(!in_array($eggGroup2, $eggGroupBlacklist)) {
+				$this->setSuccessors(
+					$eggGroup2,
+					$pkmnObj,
+					$eggGroup1,
+					$pkmnBlacklist,
+					$eggGroupBlacklist
+				);
 			}
 		}
 	}
@@ -86,8 +102,13 @@ abstract class BackendHandler {
 	 * adds eggGroup(s) and the successor to blackLists
 	 * if the successor can learn the move it is added to pkmnObj's successors
 	 */
-	private function setSuccessors ($params, &$pkmnBlacklist) {
-		$eggGroup = $params['eggGroup'];
+	private function setSuccessors (
+		String $eggGroup,
+		BreedingChainNode $pkmnObj,
+		String $otherEggGroup,
+		Array &$pkmnBlacklist,
+		Array $eggGroupBlacklist
+	) {
 		$eggGroupData = $this->eggGroups->$eggGroup;
 
 		foreach ($eggGroupData as $potSuccessorName) {
@@ -103,43 +124,49 @@ abstract class BackendHandler {
 				continue;
 			}
 
-			$paramList = [
-				'potSuccessorName' => $potSuccessorName,
-				'potSuccessorData' => $potSuccessorData,
-				'eggGroup' => $params['eggGroup'],
-				'pkmnObj' => $params['pkmnObj'],
-				'otherEggGroup' => $params['otherEggGroup'],
-				'eggGroupBlacklist' => $params['eggGroupBlacklist']
-			];
-			$this->addSuccessor($paramList, $pkmnBlacklist);
+			$this->addSuccessor(
+				$potSuccessorName,
+				$potSuccessorData,
+				$eggGroup,
+				$pkmnObj,
+				$eggGroupBlacklist,
+				$pkmnBlacklist
+			);
 		}
 	}
 
 	//todo name is meh (addSuccessor is already used in BreedingChainNode)
-	private function addSuccessor ($params, &$pkmnBlacklist) {
+	private function addSuccessor (
+		String $potSuccessorName,
+		StdClass $potSuccessorData,
+		String $eggGroup,
+		BreedingChainNode $pkmnObj,
+		Array $eggGroupBlacklist,
+		Array &$pkmnBlacklist
+	) {
 		//* this handling of the blacklists is more inaccurate
 		//*		 but creates less large amounts of results
 		$newEggGroupBlacklist = array_merge(
-			$params['eggGroupBlacklist'],
-			[$params['eggGroup']]
+			$eggGroupBlacklist,
+			[$eggGroup]
 		);
-		/* if (!is_null($params['otherEggGroup'])) {
+		/* if (!is_null($otherEggGroup)) {
 			$newEggGroupBlacklist = array_merge(
 				$newEggGroupBlacklist,
-				[$params['otherEggGroup']]
+				[$otherEggGroup]
 			);
 		} */
 
-		$pkmnBlacklist[] = $params['potSuccessorName'];
+		$pkmnBlacklist[] = $potSuccessorName;
 
 		$successor = $this->createBreedingChainNode(
-			$params['potSuccessorData'],
+			$potSuccessorData,
 			$pkmnBlacklist,
 			$newEggGroupBlacklist
 		);
 		if ($successor !== null) {
 			//this is called when successor is able to learn targetMove
-			$params['pkmnObj']->addSuccessor($successor);
+			$pkmnObj->addSuccessor($successor);
 		}
 	}
 
@@ -149,7 +176,7 @@ abstract class BackendHandler {
 	/**
 	 * checks whether the pkmn can learn targetMove via level, tmtr or tutor
 	 */
-	protected function canLearnNormally ($pkmn) {
+	protected function canLearnNormally (StdClass $pkmn) : bool {
 		$levelLearnability = $this->checkLearnsetType($pkmn->levelLearnsets);
 		if ($levelLearnability) {
 			return true;
@@ -172,21 +199,21 @@ abstract class BackendHandler {
 		return false;
 	}
 
-	protected function canInherit ($pkmn) {
+	protected function canInherit (StdClass $pkmn) : bool {
 		//not necessarily needed but it prevents masses of debug logs
 		if (!isset($pkmn->breedingLearnsets)) return false;		
 
 		return $this->checkLearnsetType($pkmn->breedingLearnsets);
 	}
 
-	protected function canLearnViaEvent ($pkmn) {
+	protected function canLearnViaEvent (StdClass $pkmn) : bool {
 		//not necessarily needed but it prevents masses of debug logs
 		if (!isset($pkmn->eventLearnsets)) return false;
 
 		return $this->checkLearnsetType($pkmn->eventLearnsets);
 	}
 
-	protected function checkLearnsetType ($learnset) {
+	protected function checkLearnsetType (Array|null $learnset) : bool {
 		if (is_null($learnset)) {
 			return false;
 		}
@@ -203,7 +230,7 @@ abstract class BackendHandler {
 	//==================================================================
 	//output stuff for debugging
 
-	protected function out ($msg) {
+	protected function out (String $msg) {
 		$this->pageOutput->addHTML($msg."<br />");
 	}
 }

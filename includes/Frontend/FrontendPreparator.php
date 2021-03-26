@@ -9,7 +9,7 @@ class FrontendPreparator {
 	//space between each pkmn 'column'
 	private $PKMN_MARGIN = 200;
 
-	public function __construct ($pkmnData, $PKMN_ICON_HEIGHT) {
+	public function __construct (StdClass $pkmnData, int $PKMN_ICON_HEIGHT) {
 		$this->pkmnData = $pkmnData;
 		$this->PKMN_ICON_HEIGHT = $PKMN_ICON_HEIGHT;
 	}
@@ -19,7 +19,9 @@ class FrontendPreparator {
 	 * in the end it creates a new tree structure with objects 
 	 * 		that have only the least possible data needed for the SVG elements
 	 */
-	public function prepareForFrontend ($breedingTree) {
+	public function prepareForFrontend (
+		BreedingChainNode $breedingTree
+	) : FrontendPkmnObj {
 		//todo mark pkmn that have learnsByEvent set to true
 		$this->setHeight($breedingTree, 1);
 
@@ -38,7 +40,7 @@ class FrontendPreparator {
 	 * an object's height is the sum of its successors' heights
 	 * 		or $PKMN_ICON_HEIGHT if it has no successors
 	 */
-	private function setHeight ($chainNode, $deepness) {
+	private function setHeight (BreedingChainNode $chainNode, int $deepness) : int {
 		if (count($chainNode->getSuccessors()) == 0) {
 			//executed if chainNode has no successors
 			$chainNode->setTreeSectionHeight($this->PKMN_ICON_HEIGHT);
@@ -61,7 +63,7 @@ class FrontendPreparator {
 	 * 		the - by the previous successors - already taken space and
 	 * 		adding the successor's height afterwards
 	 */
-	private function setOffset ($chainNode) {
+	private function setOffset (BreedingChainNode $chainNode) {
 		$takenSpace = 0;
 
 		foreach ($chainNode->getSuccessors() as $successor) {
@@ -72,7 +74,9 @@ class FrontendPreparator {
 		}
 	}
 
-	private function buildFinalObjectTree ($breedingTree) {
+	private function buildFinalObjectTree (
+		BreedingChainNode $breedingTree
+	) : FrontendPkmnObj {
 		$result = $this->handleChainNode($breedingTree, 0);
 
 		return $result;
@@ -82,7 +86,10 @@ class FrontendPreparator {
 	 * calculates the node's coordinates in pixels
 	 * creates new object for the final svg object structure
 	 */
-	private function handleChainNode ($breedingChainNode, $currentDeepness) {
+	private function handleChainNode (
+		BreedingChainNode $breedingChainNode,
+		int $currentDeepness
+	) : FrontendPkmnObj {
 		$pkmnName = $breedingChainNode->getName();
 		$pkmnData = $this->pkmnData->$pkmnName;
 		$pkmnId = $pkmnData->id;

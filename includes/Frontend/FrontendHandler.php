@@ -9,13 +9,13 @@ class FrontendHandler {
 	//todo remove this and use indivual icon heights
 	private $PKMN_ICON_HEIGHT = 50;
 	
-	public function __construct ($breedingTree, $pkmnData) {
+	public function __construct (BreedingChainNode $breedingTree, StdClass $pkmnData) {
 		$this->breedingTree = $breedingTree;
 		$this->pkmnData = $pkmnData;
 	}
 
 	//adds svg tag to output (includes adding css and js files)
-	public function addSVG ($output) {
+	public function addSVG (OutputPage $output) {
 		//for performance measuring
 		$timeStart = hrtime(true);
 

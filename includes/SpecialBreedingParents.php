@@ -21,7 +21,6 @@ class SpecialBreedingParents extends SpecialPage {
 
 	public function processStuff ($data, $form) {
 		//todo check whether pkmn is unbreebable
-
 		$targetGen = $data['genInput'];
 		$targetMove = $data['moveInput'];
 		$targetPkmn = $data['pkmnInput'];
@@ -29,15 +28,14 @@ class SpecialBreedingParents extends SpecialPage {
 		$this->getData($targetGen);
 		
 		//todo select gen handler class accordingly to targetGen
-		$paramList = [
-			'pkmnData' => $this->pkmnData,
-			'eggGroups' => $this->eggGroups,
-			'unbreedable' => $this->unbreedable,
-			'targetPkmn' => $targetPkmn,
-			'targetMove' => $targetMove,
-			'pageOutput' => $this->getOutput()//temporary
-		];
-		$backendHandler = new Gen7Handler($paramList);
+		$backendHandler = new Gen7Handler(
+			$this->pkmnData,
+			$this->eggGroups,
+			$this->unbreedable,
+			$targetPkmn,
+			$targetMove,
+			$this->getOutput()//temporary
+		);
 
 		$breedingTree = $backendHandler->createBreedingTree();
 
@@ -110,7 +108,7 @@ class SpecialBreedingParents extends SpecialPage {
 		return true;
 	}
 
-	private function getData ($gen) {
+	private function getData (String $gen) {
 		$this->pkmnData = $this->getPkmnData($gen);
 
 		$blacklistPageName = 'MediaWiki:Zuchteltern/Gen'.$gen.'/pkmn-blacklist.json';
@@ -120,7 +118,7 @@ class SpecialBreedingParents extends SpecialPage {
 		$this->eggGroups = $this->getWikiPageContent($eggGroupPageName);
 	}
 
-	private function getPkmnData ($gen) {
+	private function getPkmnData (String $gen) : StdClass {
 		$pkmnDataArr = [];
 		$pageData = null;
 		$pageIndex = 1;
@@ -141,7 +139,9 @@ class SpecialBreedingParents extends SpecialPage {
 	}
 	
 	//original code written by Buo (thanks ^^)
-	private function getWikiPageContent ($name) {
+	//if I use StdClass as the return type, it says the return type has to be Array
+	//		and this happens vice versa when I use Array as the return type
+	private function getWikiPageContent (String $name) : StdClass|Array {
 		$title = Title::newFromText($name);
 		$rev = Revision::newFromTitle($title);
 
@@ -151,17 +151,17 @@ class SpecialBreedingParents extends SpecialPage {
 
 		$data = $rev->getContent()->getNativeData();
 
-		return json_decode($data);
+		return json_decode($data);;
 	}
 
 	//===========================================================
 	//debugging stuff
 
-	private function debugOutput ($msg) {
+	private function debugOutput (String $msg) {
 		$this->getOutput()->addHTML($msg);
 	}
 
-	private function debugConsole ($msg) {
+	private function debugConsole (String $msg) {
 		echo '<script>console.log("'.$msg.'")</script>';
 	}
 }

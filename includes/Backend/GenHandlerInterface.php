@@ -1,15 +1,24 @@
 <?php
 interface GenHandlerInterface {
 	public function createBreedingChainNode (
-		$pkmn,
-		&$pkmnBlacklist,
-		$eggGroupBlacklist
-	);
+		StdClass $pkmnData,
+		Array &$pkmnBlacklist,
+		Array $eggGroupBlacklist
+	) : BreedingChainNode|null;
 
-	public function handleDirectLearnability ($chainNode);
+	public function handleDirectLearnability (
+		BreedingChainNode $pkmnObj
+	): BreedingChainNode;
 
-	public function handleInheritance ($params, &$pkmnBlacklist);
+	public function handleInheritance (
+		BreedingChainNode $pkmnObj,
+		StdClass $pkmnData,
+		Array $eggGroupBlacklist,
+		Array &$pkmnBlacklist
+	) : BreedingChainNode|null;
 
-	public function handleSpecialLearnability ($chainNode);
+	public function handleSpecialLearnability (
+		BreedingChainNode $pkmnObj
+	) : BreedingChainNode;
 }
 ?>

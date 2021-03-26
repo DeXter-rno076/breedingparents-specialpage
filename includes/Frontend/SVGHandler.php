@@ -12,14 +12,18 @@ class SVGHandler {
 
 	private $svgTag = '';
 
-	public function __construct ($frontendBreedingTree, $svgTagHeight, $PKMN_ICON_HEIGHT) {
+	public function __construct (
+		FrontendPkmnObj $frontendBreedingTree,
+		int $svgTagHeight,
+		int $PKMN_ICON_HEIGHT
+	) {
 		$this->frontendBreedingTree = $frontendBreedingTree;
 		$this->svgTag = '<svg id="breedingParentsSVG" width="TEMP_WIDTH_PLACEHOLDER"'.
 			' height="'.($svgTagHeight + 100).'">';
 		$this->PKMN_ICON_HEIGHT = $PKMN_ICON_HEIGHT;
 	}
 
-	public function addOutput ($output) {
+	public function addOutput (OutputPage $output) {
 		$this->createSVG();
 		$this->setSVGWidth();
 
@@ -47,14 +51,14 @@ class SVGHandler {
 		$this->svgTag .= '</svg>';
 	}
 
-	private function addLine ($startX, $startY, $endX, $endY) {
+	private function addLine (int $startX, int $startY, int $endX, int $endY) {
 		//safety margin of 10px to upper and left border
 		$svgLine = '<line x1="'.($startX + 10).'" y1="'.($startY + 10).'"'.
 			' x2="'.($endX + 10).'" y2="'.($endY + 10).'" />';
 		$this->svgTag .= $svgLine;
 	}
 
-	private function createSVGElements ($node) {
+	private function createSVGElements (FrontendPkmnObj $node) {
 		$this->addPkmnIcon($node);
 
 		//todo maybe outsource some stuff into a separate method
@@ -97,7 +101,7 @@ class SVGHandler {
 		}
 	}
 
-	private function addPkmnIcon ($pkmn) {
+	private function addPkmnIcon (FrontendPkmnObj $pkmn) {
 		try {
 			$iconUrl = $this->getIconUrl($pkmn->getPkmnId());
 			//safety margin to upper and left border
@@ -119,7 +123,7 @@ class SVGHandler {
 		}
 	}
 
-	private function getIconUrl ($pkmnId) {
+	private function getIconUrl (int $pkmnId) : String {
 		if ($pkmnId < 100) {
 			$pkmnId = '0'.$pkmnId;
 			if ($pkmnId < 10) {
