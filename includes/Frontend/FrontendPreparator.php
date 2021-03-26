@@ -107,7 +107,7 @@ class FrontendPreparator {
 			$pkmnY += ($breedingChainNode->getTreeSectionHeight() / 2);
 		}
 
-		$pkmnObj = new FrontendPkmnObj($pkmnId, $pkmnX, $pkmnY);
+		$pkmnObj = new FrontendPkmnObj($pkmnName, $pkmnId, $pkmnX, $pkmnY);
 		$this->transferIconData($breedingChainNode, $pkmnObj);
 
 		foreach ($breedingChainNode->getSuccessors() as $successor) {

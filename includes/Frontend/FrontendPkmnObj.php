@@ -1,5 +1,6 @@
 <?php
 class FrontendPkmnObj {
+	private $pkmnName = '';
 	private $pkmnId = -1;
 	private $x = -1;
 	private $y = -1;
@@ -11,10 +12,15 @@ class FrontendPkmnObj {
 
 	private $fileError = '';
 
-	public function __construct (int $pkmnId, int $x, int $y) {
+	public function __construct (String $pkmnName, int $pkmnId, int $x, int $y) {
+		$this->pkmnName = $pkmnName;
 		$this->pkmnId = $pkmnId;
 		$this->x = $x;
 		$this->y = $y;
+	}
+
+	public function getPkmnName () : String {
+		return $this->pkmnName;
 	}
 
 	public function addSuccessor (FrontendPkmnObj $successor) {

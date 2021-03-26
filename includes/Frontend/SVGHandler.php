@@ -99,11 +99,13 @@ class SVGHandler {
 	private function addPkmnIcon (FrontendPkmnObj $pkmn) {
 		if ($pkmn->getFileError() === '') {
 			//safety margin to upper and left border
+			//todo maybe make the click/touch area for the link bigger
+			$link = '<a href="https://www.pokewiki.de/'.$pkmn->getPkmnName().'">';
 			$icon = '<image x="'.($pkmn->getX() + 10).'" y="'.($pkmn->getY() + 10).'"'. 
 				' width="'.$pkmn->getIconWidth().'"'.
 				' height="'.$pkmn->getIconHeight().'"'.
 				' xlink:href="'.$pkmn->getIconUrl().'" />';
-			$this->svgTag .= $icon;
+			$this->svgTag .= $link.$icon.'</a>';
 		} else {
 			$x = $pkmn->getX() + 10;
 			$y = $pkmn->getY() + 10; 
