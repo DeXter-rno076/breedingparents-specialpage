@@ -5,6 +5,7 @@ class FrontendPkmnObj {
 	private $x = -1;
 	private $y = -1;
 	private $successors = [];
+	private $learnsByEvent = false;
 
 	private $iconUrl = '';
 	private $iconWidth = -1;
@@ -41,6 +42,14 @@ class FrontendPkmnObj {
 
 	public function getY () : int {
 		return $this->y;
+	}
+
+	public function setLearnsByEvent () {
+		$this->learnsByEvent = true;
+	}
+
+	public function getLearnsByEvent () : bool {
+		return $this->learnsByEvent;
 	}
 
 	//==========================================================

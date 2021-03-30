@@ -46,9 +46,9 @@ class FrontendPreparator {
 		if (count($chainNode->getSuccessors()) == 0) {
 			//executed if chainNode has no successors
 			$chainNode->setTreeSectionHeight(
-				$chainNode->getIconHeight() + self::PKMN_MARGIN_BOTTOM
+				$chainNode->getHeight() + self::PKMN_MARGIN_BOTTOM
 			);
-			return $chainNode->getIconHeight() + self::PKMN_MARGIN_BOTTOM;
+			return $chainNode->getHeight() + self::PKMN_MARGIN_BOTTOM;
 		}
 
 		$height = 0;
@@ -97,7 +97,8 @@ class FrontendPreparator {
 		$pkmnName = $breedingChainNode->getName();
 		$pkmnData = $this->pkmnData->$pkmnName;
 		$pkmnId = $pkmnData->id;
-		$pkmnX = $currentDeepness * self::PKMN_MARGIN_HORI;
+
+		$pkmnX = $currentDeepness * self::PKMN_MARGIN_HORI - $breedingChainNode->getIconWidth() / 2;
 		$pkmnY = $breedingChainNode->getTreeYOffset();
 		if ($breedingChainNode->getTreeSectionHeight() > $breedingChainNode->getIconHeight()) {
 			//this is only needed for pkmn with successors
@@ -109,6 +110,9 @@ class FrontendPreparator {
 
 		$pkmnObj = new FrontendPkmnObj($pkmnName, $pkmnId, $pkmnX, $pkmnY);
 		$this->transferIconData($breedingChainNode, $pkmnObj);
+		if ($breedingChainNode->getLearnsByEvent()) {
+			$pkmnObj->setLearnsByEvent();
+		}
 
 		foreach ($breedingChainNode->getSuccessors() as $successor) {
 			$successorObject = $this->handleChainNode($successor, $currentDeepness + 1);

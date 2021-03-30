@@ -1,7 +1,4 @@
 <?php
-//todo <desc> for eventlearnset pkmn
-//todo add links to pkmn icons
-
 class SVGHandler {
 	private $frontendBreedingTree = null;
 	
@@ -71,6 +68,7 @@ class SVGHandler {
 			//how long the distance between starting/ending point 
 			//	of the connection line to the corresponding icon shall be
 			//todo exact margin is not final
+			//todo make it depend on the icon's size
 			$MARGIN = 20;
 
 			//tries x coordinates until it reaches a suiting margin to the icon
@@ -98,26 +96,36 @@ class SVGHandler {
 
 	private function addPkmnIcon (FrontendPkmnObj $pkmn) {
 		if ($pkmn->getFileError() === '') {
-			//safety margin to upper and left border
 			//todo maybe make the click/touch area for the link bigger
-			$link = '<a href="https://www.pokewiki.de/'.$pkmn->getPkmnName().'">';
+			$link = '<a href="https://www.pokewiki.de/'.$pkmn->getPkmnName().'#Attacken">';
 			$icon = '<image x="'.($pkmn->getX() + 10).'" y="'.($pkmn->getY() + 10).'"'. 
 				' width="'.$pkmn->getIconWidth().'"'.
 				' height="'.$pkmn->getIconHeight().'"'.
 				' xlink:href="'.$pkmn->getIconUrl().'" />';
 			$this->svgTag .= $link.$icon.'</a>';
+			if ($pkmn->getLearnsByEvent()) {
+				$this->addEventMarker($pkmn);
+			}
 		} else {
+			//executed when the icon file couldn't get loaded
 			$x = $pkmn->getX() + 10;
 			$y = $pkmn->getY() + 10; 
 			$text = '<text x="'.$x.'" y="'.$y.'">'.	
-				'<tspan x="'.$x.'" y="'.$y.'">Oh, das hätte nicht passieren sollen.</tspan>'.
+				'<tspan x="'.$x.'" y="'.$y.'">Oh, das hätte nicht passieren sollen :\'(</tspan>'.
 				'<tspan x="'.$x.'" y="'.($y + 20).'">Melde das bitte auf unserem</tspan>'.
 				'<tspan x="'.$x.'" y="'.($y + 40).'">Discordserver oder in der'.
-				' <a href="https://www.pokewiki.de/Pok%C3%A9Wiki:Auskunft">Auskunft</a></tspan>'.
+				' <a href="https://www.pokewiki.de/Pok%C3%A9Wiki:Auskunft">Auskunft</a> ^^</tspan>'.
 				'<tspan x="'.$x.'" y="'.($y + 60).'">Fehler beim Laden'.
 				' von "'.$pkmn->getPkmnId().'"</tspan></text>';
 			$this->svgTag .= $text;
 		}
+	}
+
+	private function addEventMarker (FrontendPkmnObj $pkmn) {
+		$x = $pkmn->getX() - 10 + $pkmn->getIconWidth() / 2;
+		$y = $pkmn->getY() + $pkmn->getIconHeight() + 20;
+		$text = '<text x="'.$x.'" y="'.$y.'">Event</text>';
+		$this->svgTag .= $text;
 	}
 }
 ?>

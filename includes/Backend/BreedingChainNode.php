@@ -56,6 +56,13 @@ class BreedingChainNode {
 		$this->treeYOffset = $offset;
 	}
 
+	public function getHeight () : int {
+		if ($this->getLearnsByEvent()) {
+			return $this->getIconHeight() + 20;
+		}
+		return $this->getIconHeight();
+	}
+
 	//==========================================================
 	//icon stuff
 	//todo maybe outsource into a parent class
