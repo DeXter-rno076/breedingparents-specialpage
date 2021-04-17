@@ -197,4 +197,3 @@ class SVGHandler {
 		$this->svgTag .= $text;
 	}
 }
-?>

@@ -34,4 +34,3 @@ class FrontendHandler {
 		$output->addHTML('frontend needed '.$timeDiff.' seconds<br />');
 	}
 }
-?>

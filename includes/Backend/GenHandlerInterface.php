@@ -21,4 +21,3 @@ interface GenHandlerInterface {
 		BreedingChainNode $pkmnObj
 	) : BreedingChainNode;
 }
-?>

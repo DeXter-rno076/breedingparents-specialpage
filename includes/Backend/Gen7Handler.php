@@ -108,4 +108,3 @@ class Gen7Handler extends BackendHandler implements GenHandlerInterface {
 		return $pkmnObj;
 	}
 }
-?>

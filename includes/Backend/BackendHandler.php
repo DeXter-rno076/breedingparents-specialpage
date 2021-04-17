@@ -234,4 +234,3 @@ abstract class BackendHandler {
 		$this->pageOutput->addHTML($msg."<br />");
 	}
 }
-?>

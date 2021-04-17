@@ -133,4 +133,3 @@ class FrontendPkmnObj {
 		return $this->fileError;
 	}
 }
-?>

@@ -165,4 +165,3 @@ class SpecialBreedingParents extends SpecialPage {
 		echo '<script>console.log("'.$msg.'")</script>';
 	}
 }
-?>
