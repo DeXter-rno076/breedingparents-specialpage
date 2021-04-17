@@ -116,12 +116,6 @@ abstract class BackendHandler {
 		foreach ($eggGroupData as $potSuccessorName) {
 			$potSuccessorData = $this->pkmnData->$potSuccessorName;
 
-			if (is_null($potSuccessorData)) {
-				//todo this can be removed, 
-				//todo		when the pkmn data program removes pkmn
-				//todo 		that are not in the handled gen
-				continue;
-			}
 			if (in_array($potSuccessorName, $pkmnBlacklist)) {
 				continue;
 			}
