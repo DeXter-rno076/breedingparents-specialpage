@@ -43,7 +43,7 @@ abstract class BackendHandler {
 		//needed for preventing infinite recursion
 		//a pkmn may only occur once in a branch,
 		//		otherwise you would get an infinite loop
-		$pkmnBlacklist = [$targetPkmnData];
+		$pkmnBlacklist = [$targetPkmnData->name];
 		$eggGroupBlacklist = [];
 		$breedingTree = $this->createBreedingChainNode(
 			$targetPkmnData,
