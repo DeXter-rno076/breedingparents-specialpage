@@ -5,7 +5,7 @@
         ]
     },
     "breedingparents": "Breeding Parents",
-    "breedingparents-title": "Special:Breeding Parents",
+    "breedingparents-title": "Special:BreedingParents",
     "breedingparents-desc": "[[Special:BreedingParents|Displays]] the possible breeding chains of a given Pokémon, move and gen.",
     "breedingparents-summary": "Do this, and voila! (what use has this? I have no idea)"
 }

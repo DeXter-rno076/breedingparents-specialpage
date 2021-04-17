@@ -6,6 +6,6 @@
     },
     "breedingparents": "Zuchteltern",
     "breedingparents-title": "Spezial:Zuchteltern",
-    "breedingparents-desc": "[[Special:Zuchteltern|Zeigt]] den Zuchteltern-Baum eines Pokémon für eine Attacke in einer Generation.",
+    "breedingparents-desc": "[[Special:BreedingParents|Zeigt]] den Zuchteltern-Baum eines Pokémon für eine Attacke in einer Generation.",
     "breedingparents-summary": "Keine Ahnung was das hier bringt. Irgendwo im MediaWiki-Wiki hieß es, das muss so."
 }
