@@ -139,9 +139,8 @@ class SpecialBreedingParents extends SpecialPage {
 	}
 	
 	//original code written by Buo (thanks ^^)
-	//if I use StdClass as the return type, it says the return type has to be Array
-	//		and this happens vice versa when I use Array as the return type
-	private function getWikiPageContent (String $name) : StdClass|Array {
+	//returns JSON objects and arrays -> needs 2 return types which needs php 8
+	private function getWikiPageContent (String $name) {
 		$title = Title::newFromText($name);
 		$rev = Revision::newFromTitle($title);
 

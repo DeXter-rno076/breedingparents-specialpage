@@ -14,7 +14,7 @@ abstract class BackendHandler {
 	public function __construct (
 		StdClass $pkmnData,
 		StdClass $eggGroups,
-		StdClass|array $unbreedable,//todo |array is temporary
+		Array $unbreedable,
 		String $targetPkmn,
 		String $targetMove,
 		OutputPage $pageOutput
@@ -68,7 +68,7 @@ abstract class BackendHandler {
 	 */
 	protected function setPossibleParents (
 		String $eggGroup1,
-		String|null $eggGroup2,
+		?String $eggGroup2,
 		BreedingChainNode $pkmnObj,
 		Array &$pkmnBlacklist,
 		Array $eggGroupBlacklist
@@ -105,7 +105,9 @@ abstract class BackendHandler {
 	private function setSuccessors (
 		String $eggGroup,
 		BreedingChainNode $pkmnObj,
-		String $otherEggGroup,
+
+		//needed for stronger blacklist handling (not implemented now)
+		?String $otherEggGroup,
 		Array &$pkmnBlacklist,
 		Array $eggGroupBlacklist
 	) {
@@ -213,7 +215,7 @@ abstract class BackendHandler {
 		return $this->checkLearnsetType($pkmn->eventLearnsets);
 	}
 
-	protected function checkLearnsetType (Array|null $learnset) : bool {
+	protected function checkLearnsetType (?Array $learnset) : bool {
 		if (is_null($learnset)) {
 			return false;
 		}

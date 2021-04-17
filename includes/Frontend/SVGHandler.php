@@ -138,7 +138,7 @@ class SVGHandler {
 		return ($longerPart / 2) + $margin;
 	}
 
-	private function getDeltas (int $margin, int|float $m) : Array {
+	private function getDeltas (int $margin, float $m) : Array {
 		//tries x coordinates until it reaches a suiting margin to the icon
 		$dx = 0;
 		$dy = 0;
