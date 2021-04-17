@@ -1,5 +1,5 @@
 <?php
-require 'FrontendPkmnObj.php';
+require_once 'FrontendPkmnObj.php';
 use MediaWiki\MediaWikiServices;
 
 class FrontendPreparator {
@@ -24,7 +24,6 @@ class FrontendPreparator {
 		//this has to get done before setHeight()
 		$this->setIconData($breedingTree);
 
-		//todo mark pkmn that have learnsByEvent set to true
 		$this->setHeight($breedingTree, 1);
 
 		//the whole tree obviously starts at the top

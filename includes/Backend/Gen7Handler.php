@@ -1,6 +1,6 @@
 <?php
-require 'BackendHandler.php';
-require 'GenHandlerInterface.php';
+require_once 'BackendHandler.php';
+require_once 'GenHandlerInterface.php';
 class Gen7Handler extends BackendHandler implements GenHandlerInterface {
 	/** 
 	 * depending on strictness pkmnBlacklist should use 

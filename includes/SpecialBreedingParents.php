@@ -1,8 +1,8 @@
 <?php
 //todo find a solution for output of validation methods
 
-require 'Backend/Gen7Handler.php';
-require 'Frontend/FrontendHandler.php';
+require_once 'Backend/Gen7Handler.php';
+require_once 'Frontend/FrontendHandler.php';
 
 class SpecialBreedingParents extends SpecialPage {
 	private $pkmnData = null;

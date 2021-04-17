@@ -1,5 +1,5 @@
 <?php
-require 'BreedingChainNode.php';
+require_once 'BreedingChainNode.php';
 abstract class BackendHandler {
 	//contain the data of the external wiki pages
 	protected $pkmnData = null;

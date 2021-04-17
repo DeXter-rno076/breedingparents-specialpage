@@ -1,6 +1,6 @@
 <?php
-require 'FrontendPreparator.php';
-require 'SVGHandler.php';
+require_once 'FrontendPreparator.php';
+require_once 'SVGHandler.php';
 
 class FrontendHandler {
 	private $breedingTree = null;
