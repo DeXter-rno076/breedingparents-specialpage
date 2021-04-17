@@ -24,7 +24,8 @@ class FrontendHandler {
 		$svgTagHeight = $svgObjectStructure->svgTagHeight;
 		$svgHandler = new SVGHandler(
 			$svgObjectStructure,
-			$svgTagHeight
+			$svgTagHeight,
+			$output
 		);
 		$svgHandler->addOutput($output);
 

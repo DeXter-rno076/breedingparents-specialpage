@@ -108,30 +108,29 @@ class FrontendPreparator {
 			$pkmnY += ($breedingChainNode->getTreeSectionHeight() / 2);
 		}
 
-		$pkmnObj = new FrontendPkmnObj($pkmnName, $pkmnId, $pkmnX, $pkmnY);
-		$this->transferIconData($breedingChainNode, $pkmnObj);
+		$frontendPkmn = new FrontendPkmnObj(
+			$pkmnName,
+			$pkmnId,
+			$pkmnX,
+			$pkmnY,
+			$breedingChainNode->getIconUrl(),
+			$breedingChainNode->getIconWidth(),
+			$breedingChainNode->getIconHeight()
+		);
+
+		if ($breedingChainNode->getFileError() !== '') {
+			$frontendPkmn->setFileError($breedingChainNode->getFileError());
+		}
 		if ($breedingChainNode->getLearnsByEvent()) {
-			$pkmnObj->setLearnsByEvent();
+			$frontendPkmn->setLearnsByEvent();
 		}
 
 		foreach ($breedingChainNode->getSuccessors() as $successor) {
 			$successorObject = $this->handleChainNode($successor, $currentDeepness + 1);
-			$pkmnObj->addSuccessor($successorObject);
+			$frontendPkmn->addSuccessor($successorObject);
 		}
 
-		return $pkmnObj;
-	}
-
-	private function transferIconData (
-		BreedingChainNode $breedingChainNode,
-		FrontendPkmnObj $pkmnObj
-	) {
-		if ($breedingChainNode->getFileError() !== '') {
-			$pkmnObj->setFileError($breedingChainNode->getFileError());
-		}
-		$pkmnObj->setIconUrl($breedingChainNode->getIconUrl());
-		$pkmnObj->setIconHeight($breedingChainNode->getIconHeight());
-		$pkmnObj->setIconWidth($breedingChainNode->getIconWidth());
+		return $frontendPkmn;
 	}
 
 	private function setIconData (BreedingChainNode $pkmnObj) {

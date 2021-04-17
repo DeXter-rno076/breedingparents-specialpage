@@ -13,11 +13,26 @@ class FrontendPkmnObj {
 
 	private $fileError = '';
 
-	public function __construct (String $pkmnName, int $pkmnId, int $x, int $y) {
+	const EVENT_TEXT_HEIGHT = 20;
+	const EVENT_TEXT_WIDTH = 41;
+	const SAFETY_SPACE = 10;
+
+	public function __construct (
+		String $pkmnName,
+		int $pkmnId,
+		int $x,
+		int $y,
+		String $iconUrl,
+		int $iconWidth,
+		int $iconHeight
+	) {
 		$this->pkmnName = $pkmnName;
 		$this->pkmnId = $pkmnId;
 		$this->x = $x;
 		$this->y = $y;
+		$this->iconUrl = $iconUrl;
+		$this->iconWidth = $iconWidth;
+		$this->iconHeight = $iconHeight;
 	}
 
 	public function getPkmnName () : String {
@@ -37,11 +52,38 @@ class FrontendPkmnObj {
 	}
 
 	public function getX () : int {
-		return $this->x;
+		return $this->x + self::SAFETY_SPACE;
+	}
+
+	public function getEventTextX () : int {
+		return $this->getX() + $this->getPartXOffset(
+			self::EVENT_TEXT_WIDTH,
+			$this->getIconWidth()
+		);
+	}
+
+	public function getIconX () : int {
+		if (!$this->getLearnsByEvent()) {
+			return $this->getX();
+		} else {
+			return $this->getX() + $this->getPartXOffset(
+				$this->getIconWidth(),
+				self::EVENT_TEXT_WIDTH
+			);
+		}
+	}
+
+	//depending on which is wider, the icon or the text have to be indented a bit
+	private function getPartXOffset (int $targetW, int $otherW) : int {
+		if ($otherW > $targetW) {
+			return ($otherW - $targetW) / 2;
+		} else {
+			return 0;
+		}
 	}
 
 	public function getY () : int {
-		return $this->y;
+		return $this->y + self::SAFETY_SPACE;
 	}
 
 	public function setLearnsByEvent () {
@@ -55,24 +97,28 @@ class FrontendPkmnObj {
 	//==========================================================
 	//icon stuff
 
-	public function setIconUrl (String $url) {
-		$this->iconUrl = $url;
-	}
-
 	public function getIconUrl () : String {
 		return $this->iconUrl;
 	}
 
-	public function setIconWidth (int $width) {
-		$this->iconWidth = $width;
+	public function getWidth () : int {
+		if (!$this->getLearnsByEvent()) {
+			return $this->iconWidth;
+		} else {
+			return max($this->iconWidth, self::EVENT_TEXT_WIDTH);
+		}
+	}
+
+	public function getHeight () : int {
+		if (!$this->getLearnsByEvent()) {
+			return $this->iconHeight;
+		} else {
+			return $this->iconHeight + self::EVENT_TEXT_HEIGHT / 2;
+		}
 	}
 
 	public function getIconWidth () : int {
 		return $this->iconWidth;
-	}
-
-	public function setIconHeight (int $height) {
-		$this->iconHeight = $height;
 	}
 
 	public function getIconHeight () : int {
