@@ -5,12 +5,15 @@ import fs from 'fs';
 
 //!what to remember:
 //gen 7 tutor moves of evoli and pikachu
+//eF-eM
 
-//todo skip pkmn that are not in the set gen
 //todo special forms
 //todo make sure that game differences in a gen don't cause problems
 
-const GEN = 7;
+//todo check for problems with name changes
+//todo check all moves for templates
+
+const GEN = 6;
 
 //adding whitespace about doubles the file length
 const FILE_SIZE_CAP = 300000;
@@ -27,8 +30,7 @@ class PkmnObj {
 	constructor (name, id, eggGroup1) {
 		this.name = name.trim();
 
-		if (!id) {
-			//check if id is NaN
+		if (isNaN(id)) {
 			throw 'error in id: ' + id;
 		}
 		this.id = id;
@@ -41,6 +43,10 @@ class PkmnObj {
 			return;
 		}
 		this.eggGroup2 = eggGroup.trim();
+	}
+
+	setGender (gender) {
+		this.gender = gender;
 	}
 
 	addLearnset (type, move) {
@@ -125,6 +131,8 @@ async function handlePkmn (pkmn) {
 		pkmnInfobox['Ei-Gruppe'].text
 	);
 
+	setGender(pkmnObj, pkmnInfobox);
+
 	if (pkmnInfobox['Ei-Gruppe2'] !== undefined) {
 		pkmnObj.setEggGroup2(pkmnInfobox['Ei-Gruppe2'].text);
 	}
@@ -135,6 +143,30 @@ async function handlePkmn (pkmn) {
 	}
 
 	dataObj[pkmn] = pkmnObj;
+}
+
+function setGender (pkmnObj, pkmnInfobox) {
+	const genderInfo = pkmnInfobox.Geschlecht.text;
+
+	if (genderInfo.includes('Unbekannt')) {
+		pkmnObj.setGender('unknown');
+		return;
+	}
+
+	if (!/100\s*%/.test(genderInfo)) {
+		pkmnObj.setGender('both');
+		return;
+	}
+
+	const onlyGender = /.*100\s*%\s*(\S)/.exec(genderInfo)['1'];
+	if (onlyGender === '♀') {
+		pkmnObj.setGender('female');
+	} else if (onlyGender === '♂') {
+		pkmnObj.setGender('male');
+	} else {
+		console.warn('unknown symbol ' + onlyGender + 'in gender info of ' + pkmnObj.name);
+		pkmnObj.setGender('ooops, a problem occured :(');
+	}
 }
 
 /* not needed anymore (was used when the pkmn objects were stored in an array)
@@ -197,14 +229,24 @@ function handleEventLearnset (pkmnObj, learnsets) {
 }
 
 function handleLearnset (pkmnObj, learnsets, learnsetType) {
-	const template = learnsets.find(item => {
+	const tables = learnsets.filter(item => {
 		return item.Art.text === learnsetType;
 	});
 
-	if (template === undefined) {
+	if (tables.length === 0) {
 		return;
 	}
 
+	for (let table of tables) {
+		handleLearnsetTable(table, pkmnObj, learnsetType);
+		if (GEN === 7) {
+			//don't mix SoMoUSUM with LGPE
+			break;
+		}
+	}
+}
+
+function handleLearnsetTable (template, pkmnObj, learnsetType) {
 	const atkRows = template['1'].templates;
 
 	for (let row of atkRows) {
