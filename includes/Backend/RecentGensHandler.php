@@ -1,7 +1,7 @@
 <?php
 require_once 'BackendHandler.php';
 require_once 'GenHandlerInterface.php';
-class Gen7Handler extends BackendHandler implements GenHandlerInterface {
+class RecentGensHandler extends BackendHandler implements GenHandlerInterface {
 	/** 
 	 * depending on strictness pkmnBlacklist should use 
 	 * 		pass by reference (stricter, faster, inaccurate) or 
@@ -21,7 +21,7 @@ class Gen7Handler extends BackendHandler implements GenHandlerInterface {
 		$pkmnObj = new BreedingChainNode($pkmnData->name);
 
 		if ($this->canLearnNormally($pkmnData)) {
-			return $this->handleSpecialLearnability($pkmnObj);
+			return $this->handleDirectLearnability($pkmnObj);
 		}
 
 		if ($this->canInherit($pkmnData)) {

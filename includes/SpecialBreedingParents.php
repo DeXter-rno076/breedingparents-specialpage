@@ -1,7 +1,7 @@
 <?php
 //todo find a solution for output of validation methods
 
-require_once 'Backend/Gen7Handler.php';
+require_once 'Backend/RecentGensHandler.php';
 require_once 'Frontend/FrontendHandler.php';
 
 class SpecialBreedingParents extends SpecialPage {
@@ -28,14 +28,20 @@ class SpecialBreedingParents extends SpecialPage {
 		$this->getData($targetGen);
 		
 		//todo select gen handler class accordingly to targetGen
-		$backendHandler = new Gen7Handler(
-			$this->pkmnData,
-			$this->eggGroups,
-			$this->unbreedable,
-			$targetPkmn,
-			$targetMove,
-			$this->getOutput()//temporary
-		);
+		$backendHandler = null;
+
+		if ($targetGen >= 6) {
+			$backendHandler = new RecentGensHandler(
+				$this->pkmnData,
+				$this->eggGroups,
+				$this->unbreedable,
+				$targetPkmn,
+				$targetMove,
+				$this->getOutput()//temporary
+			);
+		} else {
+			$backendHandler = new OldGensHandler();
+		}
 
 		$breedingTree = $backendHandler->createBreedingTree();
 
