@@ -11,9 +11,9 @@ import fs from 'fs';
 //todo make sure that game differences in a gen don't cause problems
 
 //todo check for problems with name changes
-//todo check all moves for templates
+//todo check all moves for templates in the name fields
 
-const GEN = 6;
+const GEN = 2;
 
 //adding whitespace about doubles the file length
 const FILE_SIZE_CAP = 300000;
@@ -250,6 +250,12 @@ function handleLearnsetTable (template, pkmnObj, learnsetType) {
 	const atkRows = template['1'].templates;
 
 	for (let row of atkRows) {
+		if (GEN === 3 && learnsetType === 'Lehrer') {
+			if (onlyXDMove(row)) {
+				continue;
+			}
+		}
+
 		const moveName = row['2'].text;
 		if (moveName.includes('{')) {
 			console.warn('{ in name of ' + moveName + ' in ' + 
@@ -257,4 +263,9 @@ function handleLearnsetTable (template, pkmnObj, learnsetType) {
 		}
 		pkmnObj.addLearnset(learnsetType, moveName);
 	}
+}
+
+function onlyXDMove (atkRow) {
+	const sk = atkRow['1'].templates[0];
+	return sk.paramList.length === 1 && sk['1'].text === 'XD';
 }
