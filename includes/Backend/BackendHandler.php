@@ -118,6 +118,11 @@ abstract class BackendHandler {
 		foreach ($eggGroupPkmnList as $potSuccessorName) {
 			$potSuccessorData = $this->pkmnData->$potSuccessorName;
 
+			if (!$this->checkSuccessorSpecialRequirements($potSuccessorData)) {
+				//e. g. only fathers can give moves to their kids in gens 2-5
+				continue;
+			}
+
 			if (in_array($potSuccessorName, $pkmnBlacklist)) {
 				//pkmn that already are somewhere in the tree get skipped
 				//may vary depending on blacklist strictness
