@@ -12,22 +12,22 @@ class RecentGensHandler extends BackendHandler implements GenHandlerInterface {
 	 * 		returns null if not
 	 */
 	public function createBreedingChainNode (
-		StdClass $pkmnData,
-		Array &$pkmnBlacklist,
-		Array $eggGroupBlacklist
+		StdClass $pkmnObj,
+		Array $eggGroupBlacklist,
+		Array &$pkmnBlacklist
 	) : ?BreedingChainNode {
 		//todo form change moves (e. g. Rotom) should count as normal 
 		//todo (check if there are breedable pkmn that have those ^ form change learnsets)
-		$pkmnObj = new BreedingChainNode($pkmnData->name);
+		$node = new BreedingChainNode($pkmnObj->name);
 
-		if ($this->canLearnNormally($pkmnData)) {
-			return $this->handleDirectLearnability($pkmnObj);
+		if ($this->canLearnNormally($pkmnObj)) {
+			return $this->handleDirectLearnability($node);
 		}
 
-		if ($this->canInherit($pkmnData)) {
+		if ($this->canInherit($pkmnObj)) {
 			$inheritanceCheckResult = $this->handleInheritance(
+				$node,
 				$pkmnObj,
-				$pkmnData,
 				$eggGroupBlacklist,
 				$pkmnBlacklist
 			);
@@ -37,15 +37,15 @@ class RecentGensHandler extends BackendHandler implements GenHandlerInterface {
 			}
 		}
 
-		if ($this->canLearnViaEvent($pkmnData)) {
-			return $this->handleSpecialLearnability($pkmnObj);
+		if ($this->canLearnViaEvent($pkmnObj)) {
+			return $this->handleSpecialLearnability($node);
 		}
 
 		return null;
 	}
 
 	public function handleDirectLearnability (
-		BreedingChainNode $pkmnObj
+		BreedingChainNode $node
 	) : BreedingChainNode {
 		//if a pkmn can learn the targeted move directly without breeding
 		//		no possible successors are needed/wanted
@@ -53,12 +53,12 @@ class RecentGensHandler extends BackendHandler implements GenHandlerInterface {
 		//todo if targetPkmn is able to learn targetMove directly,
 		//todo		it looks like something went wrong
 		//todo		(only targetPkmn's icon is displayed)
-		return $pkmnObj;
+		return $node;
 	}
 
 	public function handleInheritance (
-		BreedingChainNode $pkmnObj,
-		StdClass $pkmnData,
+		BreedingChainNode $node,
+		StdClass $pkmnObj,
 		Array $eggGroupBlacklist,
 		Array &$pkmnBlacklist
 	) : ?BreedingChainNode {
@@ -67,17 +67,17 @@ class RecentGensHandler extends BackendHandler implements GenHandlerInterface {
 		//		and adds them as a successor to chainNode
 		//		if they can learn the move in some way
 		$eggGroup2 = null;
-		if (isset($pkmnData->eggGroup2)) {
+		if (isset($pkmnObj->eggGroup2)) {
 			//this prevents masses of debugging messages
-			$eggGroup2 = $pkmnData->eggGroup2;
+			$eggGroup2 = $pkmnObj->eggGroup2;
 		}
 
 		$this->setPossibleParents(
-			$pkmnData->eggGroup1,
+			$node,
+			$pkmnObj->eggGroup1,
 			$eggGroup2,
-			$pkmnObj,
-			$pkmnBlacklist,
-			$eggGroupBlacklist
+			$eggGroupBlacklist,
+			$pkmnBlacklist
 		);
 
 		//todo this explanation is not the yellow from the egg
@@ -87,16 +87,16 @@ class RecentGensHandler extends BackendHandler implements GenHandlerInterface {
 		//		it hasn't anyone to inherit the move from 
 		//		--> branch doesn't get added to existing tree structure
 		//		because there is no 'successful' end
-		if (count($pkmnObj->getSuccessors()) > 0) {
+		if (count($node->getSuccessors()) > 0) {
 			//only return if the pkmn has at least one pkmn it can inherit the move from
-			return $pkmnObj;
+			return $node;
 		}
 	
 		return null;
 	}
 
 	public function handleSpecialLearnability (
-		BreedingChainNode $pkmnObj
+		BreedingChainNode $node
 	) : BreedingChainNode {
 		//similar to the canLearnNormally section a few lines before this
 		//event learnsets can however be hard or impossible to get
@@ -104,7 +104,7 @@ class RecentGensHandler extends BackendHandler implements GenHandlerInterface {
 	
 		//marks that the chain node can only learn the move
 		//		via event learnsets (needed for frontend) 
-		$pkmnObj->setLearnsByEvent();
-		return $pkmnObj;
+		$node->setLearnsByEvent();
+		return $node;
 	}
 }
