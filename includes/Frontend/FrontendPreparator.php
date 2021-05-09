@@ -1,17 +1,15 @@
 <?php
 require_once 'FrontendPkmnObj.php';
+//for some reason prepending __DIR__ is a fix for require not liking relative paths
+require_once __DIR__.'/../Constants.php';
 use MediaWiki\MediaWikiServices;
 
-class FrontendPreparator {
-	private $pkmnData = null;
-	
+class FrontendPreparator {	
 	//space between each pkmn 'column'
 	const PKMN_MARGIN_HORI = 200;
 	const PKMN_MARGIN_BOTTOM = 10;
 
-	public function __construct (StdClass $pkmnData) {
-		$this->pkmnData = $pkmnData;
-	}
+	public function __construct () {}
 
 	/**
 	 * sets heights and y offsets for all pkmn nodes
@@ -94,7 +92,7 @@ class FrontendPreparator {
 		int $currentDeepness
 	) : FrontendPkmnObj {
 		$pkmnName = $breedingChainNode->getName();
-		$pkmnData = $this->pkmnData->$pkmnName;
+		$pkmnData = Constants::$pkmnData->$pkmnName;
 		$pkmnId = $pkmnData->id;
 
 		$pkmnX = $currentDeepness * self::PKMN_MARGIN_HORI - $breedingChainNode->getIconWidth() / 2;
@@ -135,7 +133,7 @@ class FrontendPreparator {
 	private function setIconData (BreedingChainNode $pkmnObj) {
 		try {
 			$pkmnName = $pkmnObj->getName();
-			$pkmnData = $this->pkmnData->$pkmnName;
+			$pkmnData = Constants::$pkmnData->$pkmnName;
 			$pkmnId = $pkmnData->id;
 
 			$fileObj = $this->getFile($pkmnId);

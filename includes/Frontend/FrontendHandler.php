@@ -6,7 +6,7 @@ class FrontendHandler {
 	private $breedingTree = null;
 	private $pkmnData = null;
 	
-	public function __construct (BreedingChainNode $breedingTree, StdClass $pkmnData) {
+	public function __construct (BreedingChainNode $breedingTree) {
 		$this->breedingTree = $breedingTree;
 		$this->pkmnData = $pkmnData;
 	}
@@ -18,7 +18,7 @@ class FrontendHandler {
 
 		//preparator creates a tree structure with objects
 		//	that have only the necessary infos for SVGHandler
-		$preparator = new FrontendPreparator($this->pkmnData);
+		$preparator = new FrontendPreparator();
 		$svgObjectStructure = $preparator->prepareForFrontend($this->breedingTree);
 
 		$svgTagHeight = $svgObjectStructure->svgTagHeight;

@@ -3,6 +3,7 @@
 
 require_once 'Backend/RecentGensHandler.php';
 require_once 'Frontend/FrontendHandler.php';
+require_once 'Constants.php';
 
 class SpecialBreedingParents extends SpecialPage {
 	private $pkmnData = null;
@@ -21,22 +22,17 @@ class SpecialBreedingParents extends SpecialPage {
 
 	public function processStuff ($data, $form) {
 		//todo check whether pkmn is unbreebable
-		$targetGen = $data['genInput'];
-		$targetMove = $data['moveInput'];
-		$targetPkmn = $data['pkmnInput'];
+		Constants::$targetGen = $data['genInput'];
+		Constants::$targetMove = $data['moveInput'];
+		Constants::$targetPkmn = $data['pkmnInput'];
 
-		$this->getData($targetGen);
+		$this->getData();
 		
 		//todo select gen handler class accordingly to targetGen
 		$backendHandler = null;
 
-		if ($targetGen >= 6) {
+		if (Constants::$targetGen >= 6) {
 			$backendHandler = new RecentGensHandler(
-				$this->pkmnData,
-				$this->eggGroups,
-				$this->unbreedable,
-				$targetPkmn,
-				$targetMove,
 				$this->getOutput()//temporary
 			);
 		} else {
@@ -49,14 +45,14 @@ class SpecialBreedingParents extends SpecialPage {
 			return Status::newFatal('breeding tree empty');
 		}
 
-		$frontendHandler = new FrontendHandler($breedingTree, $this->pkmnData);
+		$frontendHandler = new FrontendHandler($breedingTree);
 		$frontendHandler->addSVG($this->getOutput());
 
 		return Status::newGood();
 	}
 
 	private function addForms () {
-		require 'formDescriptor.php';
+		require_once 'formDescriptor.php';
 	
 		$form = HTMLForm::factory('inline', $formDescriptor, $this->getContext());
 		$form->setMethod('get');
@@ -114,14 +110,15 @@ class SpecialBreedingParents extends SpecialPage {
 		return true;
 	}
 
-	private function getData (String $gen) {
-		$this->pkmnData = $this->getPkmnData($gen);
+	private function getData () {
+		$gen = Constants::$targetGen;
+		Constants::$pkmnData = $this->getPkmnData($gen);
 
 		$blacklistPageName = 'MediaWiki:Zuchteltern/Gen'.$gen.'/pkmn-blacklist.json';
-		$this->unbreedable = $this->getWikiPageContent($blacklistPageName);
+		Constants::$unbreedable = $this->getWikiPageContent($blacklistPageName);
 		
 		$eggGroupPageName = 'MediaWiki:Zuchteltern/Gen'.$gen.'/egg-groups.json';
-		$this->eggGroups = $this->getWikiPageContent($eggGroupPageName);
+		Constants::$eggGroups = $this->getWikiPageContent($eggGroupPageName);
 	}
 
 	private function getPkmnData (String $gen) : StdClass {

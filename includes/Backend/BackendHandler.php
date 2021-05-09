@@ -1,33 +1,14 @@
 <?php
 require_once 'BreedingChainNode.php';
+//for some reason prepending __DIR__ is a fix for require not liking relative paths
+require_once __DIR__.'/../Constants.php';
+
 abstract class BackendHandler {
 	//paremeter structure: pkmnObj, ..., eggGroup, otherEggGroup, eggGroupBlacklist, pkmnBlacklist
 
-	//contain the data of the external wiki pages
-	protected $pkmnData = null;
-	protected $eggGroups = null;
-	protected $unbreedable = null;
-
-	protected $targetPkmn = '';
-	protected $targetMove = '';
-
 	protected $pageOutput = null;//temp
 
-	public function __construct (
-		StdClass $pkmnData,
-		StdClass $eggGroups,
-		Array $unbreedable,
-		String $targetPkmn,
-		String $targetMove,
-		OutputPage $pageOutput
-	) {
-		$this->pkmnData = $pkmnData;
-		$this->eggGroups = $eggGroups;
-		$this->unbreedable = $unbreedable;
-
-		$this->targetPkmn = $targetPkmn;
-		$this->targetMove = $targetMove;
-
+	public function __construct (OutputPage $pageOutput) {
 		$this->pageOutput = $pageOutput;
 	}
 
@@ -38,9 +19,9 @@ abstract class BackendHandler {
 		//for performance measuring
 		$timeStart = hrtime(true);
 
-		$targetPkmnName = $this->targetPkmn;
+		$targetPkmnName = Constants::$targetPkmn;
 		//contains the pkmn object from the external JSON data
-		$targetPkmnData = $this->pkmnData->$targetPkmnName;
+		$targetPkmnData = Constants::$pkmnData->$targetPkmnName;
 
 		//needed for preventing infinite recursion
 		//a pkmn may only occur once in a branch,
@@ -113,10 +94,10 @@ abstract class BackendHandler {
 		Array $eggGroupBlacklist,
 		Array &$pkmnBlacklist
 	) {
-		$eggGroupPkmnList = $this->eggGroups->$eggGroup;
+		$eggGroupPkmnList = Constants::$eggGroups->$eggGroup;
 
 		foreach ($eggGroupPkmnList as $potSuccessorName) {
-			$potSuccessorData = $this->pkmnData->$potSuccessorName;
+			$potSuccessorData = Constants::$pkmnData->$potSuccessorName;
 
 			if (!$this->checkSuccessorSpecialRequirements($potSuccessorData)) {
 				//e. g. only fathers can give moves to their kids in gens 2-5
@@ -247,7 +228,7 @@ abstract class BackendHandler {
 		}
 
 		foreach ($learnset as $move) {
-			if ($move === $this->targetMove) {
+			if ($move === Constants::$targetMove) {
 				return true;
 			}
 		}

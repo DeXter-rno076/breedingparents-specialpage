@@ -26,10 +26,10 @@ MediaWiki special page extension for displaying the possible breeding chains of 
 # bugs
 * handle wrong input (e. g. 'a' as pkmn name etc.)
 * line endings of event pkmn have too low y coords (this is so little though that you can ignore it)
+* the page freezes sometimes when moving the svg of extreme cases with looser blacklist handling (more in svgMover.js)
 
 # other stuff
 * handling of icon stuff in frontend preparation feels **very** unclean :(
   * maybe create a parent class for BreedingChainNode and FrontendPkmnObj
   * Refactoring frontend stuff in general would be nice
 * set initial y offset of svg so that the target pkmn is in the middle
-* create a global file with all globally needed constants
