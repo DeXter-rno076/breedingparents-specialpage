@@ -9,8 +9,6 @@ class FrontendPreparator {
 	const PKMN_MARGIN_HORI = 200;
 	const PKMN_MARGIN_BOTTOM = 10;
 
-	public function __construct () {}
-
 	/**
 	 * sets heights and y offsets for all pkmn nodes
 	 * in the end it creates a new tree structure with objects 

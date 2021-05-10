@@ -6,10 +6,6 @@ require_once 'Frontend/FrontendHandler.php';
 require_once 'Constants.php';
 
 class SpecialBreedingParents extends SpecialPage {
-	private $pkmnData = null;
-	private $unbreedable = null;
-	private $eggGroups = null;
-
 	public function __construct () {
 		parent::__construct('Zuchteltern');
 	}
@@ -22,22 +18,18 @@ class SpecialBreedingParents extends SpecialPage {
 
 	public function processStuff ($data, $form) {
 		//todo check whether pkmn is unbreebable
+
 		Constants::$targetGen = $data['genInput'];
 		Constants::$targetMove = $data['moveInput'];
 		Constants::$targetPkmn = $data['pkmnInput'];
+		Constants::$out = $this->getOutput();
 
 		$this->getData();
 		
 		//todo select gen handler class accordingly to targetGen
 		$backendHandler = null;
 
-		if (Constants::$targetGen >= 6) {
-			$backendHandler = new RecentGensHandler(
-				$this->getOutput()//temporary
-			);
-		} else {
-			$backendHandler = new OldGensHandler();
-		}
+		$backendHandler = new RecentGensHandler();
 
 		$breedingTree = $backendHandler->createBreedingTree();
 
@@ -46,7 +38,7 @@ class SpecialBreedingParents extends SpecialPage {
 		}
 
 		$frontendHandler = new FrontendHandler($breedingTree);
-		$frontendHandler->addSVG($this->getOutput());
+		$frontendHandler->addSVG();
 
 		return Status::newGood();
 	}
@@ -73,7 +65,7 @@ class SpecialBreedingParents extends SpecialPage {
 		//these are all characters that are used in pkmn names
 		$regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
 		if (preg_match($regex, $value)) {
-			$this->debugOutput('pkmn name is evil >:(');
+			Constants::out('pkmn name is evil >:(');
 			return 'Invalid character in the Pokémon name';
 		}
 	
@@ -89,7 +81,7 @@ class SpecialBreedingParents extends SpecialPage {
 		//these are all characters that are used in move names
 		$regex = '/[^a-zA-ZÜßäöü\- 2]/';
 		if (preg_match($regex, $value)) {
-			$this->debugOutput('move name is evil >:(');
+			Constants::out('move name is evil >:(');
 			return 'Invalid character in the move name';
 		}
 		
@@ -103,7 +95,7 @@ class SpecialBreedingParents extends SpecialPage {
 		}
 		
 		if (!is_numeric($value)) {
-			$this->debugOutput('gen is evil >:(');
+			Constants::out('gen is evil >:(');
 			return 'Invalid gen input';
 		}
 
@@ -158,10 +150,6 @@ class SpecialBreedingParents extends SpecialPage {
 
 	//===========================================================
 	//debugging stuff
-
-	private function debugOutput (String $msg) {
-		$this->getOutput()->addHTML($msg);
-	}
 
 	private function debugConsole (String $msg) {
 		echo '<script>console.log("'.$msg.'")</script>';

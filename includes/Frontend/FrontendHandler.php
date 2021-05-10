@@ -1,17 +1,17 @@
 <?php
 require_once 'FrontendPreparator.php';
 require_once 'SVGHandler.php';
+require_once __DIR__.'/../Constants.php';
 
 class FrontendHandler {
 	private $breedingTree = null;
-	private $pkmnData = null;
 	
 	public function __construct (BreedingChainNode $breedingTree) {
 		$this->breedingTree = $breedingTree;
 	}
 
 	//adds svg tag to output (includes adding css and js files)
-	public function addSVG (OutputPage $output) {
+	public function addSVG () {
 		//for performance measuring
 		$timeStart = hrtime(true);
 
@@ -26,10 +26,10 @@ class FrontendHandler {
 			$svgTagHeight,
 			$output
 		);
-		$svgHandler->addOutput($output);
+		$svgHandler->addOutput();
 
 		$timeEnd = hrtime(true);
 		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
-		$output->addHTML('frontend needed '.$timeDiff.' seconds<br />');
+		Constants::out('frontend needed '.$timeDiff.' seconds');
 	}
 }

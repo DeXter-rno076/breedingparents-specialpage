@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__.'/../Constants.php';
+
 class SVGHandler {
 	private $frontendBreedingTree = null;
 	
@@ -8,20 +10,16 @@ class SVGHandler {
 
 	private $svgTag = '';
 
-	private $output = null;//for debugging
-
 	public function __construct (
 		FrontendPkmnObj $frontendBreedingTree,
 		int $svgTagHeight,
-		OutputPage $output
 	) {
 		$this->frontendBreedingTree = $frontendBreedingTree;
 		$this->svgTag = '<svg id="breedingParentsSVG" width="TEMP_WIDTH_PLACEHOLDER"'.
 			' height="'.($svgTagHeight + self::SVG_TAG_SAFETY_SPACE).'">';
-		$this->output = $output;
 	}
 
-	public function addOutput (OutputPage $output) {
+	public function addOutput () {
 		$this->createSVG();
 		$this->setSVGWidth();
 
@@ -30,11 +28,11 @@ class SVGHandler {
 		$svgContainer = '<div id="breedingParentsSVGContainer"'.
 			' style="overflow: hidden;">'.$this->svgTag.'</div>';
 
-		$output->addModules('breedingParentsModules');
-		$output->addHTML($svgContainer);
+		Constants::$out->addModules('breedingParentsModules');
+		Constants::$out->addHTML($svgContainer);
 
 		//adding button that resets the svg to the starting position
-		$output->addHTML('<input type="button" id="breedingParentsSVGResetButton"'.
+		Constants::$out->addHTML('<input type="button" id="breedingParentsSVGResetButton"'.
 			' value="Position zurücksetzen" />');
 	}
 

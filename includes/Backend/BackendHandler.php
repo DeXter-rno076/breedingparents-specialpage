@@ -7,12 +7,6 @@ require_once 'SuccessorFilter.php';
 abstract class BackendHandler {
 	//paremeter structure: pkmnObj, ..., eggGroup, otherEggGroup, eggGroupBlacklist, pkmnBlacklist
 
-	protected $pageOutput = null;//temp
-
-	public function __construct (OutputPage $pageOutput) {
-		$this->pageOutput = $pageOutput;
-	}
-
 	/**
 	 * main function that creates and returns the breeding tree
 	 */
@@ -38,7 +32,7 @@ abstract class BackendHandler {
 
 		$timeEnd = hrtime(true);
 		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
-		$this->out("backend needed ".$timeDiff." seconds");
+		Constants::out("backend needed ".$timeDiff." seconds");
 
 		return $breedingTree;
 	}
@@ -218,12 +212,5 @@ abstract class BackendHandler {
 		}
 
 		return false;
-	}
-
-	//==================================================================
-	//output stuff for debugging
-
-	protected function out (String $msg) {
-		$this->pageOutput->addHTML($msg."<br />");
 	}
 }
