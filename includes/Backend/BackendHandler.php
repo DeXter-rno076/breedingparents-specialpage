@@ -2,6 +2,7 @@
 require_once 'BreedingChainNode.php';
 //for some reason prepending __DIR__ is a fix for require not liking relative paths
 require_once __DIR__.'/../Constants.php';
+require_once 'SuccessorFilter.php';
 
 abstract class BackendHandler {
 	//paremeter structure: pkmnObj, ..., eggGroup, otherEggGroup, eggGroupBlacklist, pkmnBlacklist
@@ -95,20 +96,11 @@ abstract class BackendHandler {
 		Array &$pkmnBlacklist
 	) {
 		$eggGroupPkmnList = Constants::$eggGroups->$eggGroup;
+		$filter = new SuccessorFilter($node, $pkmnBlacklist, $eggGroupPkmnList);
+		$filteredList = $filter->filter();
 
-		foreach ($eggGroupPkmnList as $potSuccessorName) {
+		foreach ($filteredList as $potSuccessorName) {
 			$potSuccessorData = Constants::$pkmnData->$potSuccessorName;
-
-			if (!$this->checkSuccessorSpecialRequirements($potSuccessorData)) {
-				//e. g. only fathers can give moves to their kids in gens 2-5
-				continue;
-			}
-
-			if (in_array($potSuccessorName, $pkmnBlacklist)) {
-				//pkmn that already are somewhere in the tree get skipped
-				//may vary depending on blacklist strictness
-				continue;
-			}
 
 			$newEggGroupBlacklist = $this->createNewEggGroupBlacklist(
 				$eggGroup,
@@ -165,14 +157,6 @@ abstract class BackendHandler {
 			//TODO does this work or do I have to use some pass by reference stuff?
 			$node->addSuccessor($successor);
 		}
-	}
-
-	//in older gens this has to check whether the pkmn can be male
-	//(maybe future gens will have similar stuff)
-	protected function checkSuccessorSpecialRequirements (
-		StdClass $successorObj
-	) : bool {
-		return true;
 	}
 
 	//===================================================================================
