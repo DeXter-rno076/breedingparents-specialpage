@@ -22,6 +22,7 @@ MediaWiki special page extension for displaying the possible breeding chains of 
   * maybe even do this arcane unit + integration testing like a professional beast
 * localisation files (aren't properly loaded right now)
 * adjust needed php version
+* find some way to prevent the tab from having to load several eternities when having BIIIIG breeding trees
 
 # bugs
 * handle wrong input (e. g. 'a' as pkmn name etc.)

@@ -3,7 +3,7 @@ interface GenHandlerInterface {
 	public function createBreedingChainNode (
 		StdClass $pkmnData,
 		Array $eggGroupBlacklist,
-		Array &$pkmnBlacklist
+		Array $pkmnBlacklist
 	) : ?BreedingChainNode;
 
 	public function handleDirectLearnability (
@@ -14,7 +14,7 @@ interface GenHandlerInterface {
 		BreedingChainNode $node,
 		StdClass $pkmnObj,
 		Array $eggGroupBlacklist,
-		Array &$pkmnBlacklist
+		Array $pkmnBlacklist
 	) : ?BreedingChainNode;
 
 	public function handleSpecialLearnability (

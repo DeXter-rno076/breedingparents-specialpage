@@ -50,7 +50,7 @@ abstract class BackendHandler {
 		String $eggGroup1,
 		?String $eggGroup2,
 		Array $eggGroupBlacklist,
-		Array &$pkmnBlacklist
+		Array $pkmnBlacklist
 	) {		
 		if (!in_array($eggGroup1, $eggGroupBlacklist)) {
 			$this->setSuccessors(
@@ -87,7 +87,7 @@ abstract class BackendHandler {
 		//needed for stronger blacklist handling (not implemented now)
 		?String $otherEggGroup,
 		Array $eggGroupBlacklist,
-		Array &$pkmnBlacklist
+		Array $pkmnBlacklist
 	) {
 		$eggGroupPkmnList = Constants::$eggGroups->$eggGroup;
 		$filter = new SuccessorFilter($node, $pkmnBlacklist, $eggGroupPkmnList);
@@ -136,7 +136,7 @@ abstract class BackendHandler {
 		BreedingChainNode $node,
 		StdClass $potSuccessorData,
 		Array $eggGroupBlacklist,
-		Array &$pkmnBlacklist
+		Array $pkmnBlacklist
 	) {
 		$pkmnBlacklist[] = $potSuccessorData->name;
 
@@ -174,9 +174,11 @@ abstract class BackendHandler {
 			return true;
 		}
 
-		$tutorLearnability = $this->checkLearnsetType($pkmnObj->tutorLearnsets);
-		if ($tutorLearnability) {
-			return true;
+		if (isset($pkmnObj->tutorLearnsets)) {
+			$tutorLearnability = $this->checkLearnsetType($pkmnObj->tutorLearnsets);
+			if ($tutorLearnability) {
+				return true;
+			}
 		}
 
 		return false;

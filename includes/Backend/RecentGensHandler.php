@@ -14,7 +14,7 @@ class RecentGensHandler extends BackendHandler implements GenHandlerInterface {
 	public function createBreedingChainNode (
 		StdClass $pkmnObj,
 		Array $eggGroupBlacklist,
-		Array &$pkmnBlacklist
+		Array $pkmnBlacklist
 	) : ?BreedingChainNode {
 		//todo form change moves (e. g. Rotom) should count as normal 
 		//todo (check if there are breedable pkmn that have those ^ form change learnsets)
@@ -60,7 +60,7 @@ class RecentGensHandler extends BackendHandler implements GenHandlerInterface {
 		BreedingChainNode $node,
 		StdClass $pkmnObj,
 		Array $eggGroupBlacklist,
-		Array &$pkmnBlacklist
+		Array $pkmnBlacklist
 	) : ?BreedingChainNode {
 		//calls createBreedingChainNode(...) for all suiting parents
 		//		(i. e. not in any blacklist)
