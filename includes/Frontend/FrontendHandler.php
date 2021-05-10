@@ -8,7 +8,6 @@ class FrontendHandler {
 	
 	public function __construct (BreedingChainNode $breedingTree) {
 		$this->breedingTree = $breedingTree;
-		$this->pkmnData = $pkmnData;
 	}
 
 	//adds svg tag to output (includes adding css and js files)
