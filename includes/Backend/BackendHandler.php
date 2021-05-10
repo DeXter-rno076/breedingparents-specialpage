@@ -1,10 +1,10 @@
 <?php
-require_once 'BreedingChainNode.php';
 //for some reason prepending __DIR__ is a fix for require not liking relative paths
 require_once __DIR__.'/../Constants.php';
 require_once 'SuccessorFilter.php';
+require_once 'BreedingChainNode.php';
 
-abstract class BackendHandler {
+class BackendHandler {
 	//paremeter structure: pkmnObj, ..., eggGroup, otherEggGroup, eggGroupBlacklist, pkmnBlacklist
 
 	/**
@@ -37,6 +37,79 @@ abstract class BackendHandler {
 		return $breedingTree;
 	}
 
+	/** 
+	 * depending on strictness pkmnBlacklist should use 
+	 * 		pass by reference (stricter, faster, inaccurate) or 
+	 * 		pass by value (looser,
+	 * 			slower (in extreme cases more then 200 times slower), more accurate)
+	 * 
+	 * returns a BreedingChainNode object if pkmn can learn/inherit the move
+	 * 		returns null if not
+	 */
+	private function createBreedingChainNode (
+		StdClass $pkmnObj,
+		Array $eggGroupBlacklist,
+		Array $pkmnBlacklist
+	) : ?BreedingChainNode {
+		//todo form change moves (e. g. Rotom) should count as normal 
+		//todo (check if there are breedable pkmn that have those ^ form change learnsets)
+		$node = new BreedingChainNode($pkmnObj->name);
+
+		if ($this->canLearnNormally($pkmnObj)) {
+			//if a pkmn can learn the targeted move directly without breeding
+			//		no possible successors are needed/wanted
+			//this happens at the end of a tree branch
+			//todo if targetPkmn is able to learn targetMove directly,
+			//todo		it looks like something went wrong
+			//todo		(only targetPkmn's icon is displayed)
+			return $node;
+		}
+
+		if ($this->canInherit($pkmnObj)) {
+			//calls createBreedingChainNode(...) for all suiting parents
+			//		(i. e. not in any blacklist)
+			//	and adds them as a successor to chainNode
+			//	if they can learn the move in some way
+			$eggGroup2 = null;
+			if (isset($pkmnObj->eggGroup2)) {
+				//this prevents masses of debugging messages
+				$eggGroup2 = $pkmnObj->eggGroup2;
+			}
+
+			$this->setPossibleParents(
+				$node,
+				$pkmnObj->eggGroup1,
+				$eggGroup2,
+				$eggGroupBlacklist,
+				$pkmnBlacklist
+			);
+
+			//todo this explanation is not the yellow from the egg
+			//if a pkmn has no successors
+			//		that can learn the targeted move 
+			//		(with the corresponding blacklists for the branch)
+			//		it hasn't anyone to inherit the move from 
+			//		--> branch doesn't get added to existing tree structure
+			//		because there is no 'successful' end
+			if (count($node->getSuccessors()) > 0) {
+				//only return if the pkmn has at least one pkmn it can inherit the move from
+				return $node;
+			}
+		}
+
+		if ($this->canLearnViaEvent($pkmnObj)) {
+			//event learnsets can be hard or impossible to get
+			//	so they are only checked when there is no other way
+	
+			//marks that the chain node can only learn the move
+			//	via event learnsets (needed for frontend) 
+			$node->setLearnsByEvent();
+			return $node;
+		}
+
+		return null;
+	}
+
 	/**
 	 * calls setSuccessors for every eggGroup that's not been added to eggGroupBlacklist
 	 * 
@@ -45,7 +118,7 @@ abstract class BackendHandler {
 	 * pass by value (looser, 
 	 * 		slower (in extreme cases more then 200 times slower), more accurate)
 	 */
-	protected function setPossibleParents (
+	private function setPossibleParents (
 		BreedingChainNode $node,
 		String $eggGroup1,
 		?String $eggGroup2,
@@ -159,7 +232,7 @@ abstract class BackendHandler {
 	/**
 	 * checks whether the pkmn can learn targetMove via level, tmtr or tutor
 	 */
-	protected function canLearnNormally (StdClass $pkmnObj) : bool {
+	private function canLearnNormally (StdClass $pkmnObj) : bool {
 		$levelLearnability = $this->checkLearnsetType($pkmnObj->levelLearnsets);
 		if ($levelLearnability) {
 			return true;
@@ -184,7 +257,7 @@ abstract class BackendHandler {
 		return false;
 	}
 
-	protected function canInherit (StdClass $pkmnObj) : bool {
+	private function canInherit (StdClass $pkmnObj) : bool {
 		//not necessarily needed but it prevents masses of debug logs
 		if (!isset($pkmnObj->breedingLearnsets)) {
 			return false;
@@ -193,7 +266,7 @@ abstract class BackendHandler {
 		return $this->checkLearnsetType($pkmnObj->breedingLearnsets);
 	}
 
-	protected function canLearnViaEvent (StdClass $pkmnObj) : bool {
+	private function canLearnViaEvent (StdClass $pkmnObj) : bool {
 		//not necessarily needed but it prevents masses of debug logs
 		if (!isset($pkmnObj->eventLearnsets)) {
 			return false;
@@ -202,7 +275,7 @@ abstract class BackendHandler {
 		return $this->checkLearnsetType($pkmnObj->eventLearnsets);
 	}
 
-	protected function checkLearnsetType (?Array $learnset) : bool {
+	private function checkLearnsetType (?Array $learnset) : bool {
 		if (is_null($learnset)) {
 			return false;
 		}

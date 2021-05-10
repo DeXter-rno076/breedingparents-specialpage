@@ -1,7 +1,7 @@
 <?php
 //todo find a solution for output of validation methods
 
-require_once 'Backend/RecentGensHandler.php';
+require_once 'Backend/BackendHandler.php';
 require_once 'Frontend/FrontendHandler.php';
 require_once 'Constants.php';
 
@@ -25,12 +25,8 @@ class SpecialBreedingParents extends SpecialPage {
 		Constants::$out = $this->getOutput();
 
 		$this->getData();
-		
-		//todo select gen handler class accordingly to targetGen
-		$backendHandler = null;
 
-		$backendHandler = new RecentGensHandler();
-
+		$backendHandler = new BackendHandler();
 		$breedingTree = $backendHandler->createBreedingTree();
 
 		if (is_null($breedingTree)) {
