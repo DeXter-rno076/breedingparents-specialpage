@@ -11,12 +11,11 @@ class FrontendPreparator {
 
 	/**
 	 * sets heights and y offsets for all pkmn nodes
-	 * in the end it creates a new tree structure with objects 
-	 * 		that have only the least possible data needed for the SVG elements
+	 * in the end it creates a new tree structure with objects that have only the least possible data needed for the SVG elements
 	 */
 	public function prepareForFrontend (
 		BreedingChainNode $breedingTree
-	) : FrontendPkmnObj {
+	): FrontendPkmnObj {
 		//this has to get done before setHeight()
 		$this->setIconData($breedingTree);
 
@@ -34,10 +33,9 @@ class FrontendPreparator {
 
 	/**
 	 * runs recursively over the object tree and sets all heights
-	 * an object's height is the sum of its successors' heights
-	 * 		or its own if it has no successors
+	 * an object's height is the sum of its successors' heights or its own if it has no successors
 	 */
-	private function setHeight (BreedingChainNode $chainNode, int $deepness) : int {
+	private function setHeight (BreedingChainNode $chainNode, int $deepness): int {
 		if (count($chainNode->getSuccessors()) == 0) {
 			//executed if chainNode has no successors
 			$chainNode->setTreeSectionHeight(
@@ -58,8 +56,8 @@ class FrontendPreparator {
 
 	/**
 	 * runs recursively over the object tree and sets all y offsets
-	 * in one function call the offsets for chainNode's successors are set by saving
-	 * 		the - by the previous successors - already taken space and
+	 * in one function call the offsets for chainNode's successors are set by 
+	 * 		saving the - by the previous successors - already taken space and
 	 * 		adding the successor's height afterwards
 	 */
 	private function setOffset (BreedingChainNode $chainNode) {
@@ -88,23 +86,18 @@ class FrontendPreparator {
 	private function handleChainNode (
 		BreedingChainNode $breedingChainNode,
 		int $currentDeepness
-	) : FrontendPkmnObj {
-		$pkmnName = $breedingChainNode->getName();
-		$pkmnData = Constants::$pkmnData->$pkmnName;
-		$pkmnId = $pkmnData->id;
-
+	): FrontendPkmnObj {
 		$pkmnX = $currentDeepness * self::PKMN_MARGIN_HORI - $breedingChainNode->getIconWidth() / 2;
 		$pkmnY = $breedingChainNode->getTreeYOffset();
 		if ($breedingChainNode->getTreeSectionHeight() > $breedingChainNode->getIconHeight()) {
 			//this is only needed for pkmn with successors
-			//a pkmn icon should appear in the middle
-			//		(concerning height) of its tree branch
+			//a pkmn icon should appear in the middle (concerning height) of its tree branch
 			//without this it would be set at the top of its branch
 			$pkmnY += ($breedingChainNode->getTreeSectionHeight() / 2);
 		}
 
 		$frontendPkmn = new FrontendPkmnObj(
-			$pkmnName,
+			$breedingChainNode->getName(),
 			$pkmnX,
 			$pkmnY,
 			$breedingChainNode->getIconUrl(),
