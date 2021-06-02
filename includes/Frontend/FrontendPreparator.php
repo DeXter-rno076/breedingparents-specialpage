@@ -105,7 +105,6 @@ class FrontendPreparator {
 
 		$frontendPkmn = new FrontendPkmnObj(
 			$pkmnName,
-			$pkmnId,
 			$pkmnX,
 			$pkmnY,
 			$breedingChainNode->getIconUrl(),

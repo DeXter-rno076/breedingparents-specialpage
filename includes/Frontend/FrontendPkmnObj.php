@@ -1,7 +1,7 @@
 <?php
 class FrontendPkmnObj {
+	//needed for link and pot. error message
 	private $pkmnName = '';
-	private $pkmnId = -1;
 	private $x = -1;
 	private $y = -1;
 	private $successors = [];
@@ -19,7 +19,6 @@ class FrontendPkmnObj {
 
 	public function __construct (
 		String $pkmnName,
-		int $pkmnId,
 		int $x,
 		int $y,
 		String $iconUrl,
@@ -27,7 +26,6 @@ class FrontendPkmnObj {
 		int $iconHeight
 	) {
 		$this->pkmnName = $pkmnName;
-		$this->pkmnId = $pkmnId;
 		$this->x = $x;
 		$this->y = $y;
 		$this->iconUrl = $iconUrl;
@@ -45,10 +43,6 @@ class FrontendPkmnObj {
 
 	public function getSuccessors () : Array {
 		return $this->successors;
-	}
-
-	public function getPkmnId () : int {
-		return $this->pkmnId;
 	}
 
 	public function getX () : int {

@@ -179,7 +179,7 @@ class SVGHandler {
 				'<tspan x="'.$x.'" y="'.($y + 40).'">Discordserver oder in der'.
 				' <a href="https://www.pokewiki.de/Pok%C3%A9Wiki:Auskunft">Auskunft</a> ^^</tspan>'.
 				'<tspan x="'.$x.'" y="'.($y + 60).'">Fehler beim Laden'.
-				' von "'.$pkmn->getPkmnId().'"</tspan></text>';
+				' von "'.$pkmn->getPkmnName().'"</tspan></text>';
 
 			$this->svgTag .= $text;
 		}
