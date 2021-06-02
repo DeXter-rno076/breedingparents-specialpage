@@ -136,7 +136,8 @@ class FrontendPreparator {
 			$pkmnObj->setIconWidth($iconWidth);
 			$pkmnObj->setIconHeight($iconHeight);
 		} catch (Exception $e) {
-			$pkmnObj->setFileError($e);
+			//.' ' prevents possible problems if $e is empty
+			$pkmnObj->setFileError($e.' ');
 		}
 
 		foreach ($pkmnObj->getSuccessors() as $successor) {
