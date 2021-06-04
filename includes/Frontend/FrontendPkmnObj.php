@@ -1,48 +1,27 @@
 <?php
-class FrontendPkmnObj {
-	//needed for link and pot. error message
-	private $pkmnName = '';
+require_once __DIR__.'/../PkmnObj.php';
+class FrontendPkmnObj extends PkmnObj {
 	private $x = -1;
 	private $y = -1;
-	private $successors = [];
-	private $learnsByEvent = false;
-
-	private $iconUrl = '';
-	private $iconWidth = -1;
-	private $iconHeight = -1;
-
-	private $fileError = '';
 
 	const EVENT_TEXT_HEIGHT = 20;
 	const EVENT_TEXT_WIDTH = 41;
 	const SAFETY_SPACE = 10;
 
 	public function __construct (
-		String $pkmnName,
+		String $name,
 		int $x,
 		int $y,
 		String $iconUrl,
 		int $iconWidth,
 		int $iconHeight
 	) {
-		$this->pkmnName = $pkmnName;
+		$this->name = $name;
 		$this->x = $x;
 		$this->y = $y;
 		$this->iconUrl = $iconUrl;
 		$this->iconWidth = $iconWidth;
 		$this->iconHeight = $iconHeight;
-	}
-
-	public function getPkmnName () : String {
-		return $this->pkmnName;
-	}
-
-	public function addSuccessor (FrontendPkmnObj $successor) {
-		array_push($this->successors, $successor);
-	}
-
-	public function getSuccessors () : Array {
-		return $this->successors;
 	}
 
 	public function getX () : int {
@@ -80,20 +59,8 @@ class FrontendPkmnObj {
 		return $this->y + self::SAFETY_SPACE;
 	}
 
-	public function setLearnsByEvent () {
-		$this->learnsByEvent = true;
-	}
-
-	public function getLearnsByEvent () : bool {
-		return $this->learnsByEvent;
-	}
-
 	//==========================================================
 	//icon stuff
-
-	public function getIconUrl () : String {
-		return $this->iconUrl;
-	}
 
 	public function getWidth () : int {
 		if (!$this->getLearnsByEvent()) {
@@ -109,21 +76,5 @@ class FrontendPkmnObj {
 		} else {
 			return $this->iconHeight + self::EVENT_TEXT_HEIGHT / 2;
 		}
-	}
-
-	public function getIconWidth () : int {
-		return $this->iconWidth;
-	}
-
-	public function getIconHeight () : int {
-		return $this->iconHeight;
-	}
-
-	public function setFileError (String $e) {
-		$this->fileError = $e;
-	}
-
-	public function getFileError () : String {
-		return $this->fileError;
 	}
 }

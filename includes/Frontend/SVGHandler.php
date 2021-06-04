@@ -156,7 +156,7 @@ class SVGHandler {
 	private function addPkmnIcon (FrontendPkmnObj $pkmn) {
 		if ($pkmn->getFileError() === '') {
 			//todo maybe make the click/touch area for the link bigger
-			$link = '<a href="https://www.pokewiki.de/'.$pkmn->getPkmnName().'#Attacken">';
+			$link = '<a href="https://www.pokewiki.de/'.$pkmn->getName().'#Attacken">';
 
 			$icon = '<image x="'.$pkmn->getIconX().'" y="'.$pkmn->getY().'"'. 
 				' width="'.$pkmn->getIconWidth().'"'.
@@ -179,7 +179,7 @@ class SVGHandler {
 				'<tspan x="'.$x.'" y="'.($y + 40).'">Discordserver oder in der'.
 				' <a href="https://www.pokewiki.de/Pok%C3%A9Wiki:Auskunft">Auskunft</a> ^^</tspan>'.
 				'<tspan x="'.$x.'" y="'.($y + 60).'">Fehler beim Laden'.
-				' von "'.$pkmn->getPkmnName().'"</tspan></text>';
+				' von "'.$pkmn->getName().'"</tspan></text>';
 
 			$this->svgTag .= $text;
 		}
