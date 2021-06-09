@@ -118,7 +118,6 @@ class BackendHandler {
 			$this->setSuccessors(
 				$node,
 				$eggGroup1,
-				$eggGroup2,
 				$eggGroupBlacklist,
 				$pkmnBlacklist
 			);
@@ -130,7 +129,6 @@ class BackendHandler {
 				$this->setSuccessors(
 					$node,
 					$eggGroup2,
-					$eggGroup1,
 					$eggGroupBlacklist,
 					$pkmnBlacklist
 				);
@@ -146,8 +144,6 @@ class BackendHandler {
 	private function setSuccessors (
 		BreedingChainNode $node,
 		String $eggGroup,
-		//needed for stronger blacklist handling (not implemented now)
-		?String $otherEggGroup,
 		Array $eggGroupBlacklist,
 		Array $pkmnBlacklist
 	) {
