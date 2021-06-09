@@ -128,13 +128,9 @@ class FrontendPreparator {
 
 			$fileObj = $this->getFile($pkmnId);
 
-			$iconUrl = $fileObj->getUrl();
-			$iconWidth = $fileObj->getWidth();
-			$iconHeight = $fileObj->getHeight();
-
-			$pkmnObj->setIconUrl($iconUrl);
-			$pkmnObj->setIconWidth($iconWidth);
-			$pkmnObj->setIconHeight($iconHeight);
+			$pkmnObj->setIconUrl($fileObj->getUrl());
+			$pkmnObj->setIconWidth($fileObj->getWidth());
+			$pkmnObj->setIconHeight($fileObj->getHeight());
 		} catch (Exception $e) {
 			//.' ' prevents possible problems if $e is empty
 			$pkmnObj->setFileError($e.' ');
@@ -145,7 +141,8 @@ class FrontendPreparator {
 		}
 	}
 
-	private function getFile (int $pkmnId) : File {
+	private function getFile (int $pkmnId): File {
+		//pkmn icon files have 0 at the beginning if needed
 		if ($pkmnId < 100) {
 			$pkmnId = '0'.$pkmnId;
 			if ($pkmnId < 10) {
