@@ -16,10 +16,10 @@ class FrontendPreparator {
 	public function prepareForFrontend (
 		BreedingChainNode $breedingTree
 	): FrontendPkmnObj {
-		//this has to get done before setHeight()
+		//this has to get done before setHeight() (icon sizes are needed for setHeight())
 		$this->setIconData($breedingTree);
 
-		$this->setHeight($breedingTree, 1);
+		$this->setHeight($breedingTree);
 
 		//the whole tree obviously starts at the top
 		$breedingTree->setTreeYOffset(0);
@@ -35,7 +35,7 @@ class FrontendPreparator {
 	 * runs recursively over the object tree and sets all heights
 	 * an object's height is the sum of its successors' heights or its own if it has no successors
 	 */
-	private function setHeight (BreedingChainNode $chainNode, int $deepness): int {
+	private function setHeight (BreedingChainNode $chainNode): int {
 		if (count($chainNode->getSuccessors()) == 0) {
 			//executed if chainNode has no successors
 			$chainNode->setTreeSectionHeight(
@@ -47,7 +47,7 @@ class FrontendPreparator {
 		$height = 0;
 
 		foreach ($chainNode->getSuccessors() as $successor) {
-			$height += $this->setHeight($successor, $deepness + 1);
+			$height += $this->setHeight($successor);
 		}
 
 		$chainNode->setTreeSectionHeight($height);
