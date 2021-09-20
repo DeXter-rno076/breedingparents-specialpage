@@ -21,12 +21,11 @@ class BackendHandler {
 		//needed for preventing infinite recursion
 		//a pkmn may only occur once in a branch, otherwise you would get an infinite loop
 		$pkmnBlacklist = [$targetPkmnData->name];
-		$eggGroupBlacklist = [];
 
 		$breedingTree = $this->createBreedingChainNode(
 			$targetPkmnData,
-			$eggGroupBlacklist,
-			$pkmnBlacklist
+			$pkmnBlacklist,
+			'root'
 		);
 
 		$timeEnd = hrtime(true);
@@ -46,8 +45,8 @@ class BackendHandler {
 	 */
 	private function createBreedingChainNode (
 		StdClass $pkmnObj,
-		Array $eggGroupBlacklist,
-		Array $pkmnBlacklist
+		Array &$pkmnBlacklist,
+		String $debug_predecessor
 	): ?BreedingChainNode {
 		//todo form change moves (e. g. Rotom) should count as normal 
 		//todo (check if there are breedable pkmn that have those ^ form change learnsets)
@@ -62,7 +61,7 @@ class BackendHandler {
 
 		if ($this->canInherit($pkmnObj)) {
 			//calls createBreedingChainNode(...) for all suiting parents (i. e. not in any blacklist)
-			//	and adds them as a successor to chainNode if they can learn the move in some way
+			//  and adds them as a successor to chainNode if they can learn the move in some way
 			$eggGroup2 = null;
 			if (isset($pkmnObj->eggGroup2)) {
 				//this prevents masses of debugging messages
@@ -73,8 +72,8 @@ class BackendHandler {
 				$node,
 				$pkmnObj->eggGroup1,
 				$eggGroup2,
-				$eggGroupBlacklist,
-				$pkmnBlacklist
+				$pkmnBlacklist,
+				$debug_predecessor
 			);
 
 			//todo this explanation is not the yellow from the egg
@@ -111,28 +110,24 @@ class BackendHandler {
 		BreedingChainNode $node,
 		String $eggGroup1,
 		?String $eggGroup2,
-		Array $eggGroupBlacklist,
-		Array $pkmnBlacklist
-	) {		
-		if (!in_array($eggGroup1, $eggGroupBlacklist)) {
-			$this->setSuccessors(
-				$node,
-				$eggGroup1,
-				$eggGroupBlacklist,
-				$pkmnBlacklist
-			);
-		}
+		Array &$pkmnBlacklist,
+		String $debug_predecessor
+	) {
+		$this->setSuccessors(
+			$node,
+			$eggGroup1,
+			$pkmnBlacklist,
+			$debug_predecessor
+		);
 
 		//some pkmn only have one egg group --> has to get checked via is_null()
 		if (!is_null($eggGroup2)) { 
-			if(!in_array($eggGroup2, $eggGroupBlacklist)) {
-				$this->setSuccessors(
-					$node,
-					$eggGroup2,
-					$eggGroupBlacklist,
-					$pkmnBlacklist
-				);
-			}
+			$this->setSuccessors(
+				$node,
+				$eggGroup2,
+				$pkmnBlacklist,
+				$debug_predecessor
+			);
 		}
 	}
 
@@ -144,24 +139,27 @@ class BackendHandler {
 	private function setSuccessors (
 		BreedingChainNode $node,
 		String $eggGroup,
-		Array $eggGroupBlacklist,
-		Array $pkmnBlacklist
+		Array &$pkmnBlacklist,
+		String $debug_predecessor
 	) {
 		$eggGroupPkmnList = Constants::$eggGroups->$eggGroup;
 		$filter = new SuccessorFilter($node, $pkmnBlacklist, $eggGroupPkmnList);
-		$filteredList = $filter->filter();//the filter filters the unfiltered pkmn to get a filterd filter result
 
-		foreach ($filteredList as $potSuccessorName) {
+		//the list of potential successors changes on the run because adding successors of the list makes pkmnBlacklist longer
+		//  therefore a usual foreach cant be used
+		while ($filter->hasNext()) {
+			$potSuccessorName = $filter->next();
+
 			$potSuccessorData = Constants::$pkmnData->$potSuccessorName;
-
-			$eggGroupBlacklist[] = $eggGroup;
 
 			$this->addSuccessor(
 				$node,
 				$potSuccessorData,
-				$eggGroupBlacklist,
-				$pkmnBlacklist
+				$pkmnBlacklist,
+				$debug_predecessor
 			);
+
+			$filter->update($pkmnBlacklist);
 		}
 	}
 
@@ -169,15 +167,15 @@ class BackendHandler {
 	private function addSuccessor (
 		BreedingChainNode $node,
 		StdClass $potSuccessorData,
-		Array $eggGroupBlacklist,
-		Array $pkmnBlacklist
+		Array &$pkmnBlacklist,
+		String $debug_predecessor
 	) {
 		$pkmnBlacklist[] = $potSuccessorData->name;
 
 		$successor = $this->createBreedingChainNode(
 			$potSuccessorData,
-			$eggGroupBlacklist,
-			$pkmnBlacklist
+			$pkmnBlacklist,
+			$node->getName()
 		);
 
 		if ($successor !== null) {
@@ -222,7 +220,7 @@ class BackendHandler {
 		//not necessarily needed but it prevents masses of debug logs
 		if (!isset($pkmnObj->breedingLearnsets)) {
 			return false;
-		}		
+		}
 
 		return $this->checkLearnsetType($pkmnObj->breedingLearnsets);
 	}

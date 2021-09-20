@@ -20,14 +20,23 @@ class SuccessorFilter {
 		$this->node = $node;
 		$this->pkmnBlacklist = $pkmnBlacklist;
 		$this->successorList = $successorList;
+
+		$this->removeBlacklistedPkmn();
+		//$this->removeUnbreedables();
+		//$this->checkGenSpecificRequirements();
 	}
 
-	public function filter () : Array {
-		$this->removeBlacklistedPkmn();
-		$this->removeUnbreedables();
-		$this->checkGenSpecificRequirements();
+	public function next (): String {
+		return array_shift($this->successorList);
+	}
 
-		return $this->successorList;
+	public function hasNext (): bool {
+		return count($this->successorList) > 0;
+	}
+
+	public function update (Array $newPkmnBlacklist) {
+		$this->pkmnBlacklist = $newPkmnBlacklist;
+		$this->removeBlacklistedPkmn();
 	}
 
 	private function removeBlacklistedPkmn () {
@@ -51,6 +60,7 @@ class SuccessorFilter {
 
 	private function checkGenders () {
 		$this->remove(function ($pkmn) {
+			//TODO not sure whether this works
 			$gender = Constants::$pkmnData->$pkmn->gender;
 			return $gender !== 'both' && $gender !== 'male';
 		});
@@ -61,6 +71,7 @@ class SuccessorFilter {
 			$pkmn = $this->successorList[$i];
 			if ($condition($pkmn)) {
 				array_splice($this->successorList, $i, 1);
+				//Constants::out('removed '.$pkmn);
 				$i--;
 			}
 		}
