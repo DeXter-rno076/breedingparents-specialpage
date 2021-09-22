@@ -113,6 +113,11 @@ class BackendHandler {
 		Array &$pkmnBlacklist,
 		String $debug_predecessor
 	) {
+		$this->setDirectLearners($node, $eggGroup1, $pkmnBlacklist);
+		if (!is_null($eggGroup2)) {
+			$this->setDirectLearners($node, $eggGroup2, $pkmnBlacklist);
+		}
+
 		$this->setSuccessors(
 			$node,
 			$eggGroup1,
@@ -128,6 +133,33 @@ class BackendHandler {
 				$pkmnBlacklist,
 				$debug_predecessor
 			);
+		}
+	}
+
+	private function setDirectLearners (
+		BreedingChainNode $node,
+		String $eggGroup,
+		Array &$pkmnBlacklist
+	) {
+		$eggGroupPkmnList = Constants::$eggGroups->$eggGroup;
+
+		$filter = new SuccessorFilter($node, $pkmnBlacklist, $eggGroupPkmnList);
+
+		//the list of potential successors changes on the run because adding successors of the list makes pkmnBlacklist longer
+		//  therefore a usual foreach cant be used
+		while ($filter->hasNext()) {
+			$potSuccessorName = $filter->next();
+
+			$potSuccessorData = Constants::$pkmnData->$potSuccessorName;
+
+			if ($this->canLearnNormally($potSuccessorData)) {
+				$pkmnBlacklist[] = $potSuccessorName;
+
+				$successor = new BreedingChainNode($potSuccessorName);
+				$node->addSuccessor($successor);
+			}
+
+			$filter->update($pkmnBlacklist);
 		}
 	}
 
