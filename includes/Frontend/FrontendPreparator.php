@@ -4,11 +4,8 @@ require_once 'FrontendPkmnObj.php';
 require_once __DIR__.'/../Constants.php';
 use MediaWiki\MediaWikiServices;
 
-class FrontendPreparator {	
-	//space between each pkmn 'column'
-	const PKMN_MARGIN_HORI = 200;
+class FrontendPreparator {
 	const PKMN_MARGIN_BOTTOM = 10;
-
 	/**
 	 * sets heights and y offsets for all pkmn nodes
 	 * in the end it creates a new tree structure with objects that have only the least possible data needed for the SVG elements
@@ -87,7 +84,7 @@ class FrontendPreparator {
 		BreedingChainNode $breedingChainNode,
 		int $currentDeepness
 	): FrontendPkmnObj {
-		$pkmnX = $currentDeepness * self::PKMN_MARGIN_HORI - $breedingChainNode->getIconWidth() / 2;
+		$pkmnX = $currentDeepness * Constants::PKMN_MARGIN_HORI - $breedingChainNode->getIconWidth() / 2;
 		$pkmnY = $breedingChainNode->getTreeYOffset();
 		if ($breedingChainNode->getTreeSectionHeight() > $breedingChainNode->getIconHeight()) {
 			//this is only needed for pkmn with successors

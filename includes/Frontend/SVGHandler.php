@@ -6,7 +6,7 @@ class SVGHandler {
 	
 	//needed for setting the width of the svg tag
 	private $highestXCoordinate = -1;
-	const SVG_TAG_SAFETY_SPACE = 100;
+	const SVG_TAG_SAFETY_SPACE = 200;
 
 	private $svgTag = '';
 
@@ -56,8 +56,36 @@ class SVGHandler {
 	private function createSVGElements (FrontendPkmnObj $node) {
 		$this->addPkmnIcon($node);
 
+		$generalMargin = 15;
+
+		$successorList = $node->getSuccessors();
+		$successorsLength = count($successorList);
+		if ($successorsLength === 0) {
+			return;
+		}
+
+		$highest = $successorList[0]->getMiddleY();
+
+		$lastSuccessor = $successorList[count($successorList) - 1];
+		$lowest = $lastSuccessor->getMiddleY();
+
+		$column = $node->getMiddleX() + Constants::PKMN_MARGIN_HORI / 1.5;
+
+		if ($successorsLength === 1) {
+			$this->adjustMiddleLineCoords($node, $highest, $lowest);
+		}
+
+		$this->addLine($column, $highest, $column, $lowest);
+
+		$this->addLine($node->getX() + $node->getWidth() + $generalMargin, $node->getMiddleY(), $column, $node->getMiddleY());
+
 		foreach ($node->getSuccessors() as $successor) {
-			$coords = $this->getCoordinates($node, $successor);
+			$coords = [
+				'startX' => $column,
+				'startY' => $successor->getMiddleY(),
+				'endX' => $successor->getX() - $generalMargin,
+				'endY' => $successor->getMiddleY()
+			];
 
 			if ($coords['endX'] > $this->highestXCoordinate) {
 				//highest x coordinate is needed for setting the width of the svg tag
@@ -75,82 +103,16 @@ class SVGHandler {
 		}
 	}
 
-	private function getCoordinates (
-		FrontendPkmnObj $node,
-		FrontendPkmnObj $successor
-	) : Array {
-		//slope (dt.: Steigung) doesn't need centered coordinates
-		$m = ($successor->getY() - $node->getY()) / ($successor->getX() - $node->getX());
-
-		//how long the distance between starting/ending point 
-		//	of the connection line to the corresponding icon shall be
-		$generalMargin = 5;
-
-		$nodeMargin = $this->getMargin(
-			$node->getHeight(),
-			$node->getWidth(),
-			$generalMargin
-		);
-		$nodeDs = $this->getDeltas($nodeMargin, $m);
-
-		$successorMargin = $this->getMargin(
-			$successor->getHeight(),
-			$successor->getWidth(),
-			$generalMargin
-		);
-		$successorDs = $this->getDeltas($successorMargin, $m);
-
-		return $this->calcCoordinates(
-			$node, $successor, $nodeDs, $successorDs
-		);
-	}
-
-	private function calcCoordinates (
-		FrontendPkmnObj $node,
-		FrontendPkmnObj $successor,
-		Array $nodeDs,
-		Array $successorDs	
-	) : Array {
-		$startX = $node->getX() + $nodeDs['dx']
-			+ $node->getWidth() / 2;
-
-		$startY = $node->getY() + $nodeDs['dy']
-			+ $node->getHeight() / 2;
-
-		$endX = $successor->getX() - $successorDs['dx']
-			+ $successor->getWidth() / 2;
-
-		$endY = $successor->getY() - $successorDs['dy']
-			+ $successor->getHeight() / 2;
-
-		return [
-			'startX' => $startX,
-			'startY' => $startY,
-			'endX' => $endX,
-			'endY' => $endY
-		];
-	}
-
-	private function getMargin (int $height, int $width, int $margin) : int {
-		$longerPart = max($height, $width);
-		return ($longerPart / 2) + $margin;
-	}
-
-	private function getDeltas (int $margin, float $m) : Array {
-		//tries x coordinates until it reaches a suiting margin to the icon
-		$dx = 0;
-		$dy = 0;
-		$curMargin = 0;
-		for (; $curMargin < $margin; $dx++) {
-			//basic y = mx + t structure (but t = 0)
-			$dy = $m * $dx;
-			$curMargin = sqrt($dx ** 2 + $dy ** 2);
+	public function adjustMiddleLineCoords ($node, &$highest, &$lowest) {
+		$successor = $node->getSuccessors()[0];
+		if ($node->getMiddleY() < $successor->getMiddleY()) {
+			$lowest = $node->getMiddleY();
+			return;
 		}
-
-		return [
-			'dx' => $dx,
-			'dy' => $dy
-		];
+		if ($node->getMiddleY() > $successor->getMiddleY()) {
+			$highest = $node->getMiddleY();
+			return;
+		}
 	}
 
 	private function addPkmnIcon (FrontendPkmnObj $pkmn) {

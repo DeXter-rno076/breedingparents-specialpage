@@ -28,6 +28,10 @@ class FrontendPkmnObj extends PkmnObj {
 		return $this->x + self::SAFETY_SPACE;
 	}
 
+	public function getMiddleX (): int {
+		return $this->getX() + $this->getWidth() / 2;
+	}
+
 	public function getEventTextX () : int {
 		return $this->getX() + $this->getPartXOffset(
 			self::EVENT_TEXT_WIDTH,
@@ -57,6 +61,10 @@ class FrontendPkmnObj extends PkmnObj {
 
 	public function getY () : int {
 		return $this->y + self::SAFETY_SPACE;
+	}
+
+	public function getMiddleY (): int {
+		return $this->getY() + $this->getHeight() / 2;
 	}
 
 	//==========================================================

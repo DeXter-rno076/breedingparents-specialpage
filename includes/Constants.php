@@ -8,6 +8,9 @@ class Constants {
 	public static String $targetGen;
 	public static $out;
 
+	//space between each pkmn icon
+	public const PKMN_MARGIN_HORI = 200;
+
 	public static function out (String $msg) {
 		Constants::$out->addHTML($msg."<br />");
 	}
