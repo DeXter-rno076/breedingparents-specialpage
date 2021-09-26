@@ -22,6 +22,9 @@ class SpecialBreedingParents extends SpecialPage {
 		Constants::$targetGen = $data['genInput'];
 		Constants::$targetMove = $data['moveInput'];
 		Constants::$targetPkmn = $data['pkmnInput'];
+		if (isset($_GET['debug'])) {
+			Constants::$debugMode = true;
+		}
 		Constants::$out = $this->getOutput();
 
 		$this->getData();

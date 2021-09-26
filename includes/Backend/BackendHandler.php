@@ -26,7 +26,7 @@ class BackendHandler {
 
 		$timeEnd = hrtime(true);
 		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
-		Constants::out("backend needed ".$timeDiff." seconds");
+		Constants::debug("backend needed ".$timeDiff." seconds");
 
 		return $breedingTree;
 	}
