@@ -10,15 +10,18 @@ class SuccessorFilter {
 	*/
 	private BreedingChainNode $node;
 	private Array $eggGroupBlacklist;
+	private String $whitelistedEggGroup;
 	private Array $successorList;
 	
 	public function __construct (
 		BreedingChainNode $node,
 		Array $eggGroupBlacklist,
+		String $whitelistedEggGroup,
 		Array $successorList
 	) {
 		$this->node = $node;
 		$this->eggGroupBlacklist = $eggGroupBlacklist;
+		$this->whitelistedEggGroup = $whitelistedEggGroup;
 		$this->successorList = $successorList;
 	}
 
@@ -27,20 +30,22 @@ class SuccessorFilter {
 		//$this->removeUnbreedables();
 		//$this->checkGenSpecificRequirements();
 
-		echo '=====================================================================<br />';
-		echo $this->node->getName().'<br />';
-		echo json_encode($this->eggGroupBlacklist).'<br />';
-
 		return $this->successorList;
 	}
 
 	private function removeBlacklistedPkmn () {
 		$this->remove(function ($pkmn) {
 			$pkmnData = Constants::$pkmnData->$pkmn;
+			if ($pkmnData->eggGroup1 === $this->whitelistedEggGroup) {
+				return false;
+			}
 			if (in_array($pkmnData->eggGroup1, $this->eggGroupBlacklist)) {
 				return true;
 			}
 			if (isset($pkmnData->eggGroup2)) {
+				if ($pkmnData->eggGroup2 === $this->whitelistedEggGroup) {
+					return false;
+				}
 				return in_array($pkmnData->eggGroup2, $this->eggGroupBlacklist);
 			}
 			return false;

@@ -175,7 +175,7 @@ class BackendHandler {
 		String $debug_predecessor
 	) {
 		$eggGroupPkmnList = Constants::$eggGroups->$eggGroup;
-		$filter = new SuccessorFilter($node, $eggGroupBlacklist, $eggGroupPkmnList);
+		$filter = new SuccessorFilter($node, $eggGroupBlacklist, $eggGroup, $eggGroupPkmnList);
 		$potSuccessorList = $filter->filter();
 
 		foreach ($potSuccessorList as $potSuccessor) {
