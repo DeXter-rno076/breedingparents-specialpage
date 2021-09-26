@@ -5,9 +5,6 @@ require_once 'SuccessorFilter.php';
 require_once 'BreedingChainNode.php';
 
 class BackendHandler {
-	private bool $x = true;
-	//paremeter structure: pkmnObj, ..., eggGroup, otherEggGroup, eggGroupBlacklist, pkmnBlacklist
-
 	/**
 	 * main function that creates and returns the breeding tree
 	 */
@@ -109,15 +106,15 @@ class BackendHandler {
 		Array &$eggGroupBlacklist,
 		String $debug_predecessor
 	) {
-
-		if ($this->x) {
+		static $isroot = true;
+		if ($isroot) {
 			//this is solely for the root node of the entire tree
 			//root pkmn is at the start => it is the only pkmn that doesnt need an egg group for a connection to a predecessor because it doesnt have one
 			$eggGroupBlacklist[] = $eggGroup1;
 			if (isset($eggGroup2)) {
 				$eggGroupBlacklist[] = $eggGroup2;
 
-				$this->x = false;
+				$isroot = false;
 				$this->setSuccessors(
 					$node,
 					$eggGroup2,
@@ -126,7 +123,7 @@ class BackendHandler {
 				);
 			}
 			//x must be set twice to false because it must happen before the first setSuccessors call (recursion stuff) and the first call is optionally
-			$this->x = false;
+			$isroot = false;
 			$this->setSuccessors(
 				$node,
 				$eggGroup1,
