@@ -30,6 +30,11 @@ abstract class PkmnObj {
 		return $this->learnsByEvent;
 	}
 
+	public function getLearnsByOldGen (): bool {
+		return false;
+		//more coming soon
+	}
+
 	//=========================================================
 	//icon stuff
 

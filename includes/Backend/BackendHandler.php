@@ -8,7 +8,7 @@ class BackendHandler {
 	/**
 	 * main function that creates and returns the breeding tree
 	 */
-	public function createBreedingTree (): BreedingChainNode {
+	public function createBreedingTree (): ?BreedingChainNode {
 		//for performance measuring
 		$timeStart = hrtime(true);
 

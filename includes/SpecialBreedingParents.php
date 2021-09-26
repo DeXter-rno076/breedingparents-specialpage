@@ -29,12 +29,8 @@ class SpecialBreedingParents extends SpecialPage {
 		$backendHandler = new BackendHandler();
 		$breedingTree = $backendHandler->createBreedingTree();
 
-		if (is_null($breedingTree)) {
-			return Status::newFatal('breeding tree empty');
-		}
-
 		$frontendHandler = new FrontendHandler($breedingTree);
-		$frontendHandler->addSVG();
+		$frontendHandler->addGraficOutput();
 
 		return Status::newGood();
 	}
