@@ -9,39 +9,41 @@ class SuccessorFilter {
 		pkmn that only have one gender aren't an option in some cases
 	*/
 	private BreedingChainNode $node;
-	private Array $pkmnBlacklist;
+	private Array $eggGroupBlacklist;
 	private Array $successorList;
 	
 	public function __construct (
 		BreedingChainNode $node,
-		Array $pkmnBlacklist,
+		Array $eggGroupBlacklist,
 		Array $successorList
 	) {
 		$this->node = $node;
-		$this->pkmnBlacklist = $pkmnBlacklist;
+		$this->eggGroupBlacklist = $eggGroupBlacklist;
 		$this->successorList = $successorList;
+	}
 
+	public function filter (): Array {
 		$this->removeBlacklistedPkmn();
 		//$this->removeUnbreedables();
 		//$this->checkGenSpecificRequirements();
-	}
 
-	public function next (): String {
-		return array_shift($this->successorList);
-	}
+		echo '=====================================================================<br />';
+		echo $this->node->getName().'<br />';
+		echo json_encode($this->eggGroupBlacklist).'<br />';
 
-	public function hasNext (): bool {
-		return count($this->successorList) > 0;
-	}
-
-	public function update (Array $newPkmnBlacklist) {
-		$this->pkmnBlacklist = $newPkmnBlacklist;
-		$this->removeBlacklistedPkmn();
+		return $this->successorList;
 	}
 
 	private function removeBlacklistedPkmn () {
 		$this->remove(function ($pkmn) {
-			return in_array($pkmn, $this->pkmnBlacklist);
+			$pkmnData = Constants::$pkmnData->$pkmn;
+			if (in_array($pkmnData->eggGroup1, $this->eggGroupBlacklist)) {
+				return true;
+			}
+			if (isset($pkmnData->eggGroup2)) {
+				return in_array($pkmnData->eggGroup2, $this->eggGroupBlacklist);
+			}
+			return false;
 		});
 	}
 
@@ -71,7 +73,6 @@ class SuccessorFilter {
 			$pkmn = $this->successorList[$i];
 			if ($condition($pkmn)) {
 				array_splice($this->successorList, $i, 1);
-				//Constants::out('removed '.$pkmn);
 				$i--;
 			}
 		}

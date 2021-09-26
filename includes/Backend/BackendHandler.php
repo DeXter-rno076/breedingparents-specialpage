@@ -5,6 +5,7 @@ require_once 'SuccessorFilter.php';
 require_once 'BreedingChainNode.php';
 
 class BackendHandler {
+	private bool $x = true;
 	//paremeter structure: pkmnObj, ..., eggGroup, otherEggGroup, eggGroupBlacklist, pkmnBlacklist
 
 	/**
@@ -18,13 +19,11 @@ class BackendHandler {
 		//contains the pkmn object from the external JSON data
 		$targetPkmnData = Constants::$pkmnData->$targetPkmnName;
 
-		//needed for preventing infinite recursion
-		//a pkmn may only occur once in a branch, otherwise you would get an infinite loop
-		$pkmnBlacklist = [$targetPkmnData->name];
+		$eggGroupBlacklist = [];
 
 		$breedingTree = $this->createBreedingChainNode(
 			$targetPkmnData,
-			$pkmnBlacklist,
+			$eggGroupBlacklist,
 			'root'
 		);
 
@@ -36,16 +35,13 @@ class BackendHandler {
 	}
 
 	/** 
-	 * depending on strictness pkmnBlacklist should use 
-	 * 		pass by reference (stricter, faster, inaccurate) or 
-	 * 		pass by value (looser, slower (in extreme cases more then 200 times slower), more accurate)
 	 * 
 	 * returns a BreedingChainNode object if pkmn can learn/inherit the move
 	 * 		returns null if not
 	 */
 	private function createBreedingChainNode (
 		StdClass $pkmnObj,
-		Array &$pkmnBlacklist,
+		Array $eggGroupBlacklist,
 		String $debug_predecessor
 	): ?BreedingChainNode {
 		//todo form change moves (e. g. Rotom) should count as normal 
@@ -72,7 +68,7 @@ class BackendHandler {
 				$node,
 				$pkmnObj->eggGroup1,
 				$eggGroup2,
-				$pkmnBlacklist,
+				$eggGroupBlacklist,
 				$debug_predecessor
 			);
 
@@ -110,57 +106,64 @@ class BackendHandler {
 		BreedingChainNode $node,
 		String $eggGroup1,
 		?String $eggGroup2,
-		Array &$pkmnBlacklist,
+		Array &$eggGroupBlacklist,
 		String $debug_predecessor
 	) {
-		$this->setDirectLearners($node, $eggGroup1, $pkmnBlacklist);
-		if (!is_null($eggGroup2)) {
-			$this->setDirectLearners($node, $eggGroup2, $pkmnBlacklist);
+
+		if ($this->x) {
+			//this is solely for the root node of the entire tree
+			//root pkmn is at the start => it is the only pkmn that doesnt need an egg group for a connection to a predecessor because it doesnt have one
+			$eggGroupBlacklist[] = $eggGroup1;
+			if (isset($eggGroup2)) {
+				$eggGroupBlacklist[] = $eggGroup2;
+
+				$this->x = false;
+				$this->setSuccessors(
+					$node,
+					$eggGroup2,
+					$eggGroupBlacklist,
+					$debug_predecessor
+				);
+			}
+			//x must be set twice to false because it must happen before the first setSuccessors call (recursion stuff) and the first call is optionally
+			$this->x = false;
+			$this->setSuccessors(
+				$node,
+				$eggGroup1,
+				$eggGroupBlacklist,
+				$debug_predecessor
+			);
+
 		}
+
+		if (is_null($eggGroup2)) {
+			//one egg group is ALWAYS in the blacklist (except for root node pkmn)
+			//if the pkmn has only one egg group it MUST learn the move directly in order to be a suitable parent
+			//to be able to be in the middle of a breeding chain a pkmn needs two egg groups (one for successor(s), one for predecessor)
+			//a pkmn with one egg group can ONLY be the end of a chain (=> must learn the move directly)
+			return;
+		}
+
+		//one egg group is always in the blacklist because of the connection to the predecessor
+		//possible successors can only come from the other one
+		$otherEggGroup = NULL;
+		if (!in_array($eggGroup1, $eggGroupBlacklist)) {
+			$otherEggGroup = $eggGroup1;
+		} else if (!in_array($eggGroup2, $eggGroupBlacklist)) {
+			$otherEggGroup = $eggGroup2;
+		} else {
+			//all egg groups blocked
+			return;
+		}
+
+		$eggGroupBlacklist[] = $otherEggGroup;
 
 		$this->setSuccessors(
 			$node,
-			$eggGroup1,
-			$pkmnBlacklist,
+			$otherEggGroup,
+			$eggGroupBlacklist,
 			$debug_predecessor
 		);
-
-		//some pkmn only have one egg group --> has to get checked via is_null()
-		if (!is_null($eggGroup2)) { 
-			$this->setSuccessors(
-				$node,
-				$eggGroup2,
-				$pkmnBlacklist,
-				$debug_predecessor
-			);
-		}
-	}
-
-	private function setDirectLearners (
-		BreedingChainNode $node,
-		String $eggGroup,
-		Array &$pkmnBlacklist
-	) {
-		$eggGroupPkmnList = Constants::$eggGroups->$eggGroup;
-
-		$filter = new SuccessorFilter($node, $pkmnBlacklist, $eggGroupPkmnList);
-
-		//the list of potential successors changes on the run because adding successors of the list makes pkmnBlacklist longer
-		//  therefore a usual foreach cant be used
-		while ($filter->hasNext()) {
-			$potSuccessorName = $filter->next();
-
-			$potSuccessorData = Constants::$pkmnData->$potSuccessorName;
-
-			if ($this->canLearnNormally($potSuccessorData)) {
-				$pkmnBlacklist[] = $potSuccessorName;
-
-				$successor = new BreedingChainNode($potSuccessorName);
-				$node->addSuccessor($successor);
-			}
-
-			$filter->update($pkmnBlacklist);
-		}
 	}
 
 	/**
@@ -171,27 +174,21 @@ class BackendHandler {
 	private function setSuccessors (
 		BreedingChainNode $node,
 		String $eggGroup,
-		Array &$pkmnBlacklist,
+		Array &$eggGroupBlacklist,
 		String $debug_predecessor
 	) {
 		$eggGroupPkmnList = Constants::$eggGroups->$eggGroup;
-		$filter = new SuccessorFilter($node, $pkmnBlacklist, $eggGroupPkmnList);
+		$filter = new SuccessorFilter($node, $eggGroupBlacklist, $eggGroupPkmnList);
+		$potSuccessorList = $filter->filter();
 
-		//the list of potential successors changes on the run because adding successors of the list makes pkmnBlacklist longer
-		//  therefore a usual foreach cant be used
-		while ($filter->hasNext()) {
-			$potSuccessorName = $filter->next();
-
-			$potSuccessorData = Constants::$pkmnData->$potSuccessorName;
-
+		foreach ($potSuccessorList as $potSuccessor) {
+			$potSuccessorData = Constants::$pkmnData->$potSuccessor;
 			$this->addSuccessor(
 				$node,
 				$potSuccessorData,
-				$pkmnBlacklist,
+				$eggGroupBlacklist,
 				$debug_predecessor
 			);
-
-			$filter->update($pkmnBlacklist);
 		}
 	}
 
@@ -199,20 +196,17 @@ class BackendHandler {
 	private function addSuccessor (
 		BreedingChainNode $node,
 		StdClass $potSuccessorData,
-		Array &$pkmnBlacklist,
+		Array &$eggGroupBlacklist,
 		String $debug_predecessor
 	) {
-		$pkmnBlacklist[] = $potSuccessorData->name;
-
 		$successor = $this->createBreedingChainNode(
 			$potSuccessorData,
-			$pkmnBlacklist,
+			$eggGroupBlacklist,
 			$node->getName()
 		);
 
 		if ($successor !== null) {
 			//this is called when successor is able to learn targetMove
-			//TODO does this work or do I have to use some pass by reference stuff?
 			$node->addSuccessor($successor);
 		}
 	}
