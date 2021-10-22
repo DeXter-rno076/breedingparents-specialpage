@@ -215,32 +215,22 @@ class BackendHandler {
 	 * checks whether the pkmn can learn targetMove via level, tmtr or tutor
 	 */
 	private function canLearnNormally (StdClass $pkmnObj) : bool {
-		$levelLearnability = $this->checkLearnsetType($pkmnObj->levelLearnsets);
-		if ($levelLearnability) {
-			return true;
+		if ( !isset( $pkmnObj->directLearnsets ) ) {
+			return false;
 		}
 
-		$tmtrLearnability = false;
-		if (isset($pkmnObj->tmtrLearnsets)) {
-			//prevent a couple of debugging messages
-			$tmtrLearnability = $this->checkLearnsetType($pkmnObj->tmtrLearnsets);
-		}
-		if ($tmtrLearnability) {
-			return true;
-		}
-
-		if (isset($pkmnObj->tutorLearnsets)) {
-			$tutorLearnability = $this->checkLearnsetType($pkmnObj->tutorLearnsets);
-			if ($tutorLearnability) {
-				return true;
-			}
-		}
-
-		return false;
+		return $this->checkLearnsetType( $pkmnObj->directLearnsets );
 	}
 
 	private function canInherit (StdClass $pkmnObj) : bool {
-		//not necessarily needed but it prevents masses of debug logs
+		if ( !isset( $pkmnObj->unbreedable ) ) {
+			echo $pkmnObj->name;
+		}
+		if ( $pkmnObj->unbreedable ) {
+			return false;
+		}
+		
+		//should be covered by first if, but just in case
 		if (!isset($pkmnObj->breedingLearnsets)) {
 			return false;
 		}
