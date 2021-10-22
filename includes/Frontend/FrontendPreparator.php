@@ -138,15 +138,7 @@ class FrontendPreparator {
 		}
 	}
 
-	private function getFile (int $pkmnId): File {
-		//pkmn icon files have 0 at the beginning if needed
-		if ($pkmnId < 100) {
-			$pkmnId = '0'.$pkmnId;
-			if ($pkmnId < 10) {
-				$pkmnId = '0'.$pkmnId;
-			}
-		}
-
+	private function getFile (string $pkmnId): File {
 		$fileName = 'Pokémon-Icon '.$pkmnId.'.png';
 		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
 
