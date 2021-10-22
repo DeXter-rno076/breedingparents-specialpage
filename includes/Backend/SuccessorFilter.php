@@ -27,7 +27,7 @@ class SuccessorFilter {
 
 	public function filter (): Array {
 		$this->removeBlacklistedPkmn();
-		//$this->removeUnbreedables();
+		$this->removeUnpairables();
 		//$this->checkGenSpecificRequirements();
 
 		return $this->successorList;
@@ -52,9 +52,11 @@ class SuccessorFilter {
 		});
 	}
 
-	private function removeUnbreedables () {
-		$this->remove(function ($pkmn) {
-			return in_array($pkmn, Constants::$unbreedable);
+	private function removeUnpairables () {
+		//unpairable pkmn cant get children => may only appear at the end of a chain
+		$this->remove(function ($pkmnName) {
+			$unpairableStatus = Constants::$pkmnData->$pkmnName->unpairable;
+			return $unpairableStatus;
 		});
 	}
 
