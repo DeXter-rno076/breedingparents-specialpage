@@ -38,3 +38,19 @@ $formDescriptor = [
 		'validation-callback' => [ $this, 'validateGen' ]
 	]
 ];
+
+//sb level
+$debuglogsCheckBox = [
+	'displayDebuglogs' => [
+		'type' => 'check',
+		'label' => 'display debug logs'
+	]
+];
+
+//vb level
+$statuslogsCheckBox = [
+	'displayStatuslogs' => [
+		'type' => 'check',
+		'label' => 'display status logs'
+	]
+];

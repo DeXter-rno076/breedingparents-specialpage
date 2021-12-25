@@ -1,9 +1,13 @@
 <?php
 //todo find a solution for output of validation methods
+//todo choose either tabs or spaces
+//todo look through all MediaWiki API methods and handle errors
 
-require_once 'Backend/BackendHandler.php';
-require_once 'Frontend/FrontendHandler.php';
+require_once 'tree creation/BreedingTreeNode.php';
+require_once 'svg creation/FrontendPkmn.php';
+require_once 'svg creation/SVGTag.php';
 require_once 'Constants.php';
+require_once 'Logger.php';
 
 class SpecialBreedingParents extends SpecialPage {
 	public function __construct () {
@@ -16,35 +20,123 @@ class SpecialBreedingParents extends SpecialPage {
 		$this->addForms();
 	}
 
+    //todo split this up and give it a name
 	public function processStuff ($data, $form) {
-		//todo check whether pkmn is unbreebable
-
 		Constants::$targetGen = $data['genInput'];
 		Constants::$targetMove = $data['moveInput'];
 		Constants::$targetPkmn = $data['pkmnInput'];
-		if (isset($_GET['debug'])) {
-			Constants::$debugMode = true;
+		if (isset($data['displayDebuglogs'])) {
+			Constants::$displayDebuglogs = $data['displayDebuglogs'];
 		}
+		if (isset($data['displayStatuslogs'])) {
+			Constants::$displayStatuslogs = $data['displayStatuslogs'];
+		}
+
 		Constants::$out = $this->getOutput();
 
-		$this->getData();
+        try {
+		    $this->getData();
+        } catch (Exception $e) {
+            Constants::out('Oh nein, das hätte nicht passieren sollen :\'(\n'
+                .'Fehler beim Ziehen der Daten: '.$e.'\n'
+                .'Bitte melde das auf unserem Discordserver'
+                .' oder in der '.Constants::auskunftLink.'.'
+            );
 
-		$backendHandler = new BackendHandler();
-		$breedingTree = $backendHandler->createBreedingTree();
+            Logger::flush();
 
-		$frontendHandler = new FrontendHandler($breedingTree);
-		$frontendHandler->addGraficOutput();
+            return Status::newFailed('couldn\'t load data');
+        }
 
-		return Status::newGood();
+        $breedingTreeRoot = null;
+        try {
+            $breedingTreeRoot = $this->createBreedingTree();
+        } catch (AttributeNotFoundException $e) {
+            Logger::elog('couldn\'t create breeding tree, error: '.$e);
+            return Status::newFatal($e->__toString());
+        }
+        if (is_null($breedingTreeRoot)) {
+            Constants::out('breeding tree empty');
+            Logger::flush();
+            return Status::newGood('');
+        }
+
+        $frontendRoot = $this->createFrontendRoot($breedingTreeRoot);
+
+        $this->createSVGStructure($frontendRoot);
+
+        Logger::flush();
+		return Status::newGood('all ok');
 	}
+
+    private function createBreedingTree (): ?BreedingTreeNode {
+        $timeStart = hrtime(true);
+
+        $breedingTreeRoot = new BreedingTreeNode(Constants::$targetPkmn, true);
+        Logger::statusLog('CREATING BREEDING TREE NODES');
+        $breedingTreeRoot = $breedingTreeRoot->createBreedingTreeNode([]);
+
+        $timeEnd = hrtime(true);
+        $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
+
+        Logger::debugOut('breeding tree creation needed: '.$timeDiff.'s');
+
+        return $breedingTreeRoot;
+    }
+
+    private function createFrontendRoot (BreedingTreeNode $breedingTreeRoot): FrontendPkmn {
+        Logger::statusLog('CREATING FRONTENDPKMN INSTANCES');
+        $timeStart = hrtime(true);
+        $frontendRoot = new FrontendPkmn($breedingTreeRoot);
+        $frontendRoot->setTreeIconsAndCoordinates();
+        $timeEnd = hrtime(true);
+        $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
+        Logger::debugOut('creating frontend pkmn tree needed: '.$timeDiff.'s');
+
+        return $frontendRoot;
+    }
+
+    private function createSVGStructure (FrontendPkmn $frontendRoot) {
+        Logger::statusLog('CREATING SVG STRUCTURE');
+        $timeStart = hrtime(true);
+
+        $svgRoot = new SVGTag($frontendRoot);
+        Constants::$out->addModules('breedingParentsModules');
+        Constants::plainOut(
+            '<div id="breedingParentsSVGContainer" style="overflow: hidden;">'
+            .$svgRoot->toHTMLString().'</div>');
+        //adding button that resets the svg to the starting position
+		Constants::$out->addHTML('<input type="button" id="breedingParentsSVGResetButton"'.
+        ' value="Position zurücksetzen" />');
+
+        $timeEnd = hrtime(true);
+        $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
+
+        Logger::debugOut('svg creation needed: '.$timeDiff.'s');
+    }
 
 	private function addForms () {
 		require_once 'formDescriptor.php';
-	
-		$form = HTMLForm::factory('inline', $formDescriptor, $this->getContext());
+
+        //todo put this in a separate method
+		$formDescriptionArray = $formDescriptor;
+		$user = $this->getUser();
+		$userGroups = $user->getGroupMemberships();
+		//todo put the group names in some kind of config file
+		if (isset($userGroups['voting'])) {
+			$formDescriptionArray = array_merge($formDescriptionArray,
+				$debuglogsCheckBox);
+		}
+		if (isset($userGroups['trusted'])) {
+			$formDescriptionArray = array_merge($formDescriptionArray,
+				$statuslogsCheckBox);
+		}
+
+		$form = HTMLForm::factory(
+            'inline', $formDescriptionArray, $this->getContext());
 		$form->setMethod('get');
 		$form->setSubmitCallback([$this, 'processStuff']);
-		$form->setSubmitText('do it');//todo text not final
+		$form->setSubmitText('do it!');//todo text not final
 		$form->prepareForm();
 
 		$form->displayForm('');
@@ -101,10 +193,13 @@ class SpecialBreedingParents extends SpecialPage {
 		$gen = Constants::$targetGen;
 		Constants::$pkmnData = $this->getPkmnData($gen);
 
-		$blacklistPageName = 'MediaWiki:Zuchteltern/Gen'.$gen.'/pkmn-blacklist.json';
-		Constants::$unbreedable = $this->getWikiPageContent($blacklistPageName);
+		$blacklistPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
+            .'/pkmn-blacklist.json';
+		Constants::$unbreedable = $this->getWikiPageContent(
+            $blacklistPageName);
 		
-		$eggGroupPageName = 'MediaWiki:Zuchteltern/Gen'.$gen.'/egg-groups.json';
+		$eggGroupPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
+            .'/egg-groups.json';
 		Constants::$eggGroups = $this->getWikiPageContent($eggGroupPageName);
 	}
 
@@ -114,7 +209,8 @@ class SpecialBreedingParents extends SpecialPage {
 		$pageIndex = 1;
 
 		do {
-			$pkmnDataPageName = 'MediaWiki:Zuchteltern/Gen'.$gen.'/pkmn-data'.$pageIndex.'.json';
+			$pkmnDataPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
+                .'/pkmn-data'.$pageIndex.'.json';
 			$pageData = $this->getWikiPageContent($pkmnDataPageName);
 
 			$pageDataArray = (array) $pageData;
@@ -129,7 +225,8 @@ class SpecialBreedingParents extends SpecialPage {
 	}
 	
 	//original code written by Buo (thanks ^^)
-	//returns JSON objects and arrays -> needs 2 return types which needs php 8
+	/*returns JSON objects and arrays
+    -> needs 2 return types which needs php 8*/
 	private function getWikiPageContent (String $name) {
 		$title = Title::newFromText($name);
 		$rev = Revision::newFromTitle($title);
@@ -141,12 +238,5 @@ class SpecialBreedingParents extends SpecialPage {
 		$data = $rev->getContent()->getNativeData();
 
 		return json_decode($data);;
-	}
-
-	//===========================================================
-	//debugging stuff
-
-	private function debugConsole (String $msg) {
-		echo '<script>console.log("'.$msg.'")</script>';
 	}
 }

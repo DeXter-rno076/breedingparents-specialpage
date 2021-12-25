@@ -1,11 +1,7 @@
 'use strict';
 //todo support touch events
 
-//todo x y input with button (move around more quickly on big svgs)
 //todo (idea) if the user moves the svg out of the visible area, highlight the reset button
-//todo maybe it's needed to load only the visible svg elements
-//todo		when using looser blacklist handling 
-//todo		(Pikachu and Ausdauer killed the tab multiple times)
 
 const svgContainer = document.getElementById('breedingParentsSVGContainer');
 const svgTag = document.getElementById('breedingParentsSVG');
@@ -25,6 +21,7 @@ resetButton.addEventListener('click', () => {
 });
 svgContainer.addEventListener('mousedown', startMoving);
 svgContainer.addEventListener('mouseup', stopMoving);
+svgContainer.addEventListener('touchmove', touchMove);
 
 function startMoving (event) {
 	cursorStartingX = event.clientX;
@@ -52,4 +49,8 @@ function moveSVG (event) {
 
 	svgTag.style.left = newX + 'px';
 	svgTag.style.top = newY + 'px';
+}
+
+function touchMove (event) {
+    //todo
 }
