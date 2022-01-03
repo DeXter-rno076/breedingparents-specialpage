@@ -21,3 +21,9 @@
 	stroke: black; 
 	stroke-width: 2;
 }
+
+#breedingParentsSVG circle, #breedingParentsSVG rect {
+    stroke: black;
+    stroke-width: 2;
+    fill: none;
+}

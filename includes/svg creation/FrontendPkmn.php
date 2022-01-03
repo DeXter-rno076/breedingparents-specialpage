@@ -19,10 +19,6 @@ class FrontendPkmn extends Pkmn {
     private int $iconHeight;
     private ?FileNotFoundException $fileError = null;
 
-    private const EVENT_TEXT_HEIGHT = 20;
-    private const EVENT_TEXT_WIDTH = 41;
-    private const SAFETY_SPACE = 10;
-
     public function __construct (BreedingTreeNode $breedingTreeNode) {
         parent::__construct($breedingTreeNode->getName(), $breedingTreeNode->getID());
     
@@ -104,7 +100,7 @@ class FrontendPkmn extends Pkmn {
         /* todo sometimes this is returns too small heights (Glumanda, Biss, Gen8)
         but this doesn't stand out because of the safety margin*/
         if (!$this->hasSuccessors()) {
-            $height = $this->getHeight() + self::SAFETY_SPACE;
+            $height = $this->getHeight() + Constants::SVG_PKMN_SAFETY_MARGIN;
             Logger::statusLog(
                 $this.' has no successors => setting and returning minimal height '.$height);
             $this->treeSectionHeight = $height;
@@ -118,7 +114,7 @@ class FrontendPkmn extends Pkmn {
         }
         Logger::statusLog('calculated tree section height '.$heightSum.' of '.$this);
         $this->treeSectionHeight = $heightSum;
-        return $heightSum + self::SAFETY_SPACE;
+        return $heightSum + Constants::SVG_PKMN_SAFETY_MARGIN;
     }
 
     private function getPkmnIcon (string $pkmnId): File {
@@ -174,9 +170,10 @@ class FrontendPkmn extends Pkmn {
 
     //==================================================
     //getters with actual logic (:OOOOOOOOO)
+    //correction: they had logic
 
     public function getX (): int {
-        $retX = $this->x + self::SAFETY_SPACE;
+        $retX = $this->x + Constants::SVG_PKMN_SAFETY_MARGIN;
         Logger::statusLog('returning '.$retX.' in getX call of '.$this);
         return $retX;
     }
@@ -187,50 +184,12 @@ class FrontendPkmn extends Pkmn {
         return $middleX;
     }
 
-    public function getEventTextX (): int {
-        Logger::statusLog('calling '.__FUNCTION__.' of '.$this);
-        $eventTextX = $this->getX() + $this->getPartXOffset(
-            self::EVENT_TEXT_WIDTH,
-            $this->iconWidth
-        );
-        Logger::statusLog('returning '.$eventTextX.' in getEventTextX call of '.$this);
-        return $eventTextX; 
-    }
-
     public function getIconX (): int {
-        Logger::statusLog('calling '.__FUNCTION__.' on '.$this);
-        if (!$this->learnsByEvent) {
-            $normalX = $this->getX();
-            Logger::statusLog('returning normal x '
-                .$normalX.' in getIconX call on '.$this);
-            return $normalX;
-        }
-        $indentedX = $this->getX() + $this->getPartXOffset(
-            $this->iconWidth,
-            self::EVENT_TEXT_WIDTH
-        );
-        Logger::statusLog('returning indented x '
-            .$indentedX.' in getIconX call of '.$this);
-        return $indentedX;
-    }
-
-    //todo this name is shit
-    private function getPartXOffset (
-            int $targetWidth, int $otherWidth): int {
-        /*depending on which is wider, the icon or
-        the text have to be indented a bit*/
-        if ($otherWidth > $targetWidth) {
-            $indentation = ($otherWidth - $targetWidth) / 2;
-            Logger::statusLog('returning indentation '
-                .$indentation.' in getPartXOffset call on '.$this);
-            return $indentation;
-        }
-        Logger::statusLog('width of target is greater or equal => returning 0 indentation');
-        return 0;
+        return $this->getX();
     }
 
     public function getY (): int {
-        $retY = $this->y + self::SAFETY_SPACE;
+        $retY = $this->y + Constants::SVG_PKMN_SAFETY_MARGIN;
         Logger::statusLog('returning y '.$retY.' in getY call on '.$this);
         return $retY;
     }
@@ -243,26 +202,11 @@ class FrontendPkmn extends Pkmn {
     }
 
     public function getWidth (): int {
-        if (!$this->learnsByEvent) {
-            Logger::statusLog($this.' doesn\'t learn via event '
-                .'=> returning icon width '.$this->iconWidth);
-            return $this->iconWidth;
-        }
-        $retWidth = max($this->iconWidth, self::EVENT_TEXT_WIDTH);
-        Logger::statusLog('returning width '.$retWidth);
-        return $retWidth;
+        return $this->iconWidth;
     }
 
     public function getHeight (): int {
-        if (!$this->learnsByEvent) {
-            Logger::statusLog($this.' doesn\'t learn via event '
-                .' returning icon width '.$this->iconWidth);
-            return $this->iconHeight;
-        }
-        $retHeight = $this->iconHeight
-        + self::EVENT_TEXT_HEIGHT / 2;
-        Logger::statusLog('returning height '.$retHeight);
-        return $retHeight;
+        return $this->iconHeight;
     }
 
     public function getLogInfo (): string {
