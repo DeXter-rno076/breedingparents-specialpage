@@ -39,6 +39,16 @@ class BreedingTreeNode extends Pkmn {
                 Logger::statusLog($this.' can inherit the move, successors found');
                 return $this;
             }
+        } else if ($this->isRoot) {
+            $lowestEvolution = $this->data->getLowestEvolution();
+            if ($lowestEvolution !== $this->name) {
+                $lowestEvoInstance = new BreedingTreeNode($lowestEvolution);
+                $lowestEvoNode = $lowestEvoInstance->createBreedingTreeNode($eggGroupBlacklist);
+                if (!is_null($lowestEvoNode)) {
+                    $this->addSuccessor($lowestEvoNode);
+                    return $this;
+                }
+            }
         }
 
         if ($this->canLearnByEvent()) {
