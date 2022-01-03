@@ -21,20 +21,22 @@ class SVGImg extends SVGElement {
 
         $this->href = $frontendPkmn->getIconUrl();
         if ($frontendPkmn->getLearnsByEvent()) {
-            $this->addEventMarker();
+            $this->addEventMarker($frontendPkmn->getName());
         } else if ($frontendPkmn->getLearnsByOldGen()) {
-            $this->addOldGenMarker();
+            $this->addOldGenMarker($frontendPkmn->getName());
         }
 
         Logger::statusLog('created '.$this);
     }
 
-    private function addEventMarker () {
+    private function addEventMarker (string $temp_pkmnName) {
         //todo
+        Constants::out($temp_pkmnName.' learns via event');
     }
 
-    private function addOldGenMarker () {
+    private function addOldGenMarker (string $temp_pkmnName) {
         //todo
+        Constants::out($temp_pkmnName.' learns via old gen');
     }
 
     public function toHTMLString (): string {
