@@ -8,8 +8,6 @@ class AttributeNotFoundException extends Exception {
 
     public function __construct (string $pkmnId,
             string $attr, Throwable $previous = null) {
-        Logger::statusLog('constructing AttributeNotFoundException instance for '
-            .$pkmnId.', missing '.$attr);
         $this->msg = $attr.' is missing in data obj of '.$pkmnId;
         $this->pkmnId = $pkmnId;
         $this->missingAttribute = $attr;

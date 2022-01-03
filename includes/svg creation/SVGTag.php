@@ -18,8 +18,6 @@ class SVGTag extends SVGElement {
             + Constants::SVG_SAFETY_MARGIN;
         $this->height = $pkmnRoot->getTreeSectionHeight() 
             + Constants::SVG_SAFETY_MARGIN;
-        Logger::statusLog('set width to '.$this->width.', set height to '
-            .$this->height);
 
         $this->svgRoot = new SVGPkmn($pkmnRoot);
     }

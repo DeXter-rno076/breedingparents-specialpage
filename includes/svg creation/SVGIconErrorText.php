@@ -8,7 +8,6 @@ class SVGIconErrorText extends SVGElement {
     private string $pkmnName;
 
     public function __construct (FrontendPkmn $pkmn) {
-        Logger::statusLog('creating SVGIconErrorText instance for '.$pkmn);
         parent::__construct('text');
         $this->x = $pkmn->getX();
         $this->y = $pkmn->getY();

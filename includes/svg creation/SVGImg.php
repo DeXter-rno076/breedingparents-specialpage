@@ -12,7 +12,6 @@ class SVGImg extends SVGElement {
 
     public function __construct (FrontendPkmn $frontendPkmn) {
         parent::__construct('image');
-        Logger::statusLog('creating SVGImg instance for '.$frontendPkmn);
 
         $this->x = $frontendPkmn->getX();
         $this->y = $frontendPkmn->getY();

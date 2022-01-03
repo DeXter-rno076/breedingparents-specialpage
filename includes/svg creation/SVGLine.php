@@ -10,7 +10,6 @@ class SVGLine extends SVGElement {
 
     public function __construct (int $x1, int $y1, int $x2, int $y2) {
         parent::__construct('line');
-        Logger::statusLog('creating SVGLine instance for ('.$x1.';'.$y1.')->('.$x2.';'.$y2.')');
         $this->x1 = $x1;
         $this->y1 = $y1;
         $this->x2 = $x2;

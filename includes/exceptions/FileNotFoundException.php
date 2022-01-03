@@ -6,7 +6,6 @@ class FileNotFoundException extends Exception {
     private string $pkmnId;
     
     public function __construct (string $pkmnId, Throwable $previous = null) {
-        Logger::statusLog('constructing FileNotFoundException instance of '.$pkmnId);
         $this->msg = 'couldn\'t load pkmn icon of ' + $pkmnId;
         $this->pkmnId = $pkmnId;
         parent::__construct($this->msg, 0, $previous);

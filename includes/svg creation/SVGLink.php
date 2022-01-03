@@ -9,7 +9,6 @@ class SVGLink extends SVGElement {
 
     public function __construct(string $href, SVGImg $innerEl) {
         parent::__construct('a');
-        Logger::statusLog('creating SVGLing instance for '.$href);
         $this->href = $href;
         $this->innerEl = $innerEl;
 

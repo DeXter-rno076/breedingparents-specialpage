@@ -26,7 +26,6 @@ class SVGPkmn {
     private function addIcon () {
         //todo add link
         $pkmn = $this->nodePkmn;
-        Logger::statusLog('adding pkmn icon of '.$pkmn);
         $fileE = $pkmn->getFileError();
         if (is_null($fileE)) {
             Logger::statusLog($pkmn.' has no file error set => can add icon');
@@ -41,7 +40,6 @@ class SVGPkmn {
 
     private function addConnectionStructure () {
         $pkmn = $this->nodePkmn;
-        Logger::statusLog('adding connection structure after '.$pkmn);
 
         if (!$pkmn->hasSuccessors()) {
             Logger::statusLog($pkmn.' has no successors => not adding any lines');
@@ -51,20 +49,17 @@ class SVGPkmn {
         //todo needs special handling for exactly one successor
 
         $this->middleColumnX = $pkmn->getMiddleX() + Constants::PKMN_MARGIN_HORI / 1.5;
-        Logger::statusLog('calculated middle column at '.$this->middleColumnX);
         $this->addLeftHalfConnectionLines();
         $this->addMiddleSuccessorConnections();
     }
 
     private function addLeftHalfConnectionLines () {
         $pkmn = $this->nodePkmn;
-        Logger::statusLog('adding left half of the connection structure of '.$pkmn);
         $this->addPkmnMiddleConnection();
         $this->addMiddleLine();
     }
 
     private function addPkmnMiddleConnection () {
-        Logger::statusLog('adding line from pkmn icon to middle line of '.$this->nodePkmn);
         $pkmn = $this->nodePkmn;
         $horiStartX = $pkmn->getX() + $pkmn->getIconWidth() 
             + Constants::PKMN_ICON_LINE_MARGIN;
@@ -72,18 +67,14 @@ class SVGPkmn {
         $horizontalLine = new SVGLine(
             $horiStartX, $horiY,
             $this->middleColumnX, $horiY);
-        Logger::statusLog('calculated line '.$horizontalLine);
         array_push($this->lineConnections, $horizontalLine);
     }
 
     private function addMiddleLine () {
         $pkmn = $this->nodePkmn;
-        Logger::statusLog('adding middle line of '.$pkmn);
         $successors = $pkmn->getSuccessors();
         $firstSuccessor = $successors[0];
         $lastSuccessor = $successors[count($successors) - 1];
-        Logger::statusLog('first successor: '.$firstSuccessor
-            .'last successor: '.$lastSuccessor);
 
         $lowestY = $firstSuccessor->getMiddleY();
         $highestY = $lastSuccessor->getMiddleY();
@@ -91,15 +82,11 @@ class SVGPkmn {
         $vertialLine = new SVGLine(
             $this->middleColumnX, $lowestY,
             $this->middleColumnX, $highestY);
-        Logger::statusLog('calculated line '.$vertialLine);
         array_push($this->lineConnections, $vertialLine);
     }
 
     private function addMiddleSuccessorConnections () {
-        Logger::statusLog('adding lines from middle to successors of '.$this->nodePkmn);
         foreach ($this->nodePkmn->getSuccessors() as $successor) {
-            Logger::statusLog('adding line to from vertical middle line to '
-                .'successor icon of '.$this);
             $startX = $this->middleColumnX;
             $endX = $successor->getX() - Constants::PKMN_ICON_LINE_MARGIN;
             $y = $successor->getMiddleY();

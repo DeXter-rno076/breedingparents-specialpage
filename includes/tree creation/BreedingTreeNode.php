@@ -12,8 +12,6 @@ class BreedingTreeNode extends Pkmn {
     private bool $learnsByOldGen = false;
 
     public function __construct (string $pkmnName, bool $isRoot = false) {
-        Logger::statusLog('creating BreedingTreeNode instance for '
-            .$pkmnName.', isRoot='.$isRoot);
         $this->data = new PkmnData($pkmnName);
         parent::__construct($this->data->getName(), $this->data->getID());
         $this->isRoot = $isRoot;
@@ -31,6 +29,7 @@ class BreedingTreeNode extends Pkmn {
         }
 
         if ($this->canLearnByOldGen()) {
+            Logger::statusLog($this.' could learn the move in an old gen');
             /*learning by old gen might be easier to get than breeding but also maybe not.
             It depends on the user, therefore learnsByOldGen is checked and marked before 
             inheritence check, but it only exits this method if the pkmn can't inherit the move
@@ -74,15 +73,10 @@ class BreedingTreeNode extends Pkmn {
 
     //todo maybe separate isRoot section
     private function selectSuccessors (Array &$eggGroupBlacklist) {
-        Logger::statusLog('calling '.__FUNCTION__.' on '.$this
-            .' with parameter eggGroupBlacklist: '
-            .json_encode($eggGroupBlacklist));
         $eggGroup1 = $this->data->getEggGroup1();
         $eggGroup2 = $this->data->getEggGroup2();
-        Logger::statusLog($this. 'has egg groups '.$eggGroup1.' and '.$eggGroup2);
 
 		if ($this->isRoot) {
-            Logger::statusLog($this.' is root => adding both egg groups');
 			/*root pkmn is at the start => it is the only pkmn that 
             doesnt need an egg group for a connection to a predecessor
             because it doesn't have one*/
@@ -101,7 +95,6 @@ class BreedingTreeNode extends Pkmn {
 		}
 
         if (!$this->data->hasSecondEggGroup()) {
-            Logger::statusLog($this.' has no second egg group => can\'t be a middle node');
             /*One egg group is ALWAYS in the blacklist (except for
             root node pkmn).
 			If the pkmn has only one egg group it MUST learn the move directly
@@ -177,16 +170,14 @@ class BreedingTreeNode extends Pkmn {
     }
 
     private function canLearnDirectly (): bool {
-        Logger::statusLog('calling '.__FUNCTION__.' on '.$this);
         $directLearnsets = $this->data->getDirectLearnsets();
 		return $this->checkLearnsetType($directLearnsets);
     }
 
     private function canInherit (): bool {
-        Logger::statusLog('calling '.__FUNCTION__.' on '.$this);
         $unbreedable = $this->data->getUnbreedable();
 		if ($unbreedable) {
-            Logger::statusLog($this.' is unbreedable, returning false');
+            Logger::statusLog($this.' is unbreedable');
 			return false;
 		}
 
@@ -195,7 +186,6 @@ class BreedingTreeNode extends Pkmn {
     }
 
     private function canLearnByEvent (): bool {
-        Logger::statusLog('calling '.__FUNCTION__.' on '.$this);
         $eventLearnsets = $this->data->getEventLearnsets();
 		return $this->checkLearnsetType($eventLearnsets);
     }
@@ -206,8 +196,6 @@ class BreedingTreeNode extends Pkmn {
     }
 
     private function checkLearnsetType (Array $learnsetList): bool {
-        Logger::statusLog('calling '.__FUNCTION__.' on '.$this
-            .', learnsetList: '.json_encode($learnsetList));
         foreach ($learnsetList as $move) {
 			if ($move === Constants::$targetMove) {
 				Logger::statusLog('found target move in learnset, returning true');
@@ -221,48 +209,32 @@ class BreedingTreeNode extends Pkmn {
     }
 
     public function hasSuccessors (): bool {
-        Logger::statusLog('calling '.__FUNCTION__.' on '.$this);
         $successorCount = count($this->successors);
         $hasSuccessors = $successorCount > 0;
-        Logger::statusLog($this.' has '.$successorCount.' successors'
-            .' returning '.$hasSuccessors);
         return $hasSuccessors;
     }
 
     public function getSuccessors (): Array {
-        Logger::statusLog('calling '.__FUNCTION__.' on '.$this);
         return $this->successors;
     }
 
     private function addSuccessor (BreedingTreeNode $newSuccessor) {
-        Logger::statusLog('calling '.__FUNCTION__.' on '.$this
-            .', newSuccessor is '.$newSuccessor);
-        Logger::statusLog('successor list before: '.json_encode($this->successors));
         array_push($this->successors, $newSuccessor);
-        Logger::statusLog('successor list after: '.json_encode($this->successors));
     }
 
     private function setLearnsByEvent () {
-        Logger::statusLog('calling '.__FUNCTION__.' on '
-            .$this.', setting learnsbyEvent to true');
         $this->learnsByEvent = true;
     }
 
     public function getLearnsByEvent (): bool {
-        Logger::statusLog('calling '.__FUNCTION__.' on '
-            .$this.', returning '.$this->learnsByEvent);
         return $this->learnsByEvent;
     }
 
     private function setLearnsByOldGen () {
-        Logger::statusLog('calling '.__FUNCTION__.' on '
-            .$this.', setting learnsByOldGen to true');
         $this->learnsByOldGen = true;
     }
 
     public function getLearnsByOldGen () {
-        Logger::statusLog('calling '.__FUNCTION__.' on '
-            .$this.', returning '.$this->learnsByOldGen);
         return $this->learnsByOldGen;
     }
 

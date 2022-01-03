@@ -39,7 +39,6 @@ class SuccessorFilter {
 
 	public function filter (): Array {
         Logger::statusLog('filtering successor list');
-        Logger::statusLog('successor list before: '.json_encode($this->successorList));
 		$this->removeBlacklistedPkmn();
 		$this->removeUnpairables();
 		$this->checkGenSpecificRequirements();
@@ -49,7 +48,6 @@ class SuccessorFilter {
 	}
 
 	private function removeBlacklistedPkmn () {
-        Logger::statusLog('removing blacklisted pkmn');
 		$pkmnIsBlacklisted = function (string $pkmn): bool {
 			$pkmnData = new PkmnData($pkmn);
 
@@ -128,7 +126,6 @@ class SuccessorFilter {
 	}
 	
 	private function remove ($condition) {
-        Logger::statusLog('removing pkmn');
 		for($i = 0; $i < count($this->successorList); $i++) {
 			$pkmn = $this->successorList[$i];
 			if ($condition($pkmn)) {
