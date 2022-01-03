@@ -19,21 +19,39 @@ resetButton.addEventListener('click', () => {
 	svgTag.style.top = '0px';
 	svgTag.style.left = '0px';
 });
-svgContainer.addEventListener('mousedown', startMoving);
-svgContainer.addEventListener('mouseup', stopMoving);
+svgContainer.addEventListener('mousedown', mouseStart);
+svgContainer.addEventListener('mouseup', mouseStop);
+svgContainer.addEventListener('touchstart', touchStart);
 svgContainer.addEventListener('touchmove', touchMove);
 
-function startMoving (event) {
-	cursorStartingX = event.clientX;
-	cursorStartingY = event.clientY;
+function mouseStart (event) {
+    startMoving('mouse', event.clientX, event.clientY);
+}
+
+function touchStart (event) {
+    const firstTouch = event.targetTouches[0];
+    startMoving('touch', firstTouch.clientX, firstTouch.clientY);
+}
+
+function startMoving (type, x, y) {
+	cursorStartingX = x;
+	cursorStartingY = y;
 	xOffset = parseInt(svgTag.style.left) || 0;
 	yOffset = parseInt(svgTag.style.top) || 0;
 
-	svgContainer.addEventListener('mousemove', moveSVG);
+    if (type === 'mouse') {
+	    svgContainer.addEventListener('mousemove', moveSVG);
+    }
 }
 
-function stopMoving () {
+function mouseStop () {
 	svgContainer.removeEventListener('mousemove', moveSVG);
+}
+
+function touchMove (event) {
+    event.preventDefault();
+    const firstTouch = event.targetTouches[0];
+    moveSVG(firstTouch);
 }
 
 function moveSVG (event) {
@@ -49,8 +67,4 @@ function moveSVG (event) {
 
 	svgTag.style.left = newX + 'px';
 	svgTag.style.top = newY + 'px';
-}
-
-function touchMove (event) {
-    //todo
 }
