@@ -46,8 +46,6 @@ class SVGPkmn {
             return;
         }
 
-        //todo needs special handling for exactly one successor
-
         $this->middleColumnX = $pkmn->getMiddleX() + Constants::PKMN_MARGIN_HORI / 1.5;
         $this->addLeftHalfConnectionLines();
         $this->addMiddleSuccessorConnections();
@@ -79,10 +77,24 @@ class SVGPkmn {
         $lowestY = $firstSuccessor->getMiddleY();
         $highestY = $lastSuccessor->getMiddleY();
 
+        if (count($successors) === 1) {
+            $this->adjustCoordinatesToOnlyOneSuccessor($lowestY, $highestY);
+        }
+
         $vertialLine = new SVGLine(
             $this->middleColumnX, $lowestY,
             $this->middleColumnX, $highestY);
         array_push($this->lineConnections, $vertialLine);
+    }
+
+    private function adjustCoordinatesToOnlyOneSuccessor (int &$lowestY, int &$highestY) {
+        $successor = $this->nodePkmn->getSuccessors()[0];
+
+        $nodeMiddleY = $this->nodePkmn->getMiddleY();
+        $successorMiddleY = $successor->getMiddleY();
+
+        $lowestY = min($nodeMiddleY, $successorMiddleY);
+        $highestY = max($nodeMiddleY, $successorMiddleY);
     }
 
     private function addMiddleSuccessorConnections () {
