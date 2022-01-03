@@ -171,7 +171,7 @@ class BreedingTreeNode extends Pkmn {
 
     private function canLearnDirectly (): bool {
         $directLearnsets = $this->data->getDirectLearnsets();
-		return $this->checkLearnsetType($directLearnsets);
+		return $this->checkLearnsetType($directLearnsets, 'directly');
     }
 
     private function canInherit (): bool {
@@ -182,29 +182,28 @@ class BreedingTreeNode extends Pkmn {
 		}
 
         $breedingLearnsets = $this->data->getBreedingLearnsets();
-		return $this->checkLearnsetType($breedingLearnsets);
+		return $this->checkLearnsetType($breedingLearnsets, 'breeding');
     }
 
     private function canLearnByEvent (): bool {
         $eventLearnsets = $this->data->getEventLearnsets();
-		return $this->checkLearnsetType($eventLearnsets);
+		return $this->checkLearnsetType($eventLearnsets, 'event');
     }
 
     private function canLearnByOldGen (): bool {
         $oldGenLearnsets = $this->data->getOldGenLearnsets();
-        return $this->checkLearnsetType($oldGenLearnsets);
+        return $this->checkLearnsetType($oldGenLearnsets, 'old gen');
     }
 
-    private function checkLearnsetType (Array $learnsetList): bool {
+    private function checkLearnsetType (Array $learnsetList, string $learnsetType): bool {
         foreach ($learnsetList as $move) {
 			if ($move === Constants::$targetMove) {
-				Logger::statusLog('found target move in learnset, returning true');
+				Logger::statusLog('found target move in '.$learnsetType.' learnset');
                 return true;
 			}
 		}
 
-        Logger::statusLog('couldn\'t find target move in learnset'
-            .', returning false');
+        Logger::statusLog('couldn\'t find target move in '.$learnsetType.' learnset');
 		return false;
     }
 
