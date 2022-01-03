@@ -3,9 +3,10 @@ require_once __DIR__.'/../Logger.php';
 require_once 'SVGImg.php';
 require_once 'SVGIconErrorText.php';
 require_once 'SVGLine.php';
+require_once 'SVGLink.php';
 
 class SVGPkmn {
-    private ?SVGImg $icon = null;
+    private ?SVGLink $link = null;
     private ?SVGIconErrorText $iconEText = null;
     private Array $lineConnections = [];
     private Array $successors = [];
@@ -24,13 +25,13 @@ class SVGPkmn {
     }
 
     private function addIcon () {
-        //todo add link
         $pkmn = $this->nodePkmn;
         $fileE = $pkmn->getFileError();
         if (is_null($fileE)) {
             Logger::statusLog($pkmn.' has no file error set => can add icon');
             $pkmnIcon = new SVGImg($pkmn);
-            $this->icon = $pkmnIcon;
+            $link = new SVGLink($pkmn->getName(), $pkmnIcon);
+            $this->link = $link;
             return;
         }
         Logger::statusLog($pkmn.' has file error '.$fileE.' set => adding error tetx');
@@ -110,8 +111,8 @@ class SVGPkmn {
 
     public function toHTMLString (int $offset): string {
         $outputString = '';
-        if (!is_null($this->icon)) {
-            $outputString .= $this->icon->toHTMLString($offset);
+        if (!is_null($this->link)) {
+            $outputString .= $this->link->toHTMLString($offset);
         }
         if (!is_null($this->iconEText)) {
             $outputString .= $this->iconEText->toHTMLString($offset);

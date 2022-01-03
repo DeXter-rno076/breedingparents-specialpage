@@ -7,16 +7,16 @@ class SVGLink extends SVGElement {
     private string $href;
     private SVGImg $innerEl;
 
-    public function __construct(string $href, SVGImg $innerEl) {
+    public function __construct(string $pkmnName, SVGImg $innerEl) {
         parent::__construct('a');
-        $this->href = $href;
+        $this->href = $pkmnName.'/Attacken#'.Constants::$targetGen.'. Generation';
         $this->innerEl = $innerEl;
 
         Logger::statusLog('created '.$this);
     }
 
     public function toHTMLString(int $offset): string {
-        return '<a href="'.$this->href.'#Attacken">'
+        return '<a href="'.$this->href.'">'
         .$this->innerEl->toHTMLString($offset).'</a>';
     }
 
