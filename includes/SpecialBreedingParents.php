@@ -128,7 +128,6 @@ class SpecialBreedingParents extends SpecialPage {
 	private function addForms () {
 		require_once 'formDescriptor.php';
 
-        //todo put this in a separate method
 		$formDescriptionArray = $formDescriptor;
 		$user = $this->getUser();
 		$userGroups = $user->getGroupMemberships();
@@ -143,7 +142,7 @@ class SpecialBreedingParents extends SpecialPage {
 		}
 
 		$form = HTMLForm::factory(
-            'inline', $formDescriptionArray, $this->getContext());
+            'ooui', $formDescriptionArray, $this->getContext());
 		$form->setMethod('get');
 		$form->setSubmitCallback([$this, 'reactToInputData']);
 		$form->setSubmitText('do it!');//todo text not final
