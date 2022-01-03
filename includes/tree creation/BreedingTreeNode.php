@@ -67,7 +67,7 @@ class BreedingTreeNode extends Pkmn {
             because it doesn't have one*/
             $eggGroupBlacklist[] = $eggGroup1;
 
-			if ($eggGroup2 !== null) {
+			if ($this->data->hasSecondEggGroup()) {
                 /*egg group 2 has to be called first because
                 both method calls need both egg groups in the blacklist*/
 				$eggGroupBlacklist[] = $eggGroup2;
@@ -79,7 +79,7 @@ class BreedingTreeNode extends Pkmn {
 
 		}
 
-        if ($eggGroup2 === null) {
+        if (!$this->data->hasSecondEggGroup()) {
             Logger::statusLog($this.' has no second egg group => can\'t be a middle node');
             /*One egg group is ALWAYS in the blacklist (except for
             root node pkmn).
@@ -93,7 +93,7 @@ class BreedingTreeNode extends Pkmn {
         }
 
         $otherEggGroup = $this->getOtherEggGroup($eggGroupBlacklist);
-        if ($otherEggGroup === null) {
+        if ($otherEggGroup === '') {
             Logger::wlog('selectSuccessors call on '.$this.', somehow '
                 .'getOtherEggGroup returned null, even though this case '
                 .'should have already been covered by an if block');
@@ -130,7 +130,7 @@ class BreedingTreeNode extends Pkmn {
 		}
     }
 
-    private function getOtherEggGroup (Array &$eggGroupBlacklist): ?string {
+    private function getOtherEggGroup (Array &$eggGroupBlacklist): string {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this
             .' eggGroupBlacklist: '.json_encode($eggGroupBlacklist));
         /*One egg group is always in the blacklist because of
@@ -138,7 +138,7 @@ class BreedingTreeNode extends Pkmn {
 		Possible successors can only come from the other one.*/
         $eggGroup1 = $this->data->getEggGroup1();
         $eggGroup2 = $this->data->getEggGroup2();
-		$otherEggGroup = NULL;
+		$otherEggGroup = '';
 		if (!in_array($eggGroup1, $eggGroupBlacklist)) {
             Logger::statusLog('egg group 1 '.$eggGroup1.' found for '.$this);
 			$otherEggGroup = $eggGroup1;
@@ -148,7 +148,7 @@ class BreedingTreeNode extends Pkmn {
 		} else {
 			//all egg groups blocked
             Logger::statusLog('all egg groups of '.$this. ' blocked');
-			return null;
+			return '';
 		}
 
         Logger::statusLog('returning '.$otherEggGroup);
@@ -158,46 +158,30 @@ class BreedingTreeNode extends Pkmn {
     private function canLearnDirectly (): bool {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this);
         $directLearnsets = $this->data->getDirectLearnsets();
-        if ($directLearnsets === null) {
-            Logger::statusLog(
-                $this.' has no direct learnsets, returning false');
-			return false;
-		}
-
 		return $this->checkLearnsetType($directLearnsets);
     }
 
     private function canInherit (): bool {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this);
         $unbreedable = $this->data->getUnbreedable();
-        if (is_null($unbreedable)) {
-            Logger::elog('pkmn data of '.$this->data->name.' has no'
-                .' unbreedable property');
-            return false;
-        }
 		if ($unbreedable) {
             Logger::statusLog($this.' is unbreedable, returning false');
 			return false;
 		}
-		
-        $breedingLearnsets = $this->data->getBreedingLearnsets();
-		if ($breedingLearnsets === null) {
-            Logger::statusLog($this.' has no breeding learnsets, returning false');
-			return false;
-		}
 
+        $breedingLearnsets = $this->data->getBreedingLearnsets();
 		return $this->checkLearnsetType($breedingLearnsets);
     }
 
     private function canLearnByEvent (): bool {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this);
         $eventLearnsets = $this->data->getEventLearnsets();
-		if ($eventLearnsets === null) {
-            Logger::statusLog($this.' has no event learnsets, returning false');
-			return false;
-		}
-
 		return $this->checkLearnsetType($eventLearnsets);
+    }
+
+    private function canLearnByOldGen (): bool {
+        $oldGenLearnsets = $this->data->getOldGenLearnsets();
+        return $this->checkLearnsetType($oldGenLearnsets);
     }
 
     private function checkLearnsetType (Array $learnsetList): bool {

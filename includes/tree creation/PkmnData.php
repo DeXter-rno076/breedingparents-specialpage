@@ -6,18 +6,19 @@ require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
 
 class PkmnData extends Pkmn {
     private String $eggGroup1;
-    private ?String $eggGroup2;
+    private String $eggGroup2;
     private String $gender;
-    private String $lowestEvolution = '';
+    private String $lowestEvolution;
+
     private bool $unpairable;
     private bool $unbreedable;
 
-    private ?Array $directLearnsets;
-    private ?Array $breedingLearnsets;
-    private ?Array $eventLearnsets;
+    private Array $directLearnsets;
+    private Array $breedingLearnsets;
+    private Array $eventLearnsets;
+    private Array $oldGenLearnsets;
 
     public function __construct (String $name) {
-        //todo check that all getter calls handle null values
         Logger::statusLog('creating PkmnData instance for '.$name);
         $pkmnDataObj = Constants::$pkmnData->$name;
         parent::__construct($name, $pkmnDataObj->id);
@@ -31,8 +32,9 @@ class PkmnData extends Pkmn {
         //logs commented out because they would make up large portions of the status log
         //Logger::statusLog('copying properties from JSON data to instance');
         $mustHavePropertysList = [
-            'name', 'id', 'eggGroup1', 'gender', /* 'lowestEvolution', */
-            'unpairable', 'unbreedable'
+            'eggGroup1', 'eggGroup2', 'gender', 'lowestEvolution',
+            'unpairable', 'unbreedable', 'directLearnsets', 'breedingLearnsets',
+            'eventLearnsets', 'oldGenLearnsets'
         ];
 
         foreach ($mustHavePropertysList as $property) {
@@ -45,10 +47,7 @@ class PkmnData extends Pkmn {
             $this->$property = $pkmnDataObj->$property;
         }
 
-        $optionalPropertys = [
-            'eggGroup2', 'directLearnsets',
-            'breedingLearnsets', 'eventLearnsets'
-        ];
+        $optionalPropertys = [];
 
         foreach ($optionalPropertys as $property) {
             if (isset($pkmnDataObj->$property)) {
@@ -66,7 +65,7 @@ class PkmnData extends Pkmn {
             .', returning '.$this->eggGroup1);
         return $this->eggGroup1;
     }
-    public function getEggGroup2 (): ?string {
+    public function getEggGroup2 (): string {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this
             .', returning '.$this->eggGroup2);
         return $this->eggGroup2;
@@ -91,20 +90,28 @@ class PkmnData extends Pkmn {
             .', returning '.$this->unbreedable);
         return $this->unbreedable;
     }
-    public function getDirectLearnsets (): ?Array {
+    public function getDirectLearnsets (): Array {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this.', learnsets are '
             .(is_null($this->directLearnsets) ? '' : 'not').' null');
         return $this->directLearnsets;
     }
-    public function getBreedingLearnsets (): ?Array {
+    public function getBreedingLearnsets (): Array {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this.', learnsets are '
             .(is_null($this->breedingLearnsets) ? '' : 'not').' null');
         return $this->breedingLearnsets;
     }
-    public function getEventLearnsets (): ?Array {
+    public function getEventLearnsets (): Array {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this.', learnsets are '
             .(is_null($this->eventLearnsets) ? '' : 'not').' null');
         return $this->eventLearnsets;
+    }
+
+    public function hasSecondEggGroup (): bool {
+        return $this->eggGroup2 !== '';
+    }
+
+    public function getOldGenLearnsets (): Array {
+        return $this->oldGenLearnsets;
     }
 
     public function getLogInfo(): string {

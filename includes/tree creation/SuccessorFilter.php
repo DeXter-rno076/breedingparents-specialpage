@@ -70,7 +70,7 @@ class SuccessorFilter {
 			if ($isBlacklisted($pkmnData->getEggGroup1(), $pkmn)) {
 				return true;
 			}
-			if ($pkmnData->getEggGroup2() !== null) {
+			if ($pkmnData->hasSecondEggGroup()) {
 				if ($isWhitelisted($pkmnData->getEggGroup2(), $pkmn)) {
 					return false;
 				}
@@ -90,7 +90,6 @@ class SuccessorFilter {
             $pkmnData = new PkmnData($pkmnName);
 			$unpairableStatus = $pkmnData->getUnpairable();
 
-            $unpairableStatus = $unpairableStatus !== null && $unpairableStatus;
 			Logger::statusLog('unpairable status is '.(
 				$unpairableStatus ? 'true, '.$pkmnName.' will be removed' 
 				: 'false, '.$pkmnName.' won\'t be removed'));
@@ -115,20 +114,14 @@ class SuccessorFilter {
 			//TODO not sure whether this works
             $pkmnData = new PkmnData($pkmn);
 			$gender = $pkmnData->getGender();
-            if ($gender === null) {
-				Logger::elog('gender of '.$pkmn.' is null');
-                /*rather remove one pkmn too much 
-                than having the risk to have an entire bs tree section*/
-                return true;
-            }
             //female pkmn cant pass on moves from gen 2 - 5
-			$genderStatus = $gender === 'female';
-			if ($genderStatus) {
+			$isFemale = $gender === 'female';
+			if ($isFemale) {
 				Logger::statusLog($pkmn.' is female => will be removed');
 			} else {
 				Logger::statusLog($pkmn.' is not female => won\'t be removed');
 			}
-			return $genderStatus;
+			return $isFemale;
 		};
 
         $this->remove($isFemale);
