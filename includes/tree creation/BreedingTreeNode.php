@@ -21,7 +21,6 @@ class BreedingTreeNode extends Pkmn {
 
     public function createBreedingTreeNode (
             Array $eggGroupBlacklist): ?BreedingTreeNode {
-        //todo add checking learns by old gen
         Logger::statusLog('creating tree node of '
             .$this.' with eggGroupBlacklist: '.json_encode($eggGroupBlacklist));
         /*in this single spot parameter $eggGroupBlacklist MUST NOT be
@@ -29,6 +28,14 @@ class BreedingTreeNode extends Pkmn {
         if ($this->canLearnDirectly()) {
             Logger::statusLog($this.' can learn the move directly');
             return $this;
+        }
+
+        if ($this->canLearnByOldGen()) {
+            /*learning by old gen might be easier to get than breeding but also maybe not.
+            It depends on the user, therefore learnsByOldGen is checked and marked before 
+            inheritence check, but it only exits this method if the pkmn can't inherit the move
+            (learning by old gen is in most cases easier than learning by event)*/
+            $this->setLearnsByOldGen();
         }
 
         if ($this->canInherit()) {
@@ -49,6 +56,10 @@ class BreedingTreeNode extends Pkmn {
                     return $this;
                 }
             }
+        }
+
+        if ($this->getLearnsByOldGen()) {
+            return $this;
         }
 
         if ($this->canLearnByEvent()) {
