@@ -61,12 +61,14 @@ class SVGImg extends SVGElement {
         $this->marker = $oldGenMarker;
     }
 
-    public function toHTMLString (): string {
+    public function toHTMLString (int $offset): string {
         $svgCode = '';
         if (!is_null($this->marker)) {
-            $svgCode .= $this->marker->toHTMLString();
+            $svgCode .= $this->marker->toHTMLString($offset);
         }
-        $svgCode .= '<image x="'.$this->x.'" y="'.$this->y.
+        $x = $this->x + $offset;
+        $y = $this->y + $offset;
+        $svgCode .= '<image x="'.$x.'" y="'.$y.
         '" width="'.$this->width.'" height="'.$this->height.
         '" xlink:href="'.$this->href.'" />';
 

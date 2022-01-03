@@ -96,21 +96,21 @@ class SVGPkmn {
         }
     }
 
-    public function toHTMLString (): string {
+    public function toHTMLString (int $offset): string {
         $outputString = '';
         if (!is_null($this->icon)) {
-            $outputString .= $this->icon->toHTMLString();
+            $outputString .= $this->icon->toHTMLString($offset);
         }
         if (!is_null($this->iconEText)) {
-            $outputString .= $this->iconEText->toHTMLString();
+            $outputString .= $this->iconEText->toHTMLString($offset);
         }
 
         foreach ($this->lineConnections as $line) {
-            $outputString .= $line->toHTMLString();
+            $outputString .= $line->toHTMLString($offset);
         }
 
         foreach ($this->successors as $successor) {
-            $outputString .= $successor->toHTMLString();
+            $outputString .= $successor->toHTMLString($offset);
         }
 
         return $outputString;

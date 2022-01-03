@@ -16,9 +16,9 @@ class SVGIconErrorText extends SVGElement {
         Logger::statusLog('created '.$this);
     }
 
-    public function toHTMLString (): string {
-        $x = $this->x;
-        $y = $this->y;
+    public function toHTMLString (int $offset): string {
+        $x = $this->x + $offset;
+        $y = $this->y + $offset;
         return '<text x="'.$x.'" y="'.$y.'">'.	
         '<tspan x="'.$x.'" y="'.$y.'">Oh, das hätte nicht passieren sollen :\'(</tspan>'.
         '<tspan x="'.$x.'" y="'.($y + 20).'">Melde das bitte auf unserem</tspan>'.

@@ -15,9 +15,9 @@ class SVGLink extends SVGElement {
         Logger::statusLog('created '.$this);
     }
 
-    public function toHTMLString(): string {
+    public function toHTMLString(int $offset): string {
         return '<a href="'.$this->href.'#Attacken">'
-        .$this->innerEl->toHTMLString().'</a>';
+        .$this->innerEl->toHTMLString($offset).'</a>';
     }
 
     public function getLogInfo (): string {

@@ -22,10 +22,10 @@ class SVGTag extends SVGElement {
         $this->svgRoot = new SVGPkmn($pkmnRoot);
     }
 
-    public function toHTMLString (): string {
+    public function toHTMLString (int $offset): string {
         $outputString = '<svg id="'.$this->id.
             '" width="'.$this->width.'" height="'.$this->height.'">';
-        $outputString .= $this->svgRoot->toHTMLString();
+        $outputString .= $this->svgRoot->toHTMLString($offset);
         $outputString .= '</svg>';
         return $outputString;
     }

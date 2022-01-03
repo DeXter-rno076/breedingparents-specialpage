@@ -18,9 +18,13 @@ class SVGLine extends SVGElement {
         Logger::statusLog('created '.$this);
     }
 
-    public function toHTMLString(): string {
-        return '<line x1="'.$this->x1.'" y1="'.$this->y1.'"'.
-        ' x2="'.$this->x2.'" y2="'.$this->y2.'" />';
+    public function toHTMLString(int $offset): string {
+        $x1 = $this->x1 + $offset;
+        $y1 = $this->y1 + $offset;
+        $x2 = $this->x2 + $offset;
+        $y2 = $this->y2 + $offset;
+        return '<line x1="'.$x1.'" y1="'.$y1.'"'.
+        ' x2="'.$x2.'" y2="'.$y2.'" />';
     }
 
     public function getLogInfo (): string {

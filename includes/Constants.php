@@ -17,7 +17,7 @@ class Constants {
     public const PKMN_ICON_LINE_MARGIN = 10;
     public const SVG_SAFETY_MARGIN = 400;
     public const SVG_RECT_PADDING = 5;
-    public const SVG_PKMN_SAFETY_MARGIN = 15;
+    public const SVG_PKMN_SAFETY_MARGIN = 10;
     public const SVG_CIRCLE_MARGIN = 8;
 
     //todo clean this out plainOut mess up
