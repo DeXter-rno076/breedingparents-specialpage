@@ -20,19 +20,8 @@ class SpecialBreedingParents extends SpecialPage {
 		$this->addForms();
 	}
 
-    //todo split this up and give it a name
-	public function processStuff ($data, $form) {
-		Constants::$targetGen = $data['genInput'];
-		Constants::$targetMove = $data['moveInput'];
-		Constants::$targetPkmn = $data['pkmnInput'];
-		if (isset($data['displayDebuglogs'])) {
-			Constants::$displayDebuglogs = $data['displayDebuglogs'];
-		}
-		if (isset($data['displayStatuslogs'])) {
-			Constants::$displayStatuslogs = $data['displayStatuslogs'];
-		}
-
-		Constants::$out = $this->getOutput();
+	public function reactToInputData ($data, $form) {
+		$this->initConstants($data);
 
         try {
 		    $this->getData();
@@ -42,21 +31,28 @@ class SpecialBreedingParents extends SpecialPage {
                 .'Bitte melde das auf unserem Discordserver'
                 .' oder in der '.Constants::auskunftLink.'.'
             );
-
             Logger::flush();
-
             return Status::newFailed('couldn\'t load data');
+        }
+
+        $targetPkmn = Constants::$targetPkmn;
+        if (!isset(Constants::$pkmnData->$targetPkmn)) {
+            Constants::out('unknown pkmn '.$targetPkmn);
+            Logger::flush();
+            return Status::newGood('unknown pkmn');
         }
 
         $breedingTreeRoot = null;
         try {
             $breedingTreeRoot = $this->createBreedingTree();
         } catch (AttributeNotFoundException $e) {
+            Constants::out('Oh nein. Da ist uns ein Fehler passiert :( Bitte melde mit welchen Eingaben das hier passiert ist.');
             Logger::elog('couldn\'t create breeding tree, error: '.$e);
             return Status::newFatal($e->__toString());
         }
         if (is_null($breedingTreeRoot)) {
-            Constants::out('breeding tree empty');
+            //todo check whether move has a typo or generally if it's a move
+            Constants::out(Constants::$targetPkmn.' can\'t learn '.Constants::$targetMove);
             Logger::flush();
             return Status::newGood('');
         }
@@ -68,6 +64,20 @@ class SpecialBreedingParents extends SpecialPage {
         Logger::flush();
 		return Status::newGood('all ok');
 	}
+
+    private function initConstants ($formData) {
+        Constants::$targetGen = $formData['genInput'];
+		Constants::$targetMove = $formData['moveInput'];
+		Constants::$targetPkmn = $formData['pkmnInput'];
+		if (isset($formData['displayDebuglogs'])) {
+			Constants::$displayDebuglogs = $formData['displayDebuglogs'];
+		}
+		if (isset($formData['displayStatuslogs'])) {
+			Constants::$displayStatuslogs = $formData['displayStatuslogs'];
+		}
+
+		Constants::$out = $this->getOutput();
+    }
 
     private function createBreedingTree (): ?BreedingTreeNode {
         $timeStart = hrtime(true);
@@ -135,7 +145,7 @@ class SpecialBreedingParents extends SpecialPage {
 		$form = HTMLForm::factory(
             'inline', $formDescriptionArray, $this->getContext());
 		$form->setMethod('get');
-		$form->setSubmitCallback([$this, 'processStuff']);
+		$form->setSubmitCallback([$this, 'reactToInputData']);
 		$form->setSubmitText('do it!');//todo text not final
 		$form->prepareForm();
 
