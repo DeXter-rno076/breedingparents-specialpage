@@ -3,8 +3,6 @@ $formDescriptor = [
 	'pkmnInput' => [
 		'name' => 'targetPkmn',
 		'class' => 'HTMLTextField',
-		'cssclass' => 'inputField',
-		'id' => 'pkmnInputField',
 		'placeholder' => 'Pokémon',
 		'size' => 20,
 		'validation-callback' => [ $this, 'validatePkmn' ],
@@ -13,8 +11,6 @@ $formDescriptor = [
 	'moveInput' => [
 		'name' => 'targetMove',
 		'class' => 'HTMLTextField',
-		'cssclass' => 'inputField',
-		'id' => 'pkmnInputField',
 		'placeholder' => 'Attacke',
 		'size' => 20,
 		'validation-callback' => [ $this, 'validateMove' ],
@@ -24,8 +20,6 @@ $formDescriptor = [
 		'name' => 'targetGen',
 		'label' => 'Generation: ',
 		'class' => 'HTMLSelectField',
-		'cssclass' => 'selectField',
-		'id' => 'genInputField',
 		'options' => [//breeding was implented in gen 2
 			'8' => 8,
 			'7' => 7,
@@ -43,7 +37,7 @@ $formDescriptor = [
 $debuglogsCheckBox = [
 	'displayDebuglogs' => [
 		'type' => 'check',
-		'label' => 'display debug logs'
+		'label' => 'display debug logs',
 	]
 ];
 
@@ -51,6 +45,6 @@ $debuglogsCheckBox = [
 $statuslogsCheckBox = [
 	'displayStatuslogs' => [
 		'type' => 'check',
-		'label' => 'display status logs'
+		'label' => 'display status logs',
 	]
 ];
