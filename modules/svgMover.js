@@ -18,6 +18,25 @@ function main () {
     addListeners();
 }
 
+function centerSVG () {
+    console.log(svgContainer);
+    const svgWidth = svgTag.width.baseVal.value;
+    const svgHeight = svgTag.height.baseVal.value;
+
+    const containerWidth = svgContainer.clientWidth;
+    const containerHeight = svgContainer.clientHeight;
+
+    console.log('svg: ' + svgWidth + ' ' + svgHeight);
+    console.log('container: ' + containerWidth + ' ' + containerHeight);
+
+    const xOffset = (containerWidth - svgWidth) / 2;
+    const yOffset = (containerHeight - svgHeight) / 2;
+
+    console.log(xOffset + ' ' + yOffset);
+
+    setOffset(xOffset, yOffset);
+}
+
 function initSVGInlineStyles () {
     svgTag.style.transform = 'scale(1.00)';
     svgTag.style.left = '0px';
@@ -71,6 +90,10 @@ function moveSVG (event) {
 	let newX = xOffset - dx;
 	let newY = yOffset - dy;
 
-	svgTag.style.left = newX + 'px';
-	svgTag.style.top = newY + 'px';
+	setOffset(newX, newY);
+}
+
+function setOffset (x, y) {
+    svgTag.style.left = x + 'px';
+    svgTag.style.top = y + 'px';
 }
