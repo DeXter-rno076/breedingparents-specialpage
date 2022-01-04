@@ -24,9 +24,9 @@ class SVGRectangle extends SVGElement {
         Logger::statusLog('created '.$this);
     }
 
-    public function toHTMLString (int $offset): string {
-        $x = $this->x + $offset;
-        $y = $this->y + $offset;
+    public function toHTMLString (int $xOffset, int $yOffset): string {
+        $x = $this->x + $xOffset;
+        $y = $this->y + $yOffset;
         return '<rect x="'.$x.'" y="'.$y
             .'" width="'.$this->width.'" height="'.$this->height
             .'" rx="'.$this->rx.'" ry="'.$this->ry.'" />';

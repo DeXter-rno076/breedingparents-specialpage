@@ -12,7 +12,7 @@ abstract class SVGElement {
         return $this->tagType;
     }
 
-    public abstract function toHTMLString (int $offset): string;
+    public abstract function toHTMLString (int $xOffset, int $yOffset): string;
 
     public abstract function getLogInfo (): string;
 

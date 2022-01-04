@@ -105,20 +105,20 @@ class SVGPkmn {
         }
     }
 
-    public function toHTMLString (int $offset): string {
+    public function toHTMLString (int $xOffset, int $yOffset): string {
         $outputString = '';
         if (!is_null($this->link)) {
-            $outputString .= $this->link->toHTMLString($offset);
+            $outputString .= $this->link->toHTMLString($xOffset, $yOffset);
         } else {
             Constants::error($this->nodePkmn->getFileError());
         }
 
         foreach ($this->lineConnections as $line) {
-            $outputString .= $line->toHTMLString($offset);
+            $outputString .= $line->toHTMLString($xOffset, $yOffset);
         }
 
         foreach ($this->successors as $successor) {
-            $outputString .= $successor->toHTMLString($offset);
+            $outputString .= $successor->toHTMLString($xOffset, $yOffset);
         }
 
         return $outputString;

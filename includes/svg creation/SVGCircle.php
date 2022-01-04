@@ -15,9 +15,9 @@ class SVGCircle extends SVGElement {
         Logger::statusLog('created '.$this);
     }
 
-    public function toHTMLString (int $offset): string {
-        $x = $this->cx + $offset;
-        $y = $this->cy + $offset;
+    public function toHTMLString (int $xOffset, int $yOffset): string {
+        $x = $this->cx + $xOffset;
+        $y = $this->cy + $yOffset;
         return '<circle cx="'.$x.'" cy="'.$y.'" r="'.$this->r.'" />';
     }
 

@@ -22,11 +22,14 @@ class SVGTag extends SVGElement {
         $this->svgRoot = new SVGPkmn($pkmnRoot);
     }
 
-    public function toHTMLString (int $offset): string {
+    public function toHTMLString (
+        int $xOffset = Constants::SVG_OFFSET,
+        int $yOffset = Constants::SVG_OFFSET
+    ): string {
         $outputString = '<svg id="'.$this->id.
             '" xmlns="http://www.w3.org/2000/svg" width="'.$this->width.'" height="'.$this->height
             .'">';
-        $outputString .= $this->svgRoot->toHTMLString($offset);
+        $outputString .= $this->svgRoot->toHTMLString($xOffset, $yOffset);
         if (Constants::$displayDebuglogs) {
             //zoom debugging
             $outputString .= '<circle cx="'.($this->width / 2).'" cy="'

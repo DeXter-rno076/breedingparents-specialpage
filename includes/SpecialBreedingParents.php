@@ -111,7 +111,7 @@ class SpecialBreedingParents extends SpecialPage {
         Constants::$out->addModules('breedingParentsModules');
         Constants::directOut(
             '<div id="breedingParentsSVGContainer" style="overflow: hidden;">'
-            .$svgRoot->toHTMLString(Constants::SVG_OFFSET).'</div>');
+            .$svgRoot->toHTMLString().'</div>');
 
         $timeEnd = hrtime(true);
         $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
