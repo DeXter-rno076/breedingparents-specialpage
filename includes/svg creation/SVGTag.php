@@ -24,8 +24,14 @@ class SVGTag extends SVGElement {
 
     public function toHTMLString (int $offset): string {
         $outputString = '<svg id="'.$this->id.
-            '" width="'.$this->width.'" height="'.$this->height.'">';
+            '" xmlns="http://www.w3.org/2000/svg" width="'.$this->width.'" height="'.$this->height
+            .'">';
         $outputString .= $this->svgRoot->toHTMLString($offset);
+        if (Constants::$displayDebuglogs) {
+            //zoom debugging
+            $outputString .= '<circle cx="'.($this->width / 2).'" cy="'
+                .($this->height / 2).'" r="5" style="fill:red;" />';
+        }
         $outputString .= '</svg>';
         return $outputString;
     }
