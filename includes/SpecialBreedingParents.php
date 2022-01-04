@@ -196,11 +196,6 @@ class SpecialBreedingParents extends SpecialPage {
 		$gen = Constants::$targetGen;
 		Constants::$pkmnData = $this->getPkmnData($gen);
 
-		$blacklistPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
-            .'/pkmn-blacklist.json';
-		Constants::$unbreedable = $this->getWikiPageContent(
-            $blacklistPageName);
-
 		$eggGroupPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
             .'/egg-groups.json';
 		Constants::$eggGroups = $this->getWikiPageContent($eggGroupPageName);
