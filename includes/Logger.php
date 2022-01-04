@@ -8,10 +8,6 @@ class Logger {
 
     private function __construct () {}
 
-    public static function directOut (string $msg) {
-        Constants::plainOut($msg);
-    }
-
     public static function debugOut (string $msg) {
         if (Constants::$displayDebuglogs) {
             Constants::out($msg);

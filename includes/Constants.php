@@ -23,13 +23,9 @@ class Constants {
         Constants::$out->addWikiTextAsContent($msg.' ');
     }
 
-    public static function directOut (string $msg) {
-        Logger::wlog('calling directOut to directly output HTML. This is dangerous but might be necessary.');
-        Constants::$out->addHTML($msg.'<br />');
-    }
 
     public static function error (Exception $e) {
-        Constants::directOut(Constants::$specialPage->msg(
+        Constants::out(Constants::$specialPage->msg(
             'breedingparents-error').$e);
     }
 
