@@ -18,8 +18,8 @@ class SVGCircle extends SVGElement {
 
     public function toHTML (int $xOffset, int $yOffset): HTMLElement {
         return new HTMLElement('circle', [
-            'x' => $this->cx + $xOffset,
-            'y' => $this->cy + $yOffset,
+            'cx' => $this->cx + $xOffset,
+            'cy' => $this->cy + $yOffset,
             'r' => $this->r
         ]);
     }
