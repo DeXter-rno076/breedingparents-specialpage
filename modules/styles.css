@@ -22,8 +22,24 @@
     stroke-width: 2;
 }
 
-#breedingParentsSVG circle, #breedingParentsSVG rect {
+#breedingParentsSVG circle, #breedingParentsSVG rect,
+.breedingParentsSVGExample circle, .breedingParentsSVGExample rect {
     stroke: black;
     stroke-width: 2;
     fill: none;
+}
+
+#breedingParentsExplanationTable {
+    border: 3px solid black;
+    border-radius: 0.5em;
+    /* background-color: black; */
+    margin: 2% auto;
+}
+
+#breedingParentsExplanationTable tr {
+    height: 20px;
+}
+
+#breedingParentsExplanationTable td:last-child {
+    max-width: 280px;
 }

@@ -17,5 +17,8 @@
     "breedingparents-invalid-pkmn": "Ungültiges Zeichen im Pokémonnamen. Vermutlich hast du dich vertippt.",
     "breedingparents-invalid-move": "Ungültiges Zeichen im Attackennamen. Vermutlich hast du dich vertippt.",
     "breedingparents-invalid-gen": "Ungültige Eingabe für die Spielgeneration. Bitte benutze nur die Auswahl und spiele nicht in der URL rum ;)",
-    "breedingparents-submit-text": "TU ES!"
+    "breedingparents-submit-text": "TU ES!",
+    "breedingparents-markerexplanation-head": "Legende:",
+    "breedingparents-markerexplanation-event": "Könnte Mewtu die Attacke von einer Event-Verteilung beherrschen, würde es so markiert sein.",
+    "breedingparents-markerexplanation-oldgen": "Könnte Mewtu die Attacke in einer älteren Generation erlernen, würde es so markiert sein."
 }

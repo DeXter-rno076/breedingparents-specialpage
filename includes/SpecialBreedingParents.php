@@ -56,6 +56,8 @@ class SpecialBreedingParents extends SpecialPage {
 
         $frontendRoot = $this->createFrontendRoot($breedingTreeRoot);
 
+        $this->addMarkerExplanations();
+
         $this->createSVGStructure($frontendRoot);
 
         Logger::flush();
@@ -115,6 +117,19 @@ class SpecialBreedingParents extends SpecialPage {
         $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
 
         Logger::debugOut('svg creation needed: '.$timeDiff.'s');
+    }
+
+    private function addMarkerExplanations () {
+        $explanationTable = '<table id="breedingParentsExplanationTable"><th colspan="2">'.$this->msg('breedingparents-markerexplanation-head').'</th>';
+        $explanationTable .= '<tr>';
+        $eventExample = '<svg id="breedingParentsEventMarkerExample" class="breedingParentsSVGExample" xmlns="http://www.w3.org/2000/svg" width="50" height="50"><a href="Mewtu/Attacken#8. Generation"><circle cx="25" cy="25" r="24"></circle><image x="10" y="5" width="32" height="42" xlink:href="/localwiki/images/9/92/Pok%C3%A9mon-Icon_150.png"></image></a></svg>';
+        $explanationTable .= '<td>'.$eventExample.'</td><td>'.$this->msg('breedingparents-markerexplanation-oldgen').'</td>';
+
+        $explanationTable .= '<tr>';
+        $oldGenExample = '<svg id="breedingParentsEventMarkerExample" class="breedingParentsSVGExample" xmlns="http://www.w3.org/2000/svg" width="50" height="56"><a href="Mewtu/Attacken#8. Generation"><rect x="2" y="2" width="46" height="52" rx="6" ry="6" /><image x="7" y="7" width="32" height="42" xlink:href="/localwiki/images/9/92/Pok%C3%A9mon-Icon_150.png"></image></a></svg>';
+        $explanationTable .= '<td>'.$oldGenExample.'</td><td>'.$this->msg('breedingparents-markerexplanation-event').'</td>';
+        $explanationTable .= '</tr></table>';
+        Constants::directOut($explanationTable);
     }
 
     private function addForms () {
