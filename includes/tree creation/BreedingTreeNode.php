@@ -31,7 +31,7 @@ class BreedingTreeNode extends Pkmn {
         if ($this->canLearnByOldGen()) {
             Logger::statusLog($this.' could learn the move in an old gen');
             /*learning by old gen might be easier to get than breeding but also maybe not.
-            It depends on the user, therefore learnsByOldGen is checked and marked before 
+            It depends on the user, therefore learnsByOldGen is checked and marked before
             inheritence check, but it only exits this method if the pkmn can't inherit the move
             (learning by old gen is in most cases easier than learning by event)*/
             $this->setLearnsByOldGen();
@@ -51,8 +51,14 @@ class BreedingTreeNode extends Pkmn {
                 $lowestEvoInstance = new BreedingTreeNode($lowestEvolution);
                 $lowestEvoNode = $lowestEvoInstance->createBreedingTreeNode($eggGroupBlacklist);
                 if (!is_null($lowestEvoNode)) {
-                    $this->addSuccessor($lowestEvoNode);
-                    return $this;
+                    //not (this->oldGen and (evo->oldGen or evo->event))
+                    if (!$this->getLearnsByOldGen() ||
+                        !$lowestEvoNode->getLearnsByOldGen() ||
+                        !$lowestEvoNode->getLearnsByEvent()
+                    ) {
+                        $this->addSuccessor($lowestEvoNode);
+                        return $this;
+                    }
                 }
             }
         }
@@ -77,7 +83,7 @@ class BreedingTreeNode extends Pkmn {
         $eggGroup2 = $this->data->getEggGroup2();
 
 		if ($this->isRoot) {
-			/*root pkmn is at the start => it is the only pkmn that 
+			/*root pkmn is at the start => it is the only pkmn that
             doesnt need an egg group for a connection to a predecessor
             because it doesn't have one*/
             $eggGroupBlacklist[] = $eggGroup1;
@@ -202,8 +208,6 @@ class BreedingTreeNode extends Pkmn {
                 return true;
 			}
 		}
-
-        Logger::statusLog('couldn\'t find target move in '.$learnsetType.' learnset');
 		return false;
     }
 
@@ -238,7 +242,7 @@ class BreedingTreeNode extends Pkmn {
     }
 
     public function getLogInfo (): string {
-        $msg = 'BreedingTreeNode:'.$this->data->getName().';count='.count($this->successors);
+        $msg = 'BreedingTreeNode:\'\'\''.$this->data->getName().'\'\'\';count='.count($this->successors);
         if (isset($this->learnsByEvent) && $this->learnsByEvent) {
             $msg .= ';learnsByEvent';
         }
