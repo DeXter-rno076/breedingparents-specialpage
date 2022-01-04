@@ -1,6 +1,6 @@
 #breedingParentsSVGContainer {
 	width: 100%;
-	height: 750px;/*this might be too high, maybe use something with viewport units*/
+	height: 80vh;
 	overflow: hidden;
 	box-shadow: inset 5px 5px 5px 0 gray;
 	cursor: grab;
