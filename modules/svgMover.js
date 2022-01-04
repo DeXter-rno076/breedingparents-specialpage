@@ -10,6 +10,13 @@ let xOffset = 0;
 let cursorStartingX = 0;
 let cursorStartingY = 0;
 
+const svgWidth = svgTag.width.baseVal.value;
+const svgHeight = svgTag.height.baseVal.value;
+const containerWidth = svgContainer.clientWidth;
+const containerHeight = svgContainer.clientHeight;
+
+let global_currentZoom = 1;
+
 main();
 
 function main () {
@@ -19,12 +26,6 @@ function main () {
 }
 
 function centerSVG () {
-    const svgWidth = svgTag.width.baseVal.value;
-    const svgHeight = svgTag.height.baseVal.value;
-
-    const containerWidth = svgContainer.clientWidth;
-    const containerHeight = svgContainer.clientHeight;
-
     const xOffset = (containerWidth - svgWidth) / 2;
     const yOffset = (containerHeight - svgHeight) / 2;
 
@@ -155,6 +156,16 @@ function zoomMouse (event) {
 }
 
 function setOffset (x, y) {
+    const xPadding = 50;
+    const yPadding = 75;
+    if (Math.abs(1 - global_currentZoom) < 0.05) {
+        //todo if you get how to get the plain coordinates, implement this indipendent of the zoom
+        if (x > containerWidth - xPadding) x = containerWidth - xPadding;
+        if (y > containerHeight - yPadding) y = containerHeight - yPadding;
+        if (x < -svgWidth + xPadding) x = -svgWidth + xPadding;
+        if (y < -svgHeight + yPadding) y = -svgHeight + yPadding;
+    }
+
     svgTag.style.left = x + 'px';
     svgTag.style.top = y + 'px';
 }
