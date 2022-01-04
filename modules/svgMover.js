@@ -1,28 +1,35 @@
 'use strict';
-//todo support touch events
-
-//todo (idea) if the user moves the svg out of the visible area, highlight the reset button
-
 const svgContainer = document.getElementById('breedingParentsSVGContainer');
 const svgTag = document.getElementById('breedingParentsSVG');
-const resetButton = document.getElementById('breedingParentsSVGResetButton');
 
 //offsets of the svgTag when the user started to move it
 let yOffset = 0;
 let xOffset = 0;
 
-//mouse coordinates when the user started to move the svg
+//mouse/touch coordinates when the user started to move the svg
 let cursorStartingX = 0;
 let cursorStartingY = 0;
 
-resetButton.addEventListener('click', () => {
-	svgTag.style.top = '0px';
-	svgTag.style.left = '0px';
-});
-svgContainer.addEventListener('mousedown', mouseStart);
-svgContainer.addEventListener('mouseup', mouseStop);
-svgContainer.addEventListener('touchstart', touchStart);
-svgContainer.addEventListener('touchmove', touchMove);
+main();
+
+function main () {
+    initSVGInlineStyles();
+    centerSVG();
+    addListeners();
+}
+
+function initSVGInlineStyles () {
+    svgTag.style.transform = 'scale(1.00)';
+    svgTag.style.left = '0px';
+    svgTag.style.top = '0px';
+}
+
+function addListeners () {
+    svgContainer.addEventListener('mousedown', mouseStart);
+    svgContainer.addEventListener('mouseup', mouseStop);
+    svgContainer.addEventListener('touchstart', touchStart);
+    svgContainer.addEventListener('touchmove', touchMove);
+}
 
 function mouseStart (event) {
     startMoving('mouse', event.clientX, event.clientY);
@@ -36,8 +43,8 @@ function touchStart (event) {
 function startMoving (type, x, y) {
 	cursorStartingX = x;
 	cursorStartingY = y;
-	xOffset = parseInt(svgTag.style.left) || 0;
-	yOffset = parseInt(svgTag.style.top) || 0;
+	xOffset = parseInt(svgTag.style.left);
+	yOffset = parseInt(svgTag.style.top);
 
     if (type === 'mouse') {
 	    svgContainer.addEventListener('mousemove', moveSVG);
@@ -58,7 +65,6 @@ function moveSVG (event) {
 	let x = event.clientX;
 	let y = event.clientY;
 
-	//coordinate differences
 	let dx = cursorStartingX - x;
 	let dy = cursorStartingY - y;
 
