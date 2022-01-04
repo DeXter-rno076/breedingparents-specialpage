@@ -111,10 +111,7 @@ class SpecialBreedingParents extends SpecialPage {
         Constants::$out->addModules('breedingParentsModules');
         Constants::plainOut(
             '<div id="breedingParentsSVGContainer" style="overflow: hidden;">'
-            .$svgRoot->toHTMLString(100).'</div>');
-        //adding button that resets the svg to the starting position
-		Constants::$out->addHTML('<input type="button" id="breedingParentsSVGResetButton"'.
-        ' value="Position zurücksetzen" />');
+            .$svgRoot->toHTMLString(Constants::SVG_OFFSET).'</div>');
 
         $timeEnd = hrtime(true);
         $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
