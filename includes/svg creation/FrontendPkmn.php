@@ -55,7 +55,10 @@ class FrontendPkmn extends Pkmn {
     }
 
     private function calcYCoords (int $sectionOffset): int {
-        $yCoord = $sectionOffset + $this->treeSectionHeight / 2;
+        $yCoord = $sectionOffset;
+        if ($this->hasSuccessors()) {
+            $yCoord += $this->treeSectionHeight / 2;
+        }
         Logger::statusLog('calculated y '.$yCoord.' of '.$this);
         $this->y = $yCoord;
 
@@ -114,7 +117,7 @@ class FrontendPkmn extends Pkmn {
         }
         Logger::statusLog('calculated tree section height '.$heightSum.' of '.$this);
         $this->treeSectionHeight = $heightSum;
-        return $heightSum + Constants::SVG_PKMN_SAFETY_MARGIN;
+        return $heightSum;
     }
 
     private function getPkmnIcon (string $pkmnId): File {
@@ -173,7 +176,7 @@ class FrontendPkmn extends Pkmn {
     //correction: they had logic
 
     public function getX (): int {
-        $retX = $this->x + Constants::SVG_PKMN_SAFETY_MARGIN;
+        $retX = $this->x;
         Logger::statusLog('returning '.$retX.' in getX call of '.$this);
         return $retX;
     }
@@ -189,7 +192,7 @@ class FrontendPkmn extends Pkmn {
     }
 
     public function getY (): int {
-        $retY = $this->y + Constants::SVG_PKMN_SAFETY_MARGIN;
+        $retY = $this->y;
         Logger::statusLog('returning y '.$retY.' in getY call on '.$this);
         return $retY;
     }

@@ -14,9 +14,9 @@ class SVGTag extends SVGElement {
         Logger::statusLog('creating SVGRoot instance');
         
         $treeDepth = $pkmnRoot->getDepth();
-        $this->width = $treeDepth * Constants::PKMN_MARGIN_HORI 
+        $this->width = ($treeDepth - 1) * Constants::PKMN_MARGIN_HORI + Constants::SVG_OFFSET
             + Constants::SVG_SAFETY_MARGIN;
-        $this->height = $pkmnRoot->getTreeSectionHeight() 
+        $this->height = $pkmnRoot->getTreeSectionHeight() + Constants::SVG_OFFSET
             + Constants::SVG_SAFETY_MARGIN;
 
         $this->svgRoot = new SVGPkmn($pkmnRoot);

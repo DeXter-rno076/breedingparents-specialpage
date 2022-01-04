@@ -9,8 +9,8 @@ class SVGIconErrorText extends SVGElement {
 
     public function __construct (FrontendPkmn $pkmn) {
         parent::__construct('text');
-        $this->x = $pkmn->getX();
-        $this->y = $pkmn->getY();
+        $this->x = $pkmn->getX() - Constants::SVG_OFFSET / 2;
+        $this->y = $pkmn->getY() - Constants::SVG_OFFSET / 2;
         $this->pkmnName = $pkmn->getName();
 
         Logger::statusLog('created '.$this);
