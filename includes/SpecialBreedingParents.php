@@ -15,8 +15,11 @@ class SpecialBreedingParents extends SpecialPage {
 	}
 
 	public function execute ($args) {
+        Constants::$specialPage = $this;
+        Constants::$out = $this->getOutput();
+
 		$this->setHeaders();//seems like a must have
-		$this->getOutput()->setPageTitle('Spezial:Zuchteltern');
+		$this->getOutput()->setPageTitle($this->msg('breedingparents-title'));
 		$this->addForms();
 	}
 
@@ -26,18 +29,14 @@ class SpecialBreedingParents extends SpecialPage {
         try {
 		    $this->getData();
         } catch (Exception $e) {
-            Constants::out('Oh nein, das hätte nicht passieren sollen :\'(\n'
-                .'Fehler beim Ziehen der Daten: '.$e.'\n'
-                .'Bitte melde das auf unserem Discordserver'
-                .' oder in der '.Constants::auskunftLink.'.'
-            );
+            Constants::error($e);
             Logger::flush();
-            return Status::newFailed('couldn\'t load data');
+            return Status::newFatal('couldn\'t load data');
         }
 
         $targetPkmn = Constants::$targetPkmn;
         if (!isset(Constants::$pkmnData->$targetPkmn)) {
-            Constants::out('unknown pkmn '.$targetPkmn);
+            Constants::out($this->msg('breedingparents-unknown-pkmn').Constants::$targetPkmn.'.');
             Logger::flush();
             return Status::newGood('unknown pkmn');
         }
@@ -46,13 +45,13 @@ class SpecialBreedingParents extends SpecialPage {
         try {
             $breedingTreeRoot = $this->createBreedingTree();
         } catch (AttributeNotFoundException $e) {
-            Constants::out('Oh nein. Da ist uns ein Fehler passiert :( Bitte melde mit welchen Eingaben das hier passiert ist.');
+            Constants::error($e);
             Logger::elog('couldn\'t create breeding tree, error: '.$e);
             return Status::newFatal($e->__toString());
         }
         if (is_null($breedingTreeRoot)) {
             //todo check whether move has a typo or generally if it's a move
-            Constants::out(Constants::$targetPkmn.' can\'t learn '.Constants::$targetMove);
+            Constants::out(Constants::$targetPkmn.$this->msg('breedingparents-cant-learn'));
             Logger::flush();
             return Status::newGood('');
         }
@@ -75,8 +74,6 @@ class SpecialBreedingParents extends SpecialPage {
 		if (isset($formData['displayStatuslogs'])) {
 			Constants::$displayStatuslogs = $formData['displayStatuslogs'];
 		}
-
-		Constants::$out = $this->getOutput();
     }
 
     private function createBreedingTree (): ?BreedingTreeNode {
@@ -145,13 +142,13 @@ class SpecialBreedingParents extends SpecialPage {
             'ooui', $formDescriptionArray, $this->getContext());
 		$form->setMethod('get');
 		$form->setSubmitCallback([$this, 'reactToInputData']);
-		$form->setSubmitText('do it!');//todo text not final
+		$form->setSubmitText($this->msg('breedingparents-submit-text')->__toString());
 		$form->prepareForm();
 
 		$form->displayForm('');
 		$form->trySubmit();
 	}
-	
+
 	//has to be public
 	public function validatePkmn ($value, $allData) {
 		if ($value === '' || $value === null) {
@@ -161,13 +158,13 @@ class SpecialBreedingParents extends SpecialPage {
 		//these are all characters that are used in pkmn names
 		$regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
 		if (preg_match($regex, $value)) {
-			Constants::out('pkmn name is evil >:(');
-			return 'Invalid character in the Pokémon name';
+			Constants::outputOnce($this->msg('breedingparents-invalid-pkmn'));
+			return 'invalid pkmn';
 		}
-	
+
 		return true;
 	}
-	
+
 	//has to be public
 	public function validateMove ($value, $allData) {
 		if ($value === '' || $value === null) {
@@ -177,10 +174,10 @@ class SpecialBreedingParents extends SpecialPage {
 		//these are all characters that are used in move names
 		$regex = '/[^a-zA-ZÜßäöü\- 2]/';
 		if (preg_match($regex, $value)) {
-			Constants::out('move name is evil >:(');
-			return 'Invalid character in the move name';
+            Constants::outputOnce($this->msg('breedingparents-invalid-move'));
+            return 'invalid move';
 		}
-		
+
 		return true;
 	}
 
@@ -189,10 +186,10 @@ class SpecialBreedingParents extends SpecialPage {
 		if ($value === '' || $value === null) {
 			return true;
 		}
-		
+
 		if (!is_numeric($value)) {
-			Constants::out('gen is evil >:(');
-			return 'Invalid gen input';
+            Constants::outputOnce($this->msg('breedingparents-invalid-gen'));
+            return 'invalid gen';
 		}
 
 		return true;
@@ -206,7 +203,7 @@ class SpecialBreedingParents extends SpecialPage {
             .'/pkmn-blacklist.json';
 		Constants::$unbreedable = $this->getWikiPageContent(
             $blacklistPageName);
-		
+
 		$eggGroupPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
             .'/egg-groups.json';
 		Constants::$eggGroups = $this->getWikiPageContent($eggGroupPageName);
@@ -224,7 +221,7 @@ class SpecialBreedingParents extends SpecialPage {
 
 			$pageDataArray = (array) $pageData;
 			$pkmnDataArr = array_merge($pkmnDataArr, $pageDataArray);
-			
+
 			$pageIndex++;
 		} while (isset($pageData->continue));
 
@@ -232,7 +229,7 @@ class SpecialBreedingParents extends SpecialPage {
 
 		return $pkmnDataObj;
 	}
-	
+
 	//original code written by Buo (thanks ^^)
 	/*returns JSON objects and arrays
     -> needs 2 return types which needs php 8*/

@@ -43,13 +43,17 @@ class Logger {
     }
 
     private static function printLog (string $title, Array $log) {
-        $logContainer = '<div class="specialBreedingParentsLogContainer"><br />'
-            .'\'\'\''.$title.'\'\'\'<ul>';
+        //sometimes sacrifices have to be made, here it was formatted code
+        $logContainer = '<div class="specialBreedingParentsLogContainer">
+'
+            .'\'\'\''.$title.'\'\'\'
+';
         foreach ($log as $logMsg) {
-            $logContainer .= '<li>'.$logMsg.'</li>';
+            $logContainer .= '* '.$logMsg.'
+';
         }
         $logContainer .= '</div>';
 
-        Constants::plainOut($logContainer);
+        Constants::out($logContainer);
     }
 }
