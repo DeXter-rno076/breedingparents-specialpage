@@ -19,20 +19,14 @@ function main () {
 }
 
 function centerSVG () {
-    console.log(svgContainer);
     const svgWidth = svgTag.width.baseVal.value;
     const svgHeight = svgTag.height.baseVal.value;
 
     const containerWidth = svgContainer.clientWidth;
     const containerHeight = svgContainer.clientHeight;
 
-    console.log('svg: ' + svgWidth + ' ' + svgHeight);
-    console.log('container: ' + containerWidth + ' ' + containerHeight);
-
     const xOffset = (containerWidth - svgWidth) / 2;
     const yOffset = (containerHeight - svgHeight) / 2;
-
-    console.log(xOffset + ' ' + yOffset);
 
     setOffset(xOffset, yOffset);
 }
@@ -48,6 +42,7 @@ function addListeners () {
     svgContainer.addEventListener('mouseup', mouseStop);
     svgContainer.addEventListener('touchstart', touchStart);
     svgContainer.addEventListener('touchmove', touchMove);
+    svgContainer.addEventListener('wheel', zoomMouse);
 }
 
 function mouseStart (event) {
@@ -91,6 +86,72 @@ function moveSVG (event) {
 	let newY = yOffset - dy;
 
 	setOffset(newX, newY);
+}
+
+function zoomMouse (event) {
+    event.preventDefault();
+    const wheelUp = event.deltaY < 0;
+    const currentTransform = svgTag.style.transform;
+    if (!/scale\(.+?\)/.test(currentTransform)) {
+        //user played around with the transform value
+        svgTag.style.transform = 'scale(1)';
+        return;
+    }
+
+    //this feels shady af, but scale is saved like that
+    const currentZoom = parseFloat(currentTransform.replace('scale(', '').replace(')', ''));
+
+    let newZoom = 1;
+    const zoomChange = currentZoom * 0.05;
+    if (wheelUp) {
+        newZoom = currentZoom + zoomChange;
+    } else {
+        newZoom = currentZoom - zoomChange;
+    }
+
+    if (isNaN(newZoom)) {
+        newZoom = 1;
+    } else if (newZoom <= 0.1) {
+        newZoom = 0.1;
+    } else if (newZoom > 5) {
+        newZoom = 5;
+    }
+
+    //todo
+    // const currentXOffset = parseInt(svgTag.style.left);
+    // const currentYOffset = parseInt(svgTag.style.top);
+
+    // const plainMx = svgTag.width.baseVal.value / 2;
+    // const plainMy = svgTag.height.baseVal.value / 2;
+
+    // const realMx = plainMx + currentXOffset;
+    // const realMy = plainMy + currentYOffset;
+
+
+    //c means cursor
+    // let cx = event.offsetX;
+    // let cy = event.offsetY;
+
+    // let xDiff = cx / prevX;
+    // prevX = cx;
+    // let zoomDiff = currentZoom / prevZoom;
+    // prevZoom = currentZoom;
+
+    // if (event.target.id === 'breedingParentsSVG') {
+    //     cx = cx * currentZoom + currentXOffset;
+    //     cy = cy * currentZoom + currentYOffset;
+    // }
+
+    // const cmx = realMx - cx;
+    // const cmy = realMy - cy;
+
+    // const xPush = cmx * (newZoom - 1);
+    // const yPush = cmy * (newZoom - 1);
+
+    global_currentZoom = newZoom;
+    svgTag.style.transform = 'scale(' + newZoom + ')';
+    //svgTag.style.left = currentXOffset + xPush + 'px';
+    //svgTag.style.top = currentYOffset + yPush + 'px';
 }
 
 function setOffset (x, y) {
