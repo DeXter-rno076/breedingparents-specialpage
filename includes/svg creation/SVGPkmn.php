@@ -1,13 +1,11 @@
 <?php
 require_once __DIR__.'/../Logger.php';
 require_once 'SVGImg.php';
-require_once 'SVGIconErrorText.php';
 require_once 'SVGLine.php';
 require_once 'SVGLink.php';
 
 class SVGPkmn {
     private ?SVGLink $link = null;
-    private ?SVGIconErrorText $iconEText = null;
     private Array $lineConnections = [];
     private Array $successors = [];
 
@@ -35,8 +33,6 @@ class SVGPkmn {
             return;
         }
         Logger::statusLog($pkmn.' has file error '.$fileE.' set => adding error tetx');
-        $eText = new SVGIconErrorText($pkmn);
-        $this->iconEText = $eText;
     }
 
     private function addConnectionStructure () {
@@ -113,9 +109,8 @@ class SVGPkmn {
         $outputString = '';
         if (!is_null($this->link)) {
             $outputString .= $this->link->toHTMLString($offset);
-        }
-        if (!is_null($this->iconEText)) {
-            $outputString .= $this->iconEText->toHTMLString($offset);
+        } else {
+            Constants::error($this->nodePkmn->getFileError());
         }
 
         foreach ($this->lineConnections as $line) {
