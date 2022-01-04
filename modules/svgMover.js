@@ -56,18 +56,18 @@ function touchStart (event) {
 }
 
 function startMoving (type, x, y) {
-	cursorStartingX = x;
-	cursorStartingY = y;
-	xOffset = parseInt(svgTag.style.left);
-	yOffset = parseInt(svgTag.style.top);
+    cursorStartingX = x;
+    cursorStartingY = y;
+    xOffset = parseInt(svgTag.style.left);
+    yOffset = parseInt(svgTag.style.top);
 
     if (type === 'mouse') {
-	    svgContainer.addEventListener('mousemove', moveSVG);
+        svgContainer.addEventListener('mousemove', moveSVG);
     }
 }
 
 function mouseStop () {
-	svgContainer.removeEventListener('mousemove', moveSVG);
+    svgContainer.removeEventListener('mousemove', moveSVG);
 }
 
 function touchMove (event) {
@@ -77,16 +77,16 @@ function touchMove (event) {
 }
 
 function moveSVG (event) {
-	let x = event.clientX;
-	let y = event.clientY;
+    let x = event.clientX;
+    let y = event.clientY;
 
-	let dx = cursorStartingX - x;
-	let dy = cursorStartingY - y;
+    let dx = cursorStartingX - x;
+    let dy = cursorStartingY - y;
 
-	let newX = xOffset - dx;
-	let newY = yOffset - dy;
+    let newX = xOffset - dx;
+    let newY = yOffset - dy;
 
-	setOffset(newX, newY);
+    setOffset(newX, newY);
 }
 
 function zoomMouse (event) {

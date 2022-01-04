@@ -10,24 +10,24 @@ require_once 'Constants.php';
 require_once 'Logger.php';
 
 class SpecialBreedingParents extends SpecialPage {
-	public function __construct () {
-		parent::__construct('BreedingParents');
-	}
+    public function __construct () {
+        parent::__construct('BreedingParents');
+    }
 
-	public function execute ($args) {
+    public function execute ($args) {
         Constants::$specialPage = $this;
         Constants::$out = $this->getOutput();
 
-		$this->setHeaders();//seems like a must have
-		$this->getOutput()->setPageTitle($this->msg('breedingparents-title'));
-		$this->addForms();
-	}
+        $this->setHeaders();//seems like a must have
+        $this->getOutput()->setPageTitle($this->msg('breedingparents-title'));
+        $this->addForms();
+    }
 
-	public function reactToInputData ($data, $form) {
-		$this->initConstants($data);
+    public function reactToInputData ($data, $form) {
+        $this->initConstants($data);
 
         try {
-		    $this->getData();
+            $this->getData();
         } catch (Exception $e) {
             Constants::error($e);
             Logger::flush();
@@ -61,19 +61,19 @@ class SpecialBreedingParents extends SpecialPage {
         $this->createSVGStructure($frontendRoot);
 
         Logger::flush();
-		return Status::newGood('all ok');
-	}
+        return Status::newGood('all ok');
+    }
 
     private function initConstants ($formData) {
         Constants::$targetGen = $formData['genInput'];
-		Constants::$targetMove = $formData['moveInput'];
-		Constants::$targetPkmn = $formData['pkmnInput'];
-		if (isset($formData['displayDebuglogs'])) {
-			Constants::$displayDebuglogs = $formData['displayDebuglogs'];
-		}
-		if (isset($formData['displayStatuslogs'])) {
-			Constants::$displayStatuslogs = $formData['displayStatuslogs'];
-		}
+        Constants::$targetMove = $formData['moveInput'];
+        Constants::$targetPkmn = $formData['pkmnInput'];
+        if (isset($formData['displayDebuglogs'])) {
+            Constants::$displayDebuglogs = $formData['displayDebuglogs'];
+        }
+        if (isset($formData['displayStatuslogs'])) {
+            Constants::$displayStatuslogs = $formData['displayStatuslogs'];
+        }
     }
 
     private function createBreedingTree (): ?BreedingTreeNode {
@@ -119,122 +119,122 @@ class SpecialBreedingParents extends SpecialPage {
         Logger::debugOut('svg creation needed: '.$timeDiff.'s');
     }
 
-	private function addForms () {
-		require_once 'formDescriptor.php';
+    private function addForms () {
+        require_once 'formDescriptor.php';
 
-		$formDescriptionArray = $formDescriptor;
-		$user = $this->getUser();
-		$userGroups = $user->getGroupMemberships();
-		//todo put the group names in some kind of config file
-		if (isset($userGroups['voting'])) {
-			$formDescriptionArray = array_merge($formDescriptionArray,
-				$debuglogsCheckBox);
-		}
-		if (isset($userGroups['trusted'])) {
-			$formDescriptionArray = array_merge($formDescriptionArray,
-				$statuslogsCheckBox);
-		}
+        $formDescriptionArray = $formDescriptor;
+        $user = $this->getUser();
+        $userGroups = $user->getGroupMemberships();
+        //todo put the group names in some kind of config file
+        if (isset($userGroups['voting'])) {
+            $formDescriptionArray = array_merge($formDescriptionArray,
+                $debuglogsCheckBox);
+        }
+        if (isset($userGroups['trusted'])) {
+            $formDescriptionArray = array_merge($formDescriptionArray,
+                $statuslogsCheckBox);
+        }
 
-		$form = HTMLForm::factory(
+        $form = HTMLForm::factory(
             'ooui', $formDescriptionArray, $this->getContext());
-		$form->setMethod('get');
-		$form->setSubmitCallback([$this, 'reactToInputData']);
-		$form->setSubmitText($this->msg('breedingparents-submit-text')->__toString());
-		$form->prepareForm();
+        $form->setMethod('get');
+        $form->setSubmitCallback([$this, 'reactToInputData']);
+        $form->setSubmitText($this->msg('breedingparents-submit-text')->__toString());
+        $form->prepareForm();
 
-		$form->displayForm('');
-		$form->trySubmit();
-	}
+        $form->displayForm('');
+        $form->trySubmit();
+    }
 
-	//has to be public
-	public function validatePkmn ($value, $allData) {
-		if ($value === '' || $value === null) {
-			return true;
-		}
+    //has to be public
+    public function validatePkmn ($value, $allData) {
+        if ($value === '' || $value === null) {
+            return true;
+        }
 
-		//these are all characters that are used in pkmn names
-		$regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
-		if (preg_match($regex, $value)) {
-			Constants::outputOnce($this->msg('breedingparents-invalid-pkmn'));
-			return 'invalid pkmn';
-		}
+        //these are all characters that are used in pkmn names
+        $regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
+        if (preg_match($regex, $value)) {
+            Constants::outputOnce($this->msg('breedingparents-invalid-pkmn'));
+            return 'invalid pkmn';
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	//has to be public
-	public function validateMove ($value, $allData) {
-		if ($value === '' || $value === null) {
-			return true;
-		}
+    //has to be public
+    public function validateMove ($value, $allData) {
+        if ($value === '' || $value === null) {
+            return true;
+        }
 
-		//these are all characters that are used in move names
-		$regex = '/[^a-zA-ZÜßäöü\- 2]/';
-		if (preg_match($regex, $value)) {
+        //these are all characters that are used in move names
+        $regex = '/[^a-zA-ZÜßäöü\- 2]/';
+        if (preg_match($regex, $value)) {
             Constants::outputOnce($this->msg('breedingparents-invalid-move'));
             return 'invalid move';
-		}
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	//has to be public
-	public function validateGen ($value, $allData) {
-		if ($value === '' || $value === null) {
-			return true;
-		}
+    //has to be public
+    public function validateGen ($value, $allData) {
+        if ($value === '' || $value === null) {
+            return true;
+        }
 
-		if (!is_numeric($value)) {
+        if (!is_numeric($value)) {
             Constants::outputOnce($this->msg('breedingparents-invalid-gen'));
             return 'invalid gen';
-		}
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	private function getData () {
-		$gen = Constants::$targetGen;
-		Constants::$pkmnData = $this->getPkmnData($gen);
+    private function getData () {
+        $gen = Constants::$targetGen;
+        Constants::$pkmnData = $this->getPkmnData($gen);
 
-		$eggGroupPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
+        $eggGroupPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
             .'/egg-groups.json';
-		Constants::$eggGroups = $this->getWikiPageContent($eggGroupPageName);
-	}
+        Constants::$eggGroups = $this->getWikiPageContent($eggGroupPageName);
+    }
 
-	private function getPkmnData (String $gen) : StdClass {
-		$pkmnDataArr = [];
-		$pageData = null;
-		$pageIndex = 1;
+    private function getPkmnData (String $gen) : StdClass {
+        $pkmnDataArr = [];
+        $pageData = null;
+        $pageIndex = 1;
 
-		do {
-			$pkmnDataPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
+        do {
+            $pkmnDataPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
                 .'/pkmn-data'.$pageIndex.'.json';
-			$pageData = $this->getWikiPageContent($pkmnDataPageName);
+            $pageData = $this->getWikiPageContent($pkmnDataPageName);
 
-			$pageDataArray = (array) $pageData;
-			$pkmnDataArr = array_merge($pkmnDataArr, $pageDataArray);
+            $pageDataArray = (array) $pageData;
+            $pkmnDataArr = array_merge($pkmnDataArr, $pageDataArray);
 
-			$pageIndex++;
-		} while (isset($pageData->continue));
+            $pageIndex++;
+        } while (isset($pageData->continue));
 
-		$pkmnDataObj = (object) $pkmnDataArr;
+        $pkmnDataObj = (object) $pkmnDataArr;
 
-		return $pkmnDataObj;
-	}
+        return $pkmnDataObj;
+    }
 
-	//original code written by Buo (thanks ^^)
-	/*returns JSON objects and arrays
+    //original code written by Buo (thanks ^^)
+    /*returns JSON objects and arrays
     -> needs 2 return types which needs php 8*/
-	private function getWikiPageContent (String $name) {
-		$title = Title::newFromText($name);
-		$rev = Revision::newFromTitle($title);
+    private function getWikiPageContent (String $name) {
+        $title = Title::newFromText($name);
+        $rev = Revision::newFromTitle($title);
 
-		if (is_null($rev)) {
-			throw new Exception('wiki page '.$name.' not found');
-		}
+        if (is_null($rev)) {
+            throw new Exception('wiki page '.$name.' not found');
+        }
 
-		$data = $rev->getContent()->getNativeData();
+        $data = $rev->getContent()->getNativeData();
 
-		return json_decode($data);;
-	}
+        return json_decode($data);;
+    }
 }

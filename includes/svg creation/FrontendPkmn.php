@@ -120,13 +120,13 @@ class FrontendPkmn extends Pkmn {
 
     private function getPkmnIcon (string $pkmnId): File {
         $fileName = 'Pokémon-Icon '.$pkmnId.'.png';
-		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
+        $fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
 
-		if ($fileObj === false) {
-			throw new FileNotFoundException($pkmnId);
-		}
+        if ($fileObj === false) {
+            throw new FileNotFoundException($pkmnId);
+        }
 
-		return $fileObj;
+        return $fileObj;
     }
 
     public function addSuccessor (FrontendPkmn $successor) {
