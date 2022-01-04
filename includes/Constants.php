@@ -26,7 +26,8 @@ class Constants {
         //just throwing everything throug parseAsContent might be fine
 	}
 
-    public static function plainOut (string $msg) {
+    public static function directOut (string $msg) {
+        Logger::wlog('calling directOut to directly output HTML. This is dangerous but might be necessary.');
         Constants::$out->addHTML($msg.'<br />');
     }
 

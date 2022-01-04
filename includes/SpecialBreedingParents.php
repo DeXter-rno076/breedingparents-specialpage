@@ -109,7 +109,7 @@ class SpecialBreedingParents extends SpecialPage {
 
         $svgRoot = new SVGTag($frontendRoot);
         Constants::$out->addModules('breedingParentsModules');
-        Constants::plainOut(
+        Constants::directOut(
             '<div id="breedingParentsSVGContainer" style="overflow: hidden;">'
             .$svgRoot->toHTMLString(Constants::SVG_OFFSET).'</div>');
 
