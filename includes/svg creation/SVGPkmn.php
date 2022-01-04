@@ -60,7 +60,7 @@ class SVGPkmn {
 
     private function addPkmnMiddleConnection () {
         $pkmn = $this->nodePkmn;
-        $horiStartX = $pkmn->getX() + $pkmn->getIconWidth() 
+        $horiStartX = $pkmn->getX() + $pkmn->getIconWidth()
             + Constants::PKMN_ICON_LINE_MARGIN;
         $horiY = $pkmn->getMiddleY();
         $horizontalLine = new SVGLine(
