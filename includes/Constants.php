@@ -19,11 +19,8 @@ class Constants {
     public const SVG_SAFETY_MARGIN = 50;
     public const SVG_OFFSET = 50;
 
-    //todo clean this out plainOut mess up
     public static function out (String $msg) {
         Constants::$out->addWikiTextAsContent($msg.' ');
-        //maybe rather use e.g. addElement
-        //just throwing everything throug parseAsContent might be fine
     }
 
     public static function directOut (string $msg) {
@@ -32,7 +29,7 @@ class Constants {
     }
 
     public static function error (Exception $e) {
-        Constants::plainOut(Constants::$specialPage->msg(
+        Constants::directOut(Constants::$specialPage->msg(
             'breedingparents-error').$e);
     }
 
