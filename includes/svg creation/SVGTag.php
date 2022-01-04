@@ -12,7 +12,7 @@ class SVGTag extends SVGElement {
     public function __construct (FrontendPkmn $pkmnRoot) {
         parent::__construct('svg');
         Logger::statusLog('creating SVGRoot instance');
-        
+
         $treeDepth = $pkmnRoot->getDepth();
         $this->width = ($treeDepth - 1) * Constants::PKMN_MARGIN_HORI + Constants::SVG_OFFSET
             + Constants::SVG_SAFETY_MARGIN;
@@ -37,6 +37,6 @@ class SVGTag extends SVGElement {
     }
 
     public function getLogInfo (): string {
-        return 'SVGTag:;;';
+        return '\'\'\'SVGTag\'\'\':;;';
     }
 }

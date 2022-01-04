@@ -28,6 +28,6 @@ class SVGLine extends SVGElement {
     }
 
     public function getLogInfo (): string {
-        return 'SVGLine:('.$this->x1.';'.$this->y1.')->('.$this->x2.';'.$this->y2.');;';
+        return '\'\'\'SVGLine\'\'\':('.$this->x1.';'.$this->y1.')->('.$this->x2.';'.$this->y2.');;';
     }
 }

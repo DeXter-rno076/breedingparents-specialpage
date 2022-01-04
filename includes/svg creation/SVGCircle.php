@@ -22,6 +22,6 @@ class SVGCircle extends SVGElement {
     }
 
     public function getLogInfo (): string {
-        return 'SVGCircle:('.$this->cx.';'.$this->cy.');'.$this->r.';;';
+        return '\'\'\'SVGCircle\'\'\':('.$this->cx.';'.$this->cy.');'.$this->r.';;';
     }
 }

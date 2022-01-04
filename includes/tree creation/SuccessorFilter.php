@@ -13,8 +13,8 @@ class SuccessorFilter {
 	*/
 	private Array $eggGroupBlacklist;
     /**
-     * using a whitelist variable seems unnecessarily complex 
-     * but is necessary (at least i haven't found a better solution). 
+     * using a whitelist variable seems unnecessarily complex
+     * but is necessary (at least i haven't found a better solution).
      * Just adding the egg group after filtering the successors would work
      * for almost all nodes, BUT not for the root. there the first handled
      * egg group could include the second egg group which would result in
@@ -22,7 +22,7 @@ class SuccessorFilter {
      */
 	private String $whitelistedEggGroup;
 	private Array $successorList;
-	
+
 	public function __construct (
 		Array $eggGroupBlacklist,
 		String $whitelistedEggGroup,
@@ -52,13 +52,9 @@ class SuccessorFilter {
 			$pkmnData = new PkmnData($pkmn);
 
             $isWhitelisted = function (string $eggGroup, string $pkmnName): bool {
-				Logger::statusLog('egg group '.$eggGroup.' is whitelisted'
-					.' => '.$pkmnName.' won\'t be removed');
                 return $this->whitelistedEggGroup === $eggGroup;
             };
             $isBlacklisted = function (string $eggGroup, string $pkmnName): bool {
-				Logger::statusLog('egg group '.$eggGroup.' is blacklisted'
-					.' => '.$pkmnName.' will be removed');
                 return in_array($eggGroup, $this->eggGroupBlacklist);
             };
 
@@ -87,10 +83,6 @@ class SuccessorFilter {
 		$isUnpairable = function (string $pkmnName): bool {
             $pkmnData = new PkmnData($pkmnName);
 			$unpairableStatus = $pkmnData->getUnpairable();
-
-			Logger::statusLog('unpairable status is '.(
-				$unpairableStatus ? 'true, '.$pkmnName.' will be removed' 
-				: 'false, '.$pkmnName.' won\'t be removed'));
 			return $unpairableStatus;
 		};
 
@@ -114,22 +106,16 @@ class SuccessorFilter {
 			$gender = $pkmnData->getGender();
             //female pkmn cant pass on moves from gen 2 - 5
 			$isFemale = $gender === 'female';
-			if ($isFemale) {
-				Logger::statusLog($pkmn.' is female => will be removed');
-			} else {
-				Logger::statusLog($pkmn.' is not female => won\'t be removed');
-			}
 			return $isFemale;
 		};
 
         $this->remove($isFemale);
 	}
-	
+
 	private function remove ($condition) {
 		for($i = 0; $i < count($this->successorList); $i++) {
 			$pkmn = $this->successorList[$i];
 			if ($condition($pkmn)) {
-                Logger::statusLog('removing '.$pkmn);
 				array_splice($this->successorList, $i, 1);
 				$i--;
 			}

@@ -5,7 +5,7 @@ require_once 'FrontendPkmn.php';
 require_once 'SVGCircle.php';
 require_once 'SVGRectangle.php';
 
-class SVGImg extends SVGElement { 
+class SVGImg extends SVGElement {
     private int $x;
     private int $y;
     private int $width;
@@ -56,7 +56,7 @@ class SVGImg extends SVGElement {
         $middleX = $this->frontendPkmn->getMiddleX();
         $middleY = $this->frontendPkmn->getMiddleY();
         $width = $this->frontendPkmn->getWidth();
-        
+
         $oldGenMarker = new SVGCircle($middleX, $middleY, $width / 2 + Constants::SVG_CIRCLE_MARGIN);
         $this->marker = $oldGenMarker;
     }
@@ -76,6 +76,6 @@ class SVGImg extends SVGElement {
     }
 
     public function getLogInfo (): string {
-        return 'SVGImg:('.$this->x.';'.$this->y.');href='.$this->href.';;';
+        return '\'\'\'SVGImg\'\'\':('.$this->x.';'.$this->y.');href='.$this->href.';;';
     }
 }

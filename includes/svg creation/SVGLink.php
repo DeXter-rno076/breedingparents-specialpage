@@ -21,6 +21,6 @@ class SVGLink extends SVGElement {
     }
 
     public function getLogInfo (): string {
-        return 'SVGLink:'.$this->href.';;';
+        return 'SVGLink:\'\'\''.$this->href.'\'\'\';;';
     }
 }

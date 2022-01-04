@@ -33,6 +33,6 @@ class SVGRectangle extends SVGElement {
     }
 
     public function getLogInfo (): string {
-        return 'SVGRectangle:('.$this->x.';'.$this->y.');'.$this->width.';'.$this->height.';;';
+        return '\'\'\'SVGRectangle\'\'\':('.$this->x.';'.$this->y.');'.$this->width.';'.$this->height.';;';
     }
 }

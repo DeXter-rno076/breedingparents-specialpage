@@ -21,14 +21,14 @@ class FrontendPkmn extends Pkmn {
 
     public function __construct (BreedingTreeNode $breedingTreeNode) {
         parent::__construct($breedingTreeNode->getName(), $breedingTreeNode->getID());
-    
+
         $this->learnsByEvent = $breedingTreeNode->getLearnsByEvent();
         $this->learnsByOldGen = $breedingTreeNode->getLearnsByOldGen();
 
         foreach ($breedingTreeNode->getSuccessors() as $successorTreeNode) {
             $successorFrontendObj = new FrontendPkmn($successorTreeNode);
             $this->addSuccessor($successorFrontendObj);
-        }        
+        }
     }
 
     public function getDepth (): int {
@@ -81,7 +81,7 @@ class FrontendPkmn extends Pkmn {
         }
     }
 
-    private function setIconData () {     
+    private function setIconData () {
         try {
             $iconFileObj = $this->getPkmnIcon($this->id);
             Logger::statusLog('icon file for '.$this.' successfully loaded');
@@ -100,8 +100,6 @@ class FrontendPkmn extends Pkmn {
     }
 
     private function calcTreeSectionHeights (): int {
-        /* todo sometimes this is returns too small heights (Glumanda, Biss, Gen8)
-        but this doesn't stand out because of the safety margin*/
         if (!$this->hasSuccessors()) {
             $height = $this->getHeight() + Constants::SVG_PKMN_SAFETY_MARGIN;
             Logger::statusLog(
@@ -177,7 +175,6 @@ class FrontendPkmn extends Pkmn {
 
     public function getX (): int {
         $retX = $this->x;
-        Logger::statusLog('returning '.$retX.' in getX call of '.$this);
         return $retX;
     }
 
@@ -193,7 +190,6 @@ class FrontendPkmn extends Pkmn {
 
     public function getY (): int {
         $retY = $this->y;
-        Logger::statusLog('returning y '.$retY.' in getY call on '.$this);
         return $retY;
     }
 
@@ -213,7 +209,7 @@ class FrontendPkmn extends Pkmn {
     }
 
     public function getLogInfo (): string {
-        $msg = 'FrontendPkmn:'.$this->name.';('
+        $msg = 'FrontendPkmn:\'\'\''.$this->name.'\'\'\';('
             .(isset($this->x) ? $this->x : '-').';'
             .(isset($this->y) ? $this->y : '-').')';
         if (count($this->successors) > 0) {
