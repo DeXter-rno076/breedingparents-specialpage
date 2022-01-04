@@ -1,6 +1,4 @@
 <?php
-//todo find a solution for output of validation methods
-//todo choose either tabs or spaces
 //todo look through all MediaWiki API methods and handle errors
 
 require_once 'tree creation/BreedingTreeNode.php';
@@ -222,19 +220,20 @@ class SpecialBreedingParents extends SpecialPage {
         return $pkmnDataObj;
     }
 
-    //original code written by Buo (thanks ^^)
-    /*returns JSON objects and arrays
-    -> needs 2 return types which needs php 8*/
-    private function getWikiPageContent (String $name) {
-        $title = Title::newFromText($name);
-        $rev = Revision::newFromTitle($title);
+    /*original code written by Buo and code
+    without deprecated parts written by Robbi (thanks ^^)
 
-        if (is_null($rev)) {
-            throw new Exception('wiki page '.$name.' not found');
+    returns JSON objects and arrays
+    -> needs 2 return types which needs php 8*/
+    public function getWikiPageContent (string $title) {
+        $page = WikiPage::factory(Title::newFromText($title));
+
+        if(!$page->exists()) {
+            throw new Exception('wiki page '.$title.' not found');
         }
 
-        $data = $rev->getContent()->getNativeData();
+        $pageData = ContentHandler::getContentText($page->getContent());
 
-        return json_decode($data);;
+        return json_decode($pageData);
     }
 }
