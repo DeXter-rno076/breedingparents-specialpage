@@ -22,21 +22,35 @@ class SVGTag extends SVGElement {
         $this->svgRoot = new SVGPkmn($pkmnRoot);
     }
 
-    public function toHTMLString (
+    public function toHTML (
         int $xOffset = Constants::SVG_OFFSET,
         int $yOffset = Constants::SVG_OFFSET
-    ): string {
-        $outputString = '<svg id="'.$this->id.
-            '" xmlns="http://www.w3.org/2000/svg" width="'.$this->width.'" height="'.$this->height
-            .'">';
-        $outputString .= $this->svgRoot->toHTMLString($xOffset, $yOffset);
+    ): HTMLElement {
+        $svgTag = new HTMLElement('svg', [
+            'id' => $this->id,
+            'xmlns' => 'http://www.w3.org/2000/svg',
+            'width' => $this->width,
+            'height' => $this->height
+        ]);
+        
+        $topLevelSVGTags = $this->svgRoot->toHTML($xOffset, $yOffset);
+
+        foreach ($topLevelSVGTags as $tag) {
+            $svgTag->addInnerElement($tag);
+        }
+
         if (Constants::$displayDebuglogs) {
             //zoom debugging
-            $outputString .= '<circle cx="'.($this->width / 2).'" cy="'
-                .($this->height / 2).'" r="5" style="fill:red;" />';
+            $centerMarker = new HTMLElement('circle', [
+                'cx' => $this->width / 2,
+                'cy' => $this->height / 2,
+                'r' => 5,
+                'style' => 'fill:red'
+            ]);
+            $svgTag->addInnerElement($centerMarker);
         }
-        $outputString .= '</svg>';
-        return $outputString;
+
+        return $svgTag;
     }
 
     public function getLogInfo (): string {

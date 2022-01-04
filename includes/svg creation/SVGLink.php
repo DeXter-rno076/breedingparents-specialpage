@@ -15,9 +15,12 @@ class SVGLink extends SVGElement {
         Logger::statusLog('created '.$this);
     }
 
-    public function toHTMLString(int $xOffset, int $yOffset): string {
-        return '<a href="'.$this->href.'">'
-        .$this->innerEl->toHTMLString($xOffset, $yOffset).'</a>';
+    public function toHTML (int $xOffset, int $yOffset): HTMLElement {
+        return new HTMLElement('a', [
+            'href' => $this->href
+        ], [
+            $this->innerEl->toHTML($xOffset, $yOffset)
+        ]);
     }
 
     public function getLogInfo (): string {

@@ -4,6 +4,7 @@ require_once 'svg creation/FrontendPkmn.php';
 require_once 'svg creation/SVGTag.php';
 require_once 'Constants.php';
 require_once 'Logger.php';
+require_once 'HTMLElement.php';
 require_once __DIR__.'/exceptions/AttributeNotFoundException.php';
 
 class SpecialBreedingParents extends SpecialPage {
@@ -108,9 +109,13 @@ class SpecialBreedingParents extends SpecialPage {
 
         $svgRoot = new SVGTag($frontendRoot);
         Constants::$out->addModules('breedingParentsModules');
-        Constants::directOut(
-            '<div id="breedingParentsSVGContainer" style="overflow: hidden;">'
-            .$svgRoot->toHTMLString().'</div>');
+
+        $containerDiv = new HTMLElement('div', [
+            'id' => 'breedingParentsSVGContainer',
+            'style' => 'overflow: hidden;'
+        ]);
+        $containerDiv->addInnerElement($svgRoot->toHTML());
+        $containerDiv->addToOutput();
 
         $timeEnd = hrtime(true);
         $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
@@ -119,16 +124,8 @@ class SpecialBreedingParents extends SpecialPage {
     }
 
     private function addMarkerExplanations () {
-        $explanationTable = '<table id="breedingParentsExplanationTable"><th colspan="2">'.$this->msg('breedingparents-markerexplanation-head').'</th>';
-        $explanationTable .= '<tr>';
-        $eventExample = '<svg id="breedingParentsEventMarkerExample" class="breedingParentsSVGExample" xmlns="http://www.w3.org/2000/svg" width="50" height="50"><a href="Mewtu/Attacken#8. Generation"><circle cx="25" cy="25" r="24"></circle><image x="10" y="5" width="32" height="42" xlink:href="/localwiki/images/9/92/Pok%C3%A9mon-Icon_150.png"></image></a></svg>';
-        $explanationTable .= '<td>'.$eventExample.'</td><td>'.$this->msg('breedingparents-markerexplanation-oldgen').'</td>';
-
-        $explanationTable .= '<tr>';
-        $oldGenExample = '<svg id="breedingParentsEventMarkerExample" class="breedingParentsSVGExample" xmlns="http://www.w3.org/2000/svg" width="50" height="56"><a href="Mewtu/Attacken#8. Generation"><rect x="2" y="2" width="46" height="52" rx="6" ry="6" /><image x="7" y="7" width="32" height="42" xlink:href="/localwiki/images/9/92/Pok%C3%A9mon-Icon_150.png"></image></a></svg>';
-        $explanationTable .= '<td>'.$oldGenExample.'</td><td>'.$this->msg('breedingparents-markerexplanation-event').'</td>';
-        $explanationTable .= '</tr></table>';
-        Constants::directOut($explanationTable);
+        require_once 'markerExamples.php';
+        $markerExamplesTable->addToOutput();
     }
 
     private function addForms () {

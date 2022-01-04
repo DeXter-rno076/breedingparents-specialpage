@@ -105,23 +105,57 @@ class SVGPkmn {
         }
     }
 
-    public function toHTMLString (int $xOffset, int $yOffset): string {
-        $outputString = '';
+    public function toHTML (int $xOffset, int $yOffset): array {
+        $tagArray = [];
         if (!is_null($this->link)) {
-            $outputString .= $this->link->toHTMLString($xOffset, $yOffset);
+            array_push($tagArray, $this->link->toHTML($xOffset, $yOffset));
         } else {
             Constants::error($this->nodePkmn->getFileError());
         }
 
+        if ($this->nodePkmn->getLearnsByOldGen()) {
+            array_push($tagArray, $this->createOldGenMarker($xOffset, $yOffset));
+        } else if ($this->nodePkmn->getLearnsByEvent()) {
+            array_push($tagArray, $this->createEventMarker($xOffset, $yOffset));
+        }
+
         foreach ($this->lineConnections as $line) {
-            $outputString .= $line->toHTMLString($xOffset, $yOffset);
+            array_push($tagArray, $line->toHTML($xOffset, $yOffset));
         }
 
         foreach ($this->successors as $successor) {
-            $outputString .= $successor->toHTMLString($xOffset, $yOffset);
+            foreach ($successor->toHTML($xOffset, $yOffset) as $tag) {
+                array_push($tagArray, $tag);
+            }
         }
 
-        return $outputString;
+        return $tagArray;
+    }
+
+    private function createOldGenMarker (int $xOffset, int $yOffset): HTMLElement {
+        $middleX = $this->nodePkmn->getMiddleX();
+        $middleY = $this->nodePkmn->getMiddleY();
+        $width = $this->nodePkmn->getWidth();
+
+        $oldGenMarker = new SVGCircle($middleX, $middleY, $width / 2 + Constants::SVG_CIRCLE_MARGIN);
+
+        return $oldGenMarker->toHTML($xOffset, $yOffset);
+    }
+
+    private function createEventMarker (int $xOffset, int $yOffset): HTMLElement {
+        $x = $this->nodePkmn->getX();
+        $y = $this->nodePkmn->getY();
+        $width = $this->nodePkmn->getWidth();
+        $height = $this->nodePkmn->getHeight();
+
+        $eventMarker = new SVGRectangle(
+            $x - Constants::SVG_RECT_PADDING,
+            $y - Constants::SVG_RECT_PADDING,
+            $width + 2 * Constants::SVG_RECT_PADDING,
+            $height + 2 * Constants::SVG_RECT_PADDING
+        );
+
+        return $eventMarker->toHTML($xOffset, $yOffset);
     }
 
     public function getLogInfo (): string {

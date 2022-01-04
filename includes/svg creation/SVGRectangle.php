@@ -24,12 +24,15 @@ class SVGRectangle extends SVGElement {
         Logger::statusLog('created '.$this);
     }
 
-    public function toHTMLString (int $xOffset, int $yOffset): string {
-        $x = $this->x + $xOffset;
-        $y = $this->y + $yOffset;
-        return '<rect x="'.$x.'" y="'.$y
-            .'" width="'.$this->width.'" height="'.$this->height
-            .'" rx="'.$this->rx.'" ry="'.$this->ry.'" />';
+    public function toHTML(int $xOffset, int $yOffset): HTMLElement {
+        return new HTMLElement('rect', [
+            'x' => $this->x + $xOffset,
+            'y' => $this->y + $yOffset,
+            'height' => $this->height,
+            'width' => $this->width,
+            'rx' => $this->rx,
+            'ry' => $this->ry
+        ]);
     }
 
     public function getLogInfo (): string {
