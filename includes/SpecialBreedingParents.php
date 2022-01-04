@@ -11,7 +11,7 @@ require_once 'Logger.php';
 
 class SpecialBreedingParents extends SpecialPage {
 	public function __construct () {
-		parent::__construct('Zuchteltern');
+		parent::__construct('BreedingParents');
 	}
 
 	public function execute ($args) {
