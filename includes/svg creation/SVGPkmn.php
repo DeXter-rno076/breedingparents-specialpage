@@ -3,6 +3,9 @@ require_once __DIR__.'/../Logger.php';
 require_once 'SVGImg.php';
 require_once 'SVGLine.php';
 require_once 'SVGLink.php';
+require_once 'SVGCircle.php';
+require_once 'SVGRectangle.php';
+require_once __DIR__.'/../HTMLElement.php';
 
 class SVGPkmn {
     private ?SVGLink $link = null;

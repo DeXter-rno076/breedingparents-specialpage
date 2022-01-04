@@ -2,6 +2,7 @@
 require_once __DIR__.'/../Logger.php';
 require_once 'SVGElement.php';
 require_once 'SVGPkmn.php';
+require_once __DIR__.'/../HTMLElement.php';
 
 class SVGTag extends SVGElement {
     private string $id = 'breedingParentsSVG';

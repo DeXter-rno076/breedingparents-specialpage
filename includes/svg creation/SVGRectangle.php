@@ -1,6 +1,7 @@
 <?php
 require_once 'SVGElement.php';
 require_once __DIR__.'/../Logger.php';
+require_once __DIR__.'/../HTMLElement.php';
 
 class SVGRectangle extends SVGElement {
     private int $x;
