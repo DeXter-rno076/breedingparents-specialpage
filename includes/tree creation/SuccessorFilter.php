@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../Constants.php';
+require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
 require_once 'PkmnData.php';
 
 class SuccessorFilter {
@@ -49,7 +50,13 @@ class SuccessorFilter {
 
     private function removeBlacklistedPkmn () {
         $pkmnIsBlacklisted = function (string $pkmn): bool {
-            $pkmnData = new PkmnData($pkmn);
+            $pkmnData = null;
+            try {
+                $pkmnData = new PkmnData($pkmn);
+            } catch (AttributeNotFoundException $e) {
+                Constants::error($e);
+                return true;
+            }
 
             $isWhitelisted = function (string $eggGroup, string $pkmnName): bool {
                 return $this->whitelistedEggGroup === $eggGroup;
@@ -81,7 +88,13 @@ class SuccessorFilter {
         /*unpairable pkmn cant get children
         => may only appear at the end of a chain*/
         $isUnpairable = function (string $pkmnName): bool {
-            $pkmnData = new PkmnData($pkmnName);
+            $pkmnData = null;
+            try {
+                $pkmnData = new PkmnData($pkmnName);
+            } catch (AttributeNotFoundException $e) {
+                Constants::error($e);
+                return true;
+            }
             $unpairableStatus = $pkmnData->getUnpairable();
             return $unpairableStatus;
         };
@@ -101,8 +114,13 @@ class SuccessorFilter {
     private function checkGender () {
         Logger::statusLog('removing only female pkmn');
         $isFemale = function (string $pkmn): bool {
-            //TODO not sure whether this works
-            $pkmnData = new PkmnData($pkmn);
+            $pkmnData = null;
+            try {
+                $pkmnData = new PkmnData($pkmn);
+            } catch (AttributeNotFoundException $e) {
+                Constants::error($e);
+                return true;
+            }
             $gender = $pkmnData->getGender();
             //female pkmn cant pass on moves from gen 2 - 5
             $isFemale = $gender === 'female';

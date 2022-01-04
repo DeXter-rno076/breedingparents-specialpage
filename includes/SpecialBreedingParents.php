@@ -1,11 +1,10 @@
 <?php
-//todo look through all MediaWiki API methods and handle errors
-
 require_once 'tree creation/BreedingTreeNode.php';
 require_once 'svg creation/FrontendPkmn.php';
 require_once 'svg creation/SVGTag.php';
 require_once 'Constants.php';
 require_once 'Logger.php';
+require_once __DIR__.'/exceptions/AttributeNotFoundException.php';
 
 class SpecialBreedingParents extends SpecialPage {
     public function __construct () {

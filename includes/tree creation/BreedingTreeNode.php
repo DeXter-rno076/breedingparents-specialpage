@@ -3,6 +3,7 @@ require_once __DIR__.'/../Pkmn.php';
 require_once 'PkmnData.php';
 require_once __DIR__.'/../Logger.php';
 require_once 'SuccessorFilter.php';
+require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
 
 class BreedingTreeNode extends Pkmn {
     private bool $isRoot = false;
@@ -46,20 +47,9 @@ class BreedingTreeNode extends Pkmn {
                 return $this;
             }
         } else if ($this->isRoot) {
-            $lowestEvolution = $this->data->getLowestEvolution();
-            if ($lowestEvolution !== $this->name) {
-                $lowestEvoInstance = new BreedingTreeNode($lowestEvolution);
-                $lowestEvoNode = $lowestEvoInstance->createBreedingTreeNode($eggGroupBlacklist);
-                if (!is_null($lowestEvoNode)) {
-                    //not (this->oldGen and (evo->oldGen or evo->event))
-                    if (!$this->getLearnsByOldGen() ||
-                        !$lowestEvoNode->getLearnsByOldGen() ||
-                        !$lowestEvoNode->getLearnsByEvent()
-                    ) {
-                        $this->addSuccessor($lowestEvoNode);
-                        return $this;
-                    }
-                }
+            $result = $this->tryAddRootEvoConnection($eggGroupBlacklist);
+            if (!is_null($result)) {
+                return $result;
             }
         }
 
@@ -75,6 +65,33 @@ class BreedingTreeNode extends Pkmn {
 
         Logger::statusLog($this.' can\'t learn the move');
         return null;
+    }
+
+    private function tryAddRootEvoConnection (array &$eggGroupBlacklist): ?BreedingTreeNode {
+        $lowestEvolution = $this->data->getLowestEvolution();
+        if ($lowestEvolution === $this->name) {
+            return null;
+        }
+
+        $lowestEvoInstance = null;
+        try {
+            $lowestEvoInstance = new BreedingTreeNode($lowestEvolution);
+        } catch (AttributeNotFoundException $e) {
+            Constants::error($e);
+            return null;
+        }
+
+        $lowestEvoNode = $lowestEvoInstance->createBreedingTreeNode($eggGroupBlacklist);
+        if (!is_null($lowestEvoNode)) {
+            //not (this->oldGen and (evo->oldGen or evo->event))
+            if (!$this->getLearnsByOldGen() ||
+                !$lowestEvoNode->getLearnsByOldGen() ||
+                !$lowestEvoNode->getLearnsByEvent()
+            ) {
+                $this->addSuccessor($lowestEvoNode);
+                return $this;
+            }
+        }
     }
 
     //todo maybe separate isRoot section
