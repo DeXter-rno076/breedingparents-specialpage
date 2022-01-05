@@ -57,7 +57,7 @@ class FrontendPkmn extends Pkmn {
     private function calcYCoords (int $sectionOffset): int {
         $yCoord = $sectionOffset;
         if ($this->hasSuccessors()) {
-            $yCoord += $this->treeSectionHeight / 2;
+            $yCoord += $this->treeSectionHeight / 2 - $this->getIconHeight() / 2;
         }
         Logger::statusLog('calculated y '.$yCoord.' of '.$this);
         $this->y = $yCoord;
