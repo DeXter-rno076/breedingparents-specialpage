@@ -34,7 +34,7 @@ class SpecialBreedingParents extends SpecialPage {
 
         $targetPkmn = Constants::$targetPkmn;
         if (!isset(Constants::$pkmnData->$targetPkmn)) {
-            Constants::out($this->msg('breedingparents-unknown-pkmn').Constants::$targetPkmn.'.');
+            Constants::out($this->msg('breedingparents-unknown-pkmn', Constants::$targetPkmn));
             Logger::flush();
             return Status::newGood('unknown pkmn');
         }
@@ -49,7 +49,7 @@ class SpecialBreedingParents extends SpecialPage {
         }
         if (is_null($breedingTreeRoot)) {
             //todo check whether move has a typo or generally if it's a move
-            Constants::out(Constants::$targetPkmn.' '.$this->msg('breedingparents-cant-learn'));
+            Constants::out($this->msg('breedingparents-cant-learn', Constants::$targetPkmn, Constants::$targetMove));
             Logger::flush();
             return Status::newGood('');
         }

@@ -26,7 +26,7 @@ class Constants {
 
     public static function error (Exception $e) {
         Constants::out(Constants::$specialPage->msg(
-            'breedingparents-error').$e);
+            'breedingparents-error', $e));
     }
 
     public static function outputOnce (string $msg) {
