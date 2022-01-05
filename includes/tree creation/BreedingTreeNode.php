@@ -72,10 +72,11 @@ class BreedingTreeNode extends Pkmn {
         if ($lowestEvolution === $this->name) {
             return null;
         }
+        Logger::statusLog($this.' is not the lowest evolution in it\'s line, trying an evo connection');
 
         $lowestEvoInstance = null;
         try {
-            $lowestEvoInstance = new BreedingTreeNode($lowestEvolution);
+            $lowestEvoInstance = new BreedingTreeNode($lowestEvolution, true);
         } catch (AttributeNotFoundException $e) {
             Constants::error($e);
             return null;
