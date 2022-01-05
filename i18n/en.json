@@ -14,11 +14,12 @@
     "breedingparents-error": "Oh no :O, this should not have happened. Please report this on our Discord server or [[PokéWiki:Auskunft|here]]. Error: $1.",
     "breedingparents-unknown-pkmn": "Unknown Pokémon $1.",
     "breedingparents-cant-learn": "$1 can't learn the move $2.",
+    "breedingparents-can-learn-directly": "$1 can learn the move $2 directly via level up, TMHM / TMTR or a move tutor.",
     "breedingparents-invalid-pkmn": "Invalid character in the Pokémon name. You probably made a typo somewhere.",
     "breedingparents-invalid-move": "Invalid character in the move name. You probably made a typo somewhere.",
     "breedingparents-invalid-gen": "Invalid input for the game generation. Please just use the selection and don't play around in the URL ;)",
     "breedingparents-submit-text": "DO IT!",
     "breedingparents-markerexplanation-head": "Legend:",
-    "breedingparents-markerexplanation-oldgen": "If Mewtu could learn the move in an old generation, it would look like this.",
-    "breedingparents-markerexplanation-event": "If Mewtu could have the move from an event distribution, it would look like this."
+    "breedingparents-markerexplanation-oldgen": "If Mewtu could learn the move in an '''old generation''', it would look like this.",
+    "breedingparents-markerexplanation-event": "If Mewtu could have the move from an '''event distribution''', it would look like this."
 }

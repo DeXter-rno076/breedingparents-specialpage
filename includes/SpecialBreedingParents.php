@@ -51,7 +51,13 @@ class SpecialBreedingParents extends SpecialPage {
             //todo check whether move has a typo or generally if it's a move
             Constants::out($this->msg('breedingparents-cant-learn', Constants::$targetPkmn, Constants::$targetMove));
             Logger::flush();
-            return Status::newGood('');
+            return Status::newGood('cant learn');
+        } else if (!$breedingTreeRoot->hasSuccessors()) {
+            Constants::out($this->msg(
+                'breedingparents-can-learn-directly', Constants::$targetPkmn,
+                Constants::$targetMove));
+            Logger::flush();
+            return Status::newGood('can learn directly');
         }
 
         $frontendRoot = $this->createFrontendRoot($breedingTreeRoot);
