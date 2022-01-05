@@ -36,8 +36,8 @@ class HTMLElement {
 
         foreach ($this->innerContent as $el) {
             /*to both support nested elements and plain strings
-            toString is overwritten and used here*/
-            $innerContentString .= $el->__toString();
+            $el is converted to string and toString for HTMLElement is overwritten*/
+            $innerContentString .= (string) $el;
         }
 
         return $innerContentString;
