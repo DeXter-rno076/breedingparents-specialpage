@@ -9,6 +9,7 @@ class FrontendPkmn extends Pkmn {
     private bool $learnsByEvent;
     private bool $learnsByOldGen;
     private Array $successors = [];
+    private bool $isRoot;
 
     private int $x;
     private int $y;
@@ -24,6 +25,7 @@ class FrontendPkmn extends Pkmn {
 
         $this->learnsByEvent = $breedingTreeNode->getLearnsByEvent();
         $this->learnsByOldGen = $breedingTreeNode->getLearnsByOldGen();
+        $this->isRoot = $breedingTreeNode->getIsRoot();
 
         foreach ($breedingTreeNode->getSuccessors() as $successorTreeNode) {
             $successorFrontendObj = new FrontendPkmn($successorTreeNode);
@@ -206,6 +208,10 @@ class FrontendPkmn extends Pkmn {
 
     public function getHeight (): int {
         return $this->iconHeight;
+    }
+
+    public function getIsRoot (): bool {
+        return $this->isRoot;
     }
 
     public function getLogInfo (): string {

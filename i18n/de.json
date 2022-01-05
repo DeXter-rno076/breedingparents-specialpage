@@ -11,6 +11,7 @@
     "breedingparents-pkmn": "Pokémon",
     "breedingparents-move": "Attacke",
     "breedingparents-gen": "Generation: ",
+    "breedingparents-evo": "Entwicklung",
     "breedingparents-error": "Oh nein, das hätte nicht passieren sollen :( Bitte melde das auf unserem Discordserver oder in der [[PokéWiki:Auskunft|Auskunft]].<br /> Fehler: $1.",
     "breedingparents-unknown-pkmn": "Das Pokémon $1 ist mir unbekannt. Hast du dich eventuell vertippt?",
     "breedingparents-cant-learn": "$1 kann die Attacke $2 nicht erlernen.",

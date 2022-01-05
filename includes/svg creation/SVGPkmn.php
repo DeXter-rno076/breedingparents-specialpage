@@ -5,6 +5,7 @@ require_once 'SVGLine.php';
 require_once 'SVGLink.php';
 require_once 'SVGCircle.php';
 require_once 'SVGRectangle.php';
+require_once 'SVGText.php';
 require_once __DIR__.'/../HTMLElement.php';
 
 class SVGPkmn {
@@ -44,6 +45,10 @@ class SVGPkmn {
         if (!$pkmn->hasSuccessors()) {
             Logger::statusLog($pkmn.' has no successors => not adding any lines');
             return;
+        } else if (count($pkmn->getSuccessors()) === 1) {
+            if ($pkmn->getIsRoot() && $pkmn->getSuccessors()[0]->getIsRoot()) {
+                $this->addEvoConnection();
+            }
         }
 
         $this->middleColumnX = $pkmn->getMiddleX() + Constants::PKMN_MARGIN_HORI / 1.5;
@@ -52,7 +57,6 @@ class SVGPkmn {
     }
 
     private function addLeftHalfConnectionLines () {
-        $pkmn = $this->nodePkmn;
         $this->addPkmnMiddleConnection();
         $this->addMiddleLine();
     }
@@ -106,6 +110,29 @@ class SVGPkmn {
             $line = new SVGLine($startX, $y, $endX, $y);
             array_push($this->lineConnections, $line);
         }
+    }
+
+    private function addEvoConnection () {
+        Logger::statusLog('adding evo arrow line connection for '.$this);
+        $pkmn = $this->nodePkmn;
+        $evo = $pkmn->getSuccessors()[0];
+
+        $startX = $pkmn->getX() + $pkmn->getIconWidth()
+            + Constants::PKMN_ICON_LINE_MARGIN;
+        $endX = $evo->getX() - Constants::PKMN_ICON_LINE_MARGIN;
+        $y = $pkmn->getMiddleY();
+        $horizontalLine = new SVGLine($startX, $y, $endX, $y);
+        $upperArrowPart = new SVGLine($startX, $y, $startX + 10, $y - 10);
+        $lowerArrowPart = new SVGLine($startX, $y, $startX + 10, $y + 10);
+
+        $connectionText = new SVGText($startX + 30, $y - 2, Constants::$specialPage->msg('breedingparents-evo'));
+
+        array_push($this->lineConnections, $horizontalLine);
+        array_push($this->lineConnections, $upperArrowPart);
+        array_push($this->lineConnections, $lowerArrowPart);
+
+        //wer nicht pfuschen kann, kann nicht arbeiten
+        array_push($this->lineConnections, $connectionText);
     }
 
     public function toHTML (int $xOffset, int $yOffset): array {

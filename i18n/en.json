@@ -11,6 +11,7 @@
     "breedingparents-pkmn": "Pokémon (for now german translation)",
     "breedingparents-move": "Move (for now german translation)",
     "breedingparents-gen": "Generation: ",
+    "breedingparents-evo": "evolution",
     "breedingparents-error": "Oh no :O, this should not have happened. Please report this on our Discord server or [[PokéWiki:Auskunft|here]]. Error: $1.",
     "breedingparents-unknown-pkmn": "Unknown Pokémon $1.",
     "breedingparents-cant-learn": "$1 can't learn the move $2.",

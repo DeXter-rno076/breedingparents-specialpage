@@ -255,8 +255,12 @@ class BreedingTreeNode extends Pkmn {
         $this->learnsByOldGen = true;
     }
 
-    public function getLearnsByOldGen () {
+    public function getLearnsByOldGen (): bool {
         return $this->learnsByOldGen;
+    }
+
+    public function getIsRoot (): bool {
+        return $this->isRoot;
     }
 
     public function getLogInfo (): string {
