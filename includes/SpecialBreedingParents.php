@@ -49,7 +49,7 @@ class SpecialBreedingParents extends SpecialPage {
         }
         if (is_null($breedingTreeRoot)) {
             //todo check whether move has a typo or generally if it's a move
-            Constants::out(Constants::$targetPkmn.$this->msg('breedingparents-cant-learn'));
+            Constants::out(Constants::$targetPkmn.' '.$this->msg('breedingparents-cant-learn'));
             Logger::flush();
             return Status::newGood('');
         }

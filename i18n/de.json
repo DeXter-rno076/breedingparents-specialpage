@@ -13,7 +13,7 @@
     "breedingparents-gen": "Generation: ",
     "breedingparents-error": "Oh nein, das hätte nicht passieren sollen :( Bitte melde das auf unserem Discordserver oder in der [[PokéWiki:Auskunft|Auskunft]].<br /> Fehler: ",
     "breedingparents-unknown-pkmn": "Unbekanntes Pokémon ",
-    "breedingparents-cant-learn": " kann die Attacke nicht erlernen.",
+    "breedingparents-cant-learn": "kann die Attacke nicht erlernen.",
     "breedingparents-invalid-pkmn": "Ungültiges Zeichen im Pokémonnamen. Vermutlich hast du dich vertippt.",
     "breedingparents-invalid-move": "Ungültiges Zeichen im Attackennamen. Vermutlich hast du dich vertippt.",
     "breedingparents-invalid-gen": "Ungültige Eingabe für die Spielgeneration. Bitte benutze nur die Auswahl und spiele nicht in der URL rum ;)",

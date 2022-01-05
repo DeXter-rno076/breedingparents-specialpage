@@ -13,7 +13,7 @@
     "breedingparents-gen": "Generation: ",
     "breedingparents-error": "Oh no :O, this should not have happened. Please report this on our Discord server or [[PokéWiki:Auskunft|here]]. Error: ",
     "breedingparents-unknown-pkmn": "Unknown Pokémon ",
-    "breedingparents-cant-learn": " can't learn the move.",
+    "breedingparents-cant-learn": "can't learn the move.",
     "breedingparents-invalid-pkmn": "Invalid character in the Pokémon name. You probably made a typo somewhere.",
     "breedingparents-invalid-move": "Invalid character in the move name. You probably made a typo somewhere.",
     "breedingparents-invalid-gen": "Invalid input for the game generation. Please just use the selection and don't play around in the URL ;)",
