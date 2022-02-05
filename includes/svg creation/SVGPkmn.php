@@ -17,10 +17,10 @@ class SVGPkmn {
     private int $middleColumnX = 0;
 
     public function __construct (FrontendPkmn $pkmn) {
-        $this->nodePkmn = $pkmn;
+        $this->nodeFrontendPkmn = $pkmn;
         $this->addIcon();
         $this->addConnectionStructure();
-        foreach ($this->nodePkmn->getSuccessors() as $successor) {
+        foreach ($this->nodeFrontendPkmn->getSuccessors() as $successor) {
             $svgSuccessor = new SVGPkmn($successor);
             array_push($this->successors, $svgSuccessor);
         }
@@ -31,19 +31,19 @@ class SVGPkmn {
      * if the icon for this node could be loaded.
      */
     private function addIcon () {
-        $pkmn = $this->nodePkmn;
+        $pkmn = $this->nodeFrontendPkmn;
         $fileE = $pkmn->getFileError();
         if (is_null($fileE)) {
             Logger::statusLog($pkmn.' has no file error set => can add icon');
             $pkmnIcon = new SVGImg($pkmn);
             $link = new SVGLink($pkmn->getName(), $pkmnIcon);
-            $this->link = $link;
+            $this->pkmnLink = $link;
             return;
         }
     }
 
     private function addConnectionStructure () {
-        $pkmn = $this->nodePkmn;
+        $pkmn = $this->nodeFrontendPkmn;
 
         if (!$pkmn->hasSuccessors()) {
             Logger::statusLog($pkmn.' has no successors => not adding any lines');
@@ -65,7 +65,7 @@ class SVGPkmn {
     }
 
     private function addPkmnMiddleConnection () {
-        $pkmn = $this->nodePkmn;
+        $pkmn = $this->nodeFrontendPkmn;
         $horiStartX = $pkmn->getX() + $pkmn->getIconWidth()
             + Constants::PKMN_ICON_LINE_MARGIN;
         $horiY = $pkmn->getMiddleY();
@@ -76,7 +76,7 @@ class SVGPkmn {
     }
 
     private function addMiddleLine () {
-        $pkmn = $this->nodePkmn;
+        $pkmn = $this->nodeFrontendPkmn;
         $successors = $pkmn->getSuccessors();
         $firstSuccessor = $successors[0];
         $lastSuccessor = $successors[count($successors) - 1];
@@ -94,30 +94,18 @@ class SVGPkmn {
         array_push($this->lineConnections, $vertialLine);
     }
 
-
-    /**
-     * If this node only has one successor start and end coordinates of the
-     * vertical middle line have to be adjusted to connect the lines of 
-     * this node and its successor.
-     * @param int &$lowestY
-     * @param int &$highestY
-     */
     private function adjustCoordinatesToOnlyOneSuccessor (int &$lowestY, int &$highestY) {
-        $successor = $this->nodePkmn->getSuccessors()[0];
+        $successor = $this->nodeFrontendPkmn->getSuccessors()[0];
 
-        $nodeMiddleY = $this->nodePkmn->getMiddleY();
+        $nodeMiddleY = $this->nodeFrontendPkmn->getMiddleY();
         $successorMiddleY = $successor->getMiddleY();
 
         $lowestY = min($nodeMiddleY, $successorMiddleY);
         $highestY = max($nodeMiddleY, $successorMiddleY);
     }
 
-    /**
-     * Creates and adds the lines from the vertical middle line to the successors
-     * of this node.
-     */
     private function addMiddleSuccessorConnections () {
-        foreach ($this->nodePkmn->getSuccessors() as $successor) {
+        foreach ($this->nodeFrontendPkmn->getSuccessors() as $successor) {
             $startX = $this->middleColumnX;
             $endX = $successor->getX() - Constants::PKMN_ICON_LINE_MARGIN;
             $y = $successor->getMiddleY();
@@ -133,7 +121,7 @@ class SVGPkmn {
      */
     private function addEvoConnection () {
         Logger::statusLog('adding evo arrow line connection for '.$this);
-        $pkmn = $this->nodePkmn;
+        $pkmn = $this->nodeFrontendPkmn;
         $evo = $pkmn->getSuccessors()[0];
 
         $startX = $pkmn->getX() + $pkmn->getIconWidth()
@@ -151,21 +139,21 @@ class SVGPkmn {
         array_push($this->lineConnections, $upperArrowPart);
         array_push($this->lineConnections, $lowerArrowPart);
 
-        //wer nicht pfuschen kann, kann nicht arbeiten
-        array_push($this->lineConnections, $connectionText);
+		//todo this is unclean af
+		array_push($this->lineConnections, $connectionText);
     }
 
     public function toHTML (int $xOffset, int $yOffset): array {
         $tagArray = [];
-        if (!is_null($this->link)) {
-            array_push($tagArray, $this->link->toHTML($xOffset, $yOffset));
+        if (!is_null($this->pkmnLink)) {
+            array_push($tagArray, $this->pkmnLink->toHTML($xOffset, $yOffset));
         } else {
-            Constants::error($this->nodePkmn->getFileError());
+            Constants::error($this->nodeFrontendPkmn->getFileError());
         }
 
-        if ($this->nodePkmn->getLearnsByOldGen()) {
+        if ($this->nodeFrontendPkmn->getLearnsByOldGen()) {
             array_push($tagArray, $this->createOldGenMarker($xOffset, $yOffset));
-        } else if ($this->nodePkmn->getLearnsByEvent()) {
+        } else if ($this->nodeFrontendPkmn->getLearnsByEvent()) {
             array_push($tagArray, $this->createEventMarker($xOffset, $yOffset));
         }
 
@@ -183,9 +171,9 @@ class SVGPkmn {
     }
 
     private function createOldGenMarker (int $xOffset, int $yOffset): HTMLElement {
-        $middleX = $this->nodePkmn->getMiddleX();
-        $middleY = $this->nodePkmn->getMiddleY();
-        $width = $this->nodePkmn->getWidth();
+        $middleX = $this->nodeFrontendPkmn->getMiddleX();
+        $middleY = $this->nodeFrontendPkmn->getMiddleY();
+        $width = $this->nodeFrontendPkmn->getWidth();
 
         $oldGenMarker = new SVGCircle($middleX, $middleY, $width / 2 + Constants::SVG_CIRCLE_MARGIN);
 
@@ -193,10 +181,10 @@ class SVGPkmn {
     }
 
     private function createEventMarker (int $xOffset, int $yOffset): HTMLElement {
-        $x = $this->nodePkmn->getX();
-        $y = $this->nodePkmn->getY();
-        $width = $this->nodePkmn->getWidth();
-        $height = $this->nodePkmn->getHeight();
+        $x = $this->nodeFrontendPkmn->getX();
+        $y = $this->nodeFrontendPkmn->getY();
+        $width = $this->nodeFrontendPkmn->getWidth();
+        $height = $this->nodeFrontendPkmn->getHeight();
 
         $eventMarker = new SVGRectangle(
             $x - Constants::SVG_RECTANGLE_PADDING,
@@ -212,7 +200,7 @@ class SVGPkmn {
      * @return string SVGPkmn:<frontendPkmn instance>
      */
     public function getLogInfo (): string {
-        return 'SVGPkmn:'.$this->nodePkmn;
+        return 'SVGPkmn:'.$this->nodeFrontendPkmn;
     }
 
     public function __toString (): string {
