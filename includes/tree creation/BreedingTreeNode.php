@@ -18,6 +18,12 @@ class BreedingTreeNode extends Pkmn {
         $this->isRoot = $isRoot;
     }
 
+    /**
+     * Central functions that recursively creates the breeding tree by
+     * checking this node for learnability and possible successors.
+     * @param Array $eggGroupBlacklist - list of egg groups that were already used in this path
+     * @return BreedingTreeNode|null BreedingTreeNode with learnability info set or null if this pkmn can't learn the move
+     */
     public function createBreedingTreeNode (
             Array $eggGroupBlacklist): ?BreedingTreeNode {
         Logger::statusLog('creating tree node of '
@@ -47,7 +53,7 @@ class BreedingTreeNode extends Pkmn {
                 return $this;
             }
         } else if ($this->isRoot) {
-            $result = $this->tryAddRootEvoConnection($eggGroupBlacklist);
+            $result = $this->tryAddRootEvoConnection();
             if (!is_null($result)) {
                 return $result;
             }
@@ -67,7 +73,13 @@ class BreedingTreeNode extends Pkmn {
         return null;
     }
 
-    private function tryAddRootEvoConnection (array &$eggGroupBlacklist): ?BreedingTreeNode {
+    /**
+     * If the tree root is an evolution it can't inherit any moves (because it can't be breeded directly).
+     * So inheritance is tried on its lowest evo.
+     * 
+     * @return BreedingTreeNode|null
+     */
+    private function tryAddRootEvoConnection (): ?BreedingTreeNode {
         $lowestEvolution = $this->data->getLowestEvolution();
         if ($lowestEvolution === $this->name) {
             return null;
@@ -82,7 +94,7 @@ class BreedingTreeNode extends Pkmn {
             return null;
         }
 
-        $lowestEvoNode = $lowestEvoInstance->createBreedingTreeNode($eggGroupBlacklist);
+        $lowestEvoNode = $lowestEvoInstance->createBreedingTreeNode([]);
         if (!is_null($lowestEvoNode)) {
             //not (this->oldGen and (evo->oldGen or evo->event))
             if (!$this->getLearnsByOldGen() ||
@@ -93,9 +105,17 @@ class BreedingTreeNode extends Pkmn {
                 return $this;
             }
         }
+		return null;
     }
 
-    //todo maybe separate isRoot section
+    /**
+     * Looks which egg group(s) could 'deliver' possible breeding parents
+     * and calls the methods to check and add those pkmn.
+     * 
+     * @param Array $eggGroupBlacklist
+     * 
+     * todo separate isRoot section
+     */
     private function selectSuccessors (Array &$eggGroupBlacklist) {
         $eggGroup1 = $this->data->getEggGroup1();
         $eggGroup2 = $this->data->getEggGroup2();
@@ -142,14 +162,17 @@ class BreedingTreeNode extends Pkmn {
         $this->createSuccessorsTreeSection($eggGroupBlacklist, $otherEggGroup);
     }
 
+    /**
+     * Checks and adds the suiting pkmn of $whitelisted as the successors of this node
+     * @param Array &$eggGroupBlacklist
+     * @param string $whitelisted currently handled egg group
+     */
     private function createSuccessorsTreeSection (
             Array &$eggGroupBlacklist, string $whitelisted) {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this
             .' eggGroupBlacklist: '.json_encode($eggGroupBlacklist)
             .', whitelisted: '.$whitelisted);
-        $eggGroupPkmnList = Constants::$eggGroups->$whitelisted;
-        $filter = new SuccessorFilter(
-            $eggGroupBlacklist, $whitelisted, $eggGroupPkmnList);
+        $filter = new SuccessorFilter($eggGroupBlacklist, $whitelisted);
         $potSuccessorList = $filter->filter();
 
         foreach ($potSuccessorList as $potSuccessor) {
@@ -168,6 +191,13 @@ class BreedingTreeNode extends Pkmn {
         }
     }
 
+    /**
+     * Looks for the non-blacklisted egg group of this pkmn and returns it
+     * if it finds one.
+     * @param Array $eggGroupBlacklist
+     * 
+     * @return string egg group that is not blacklisted or '' if none is found
+     */
     private function getOtherEggGroup (Array &$eggGroupBlacklist): string {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this
             .' eggGroupBlacklist: '.json_encode($eggGroupBlacklist));
@@ -193,6 +223,9 @@ class BreedingTreeNode extends Pkmn {
         return $otherEggGroup;
     }
 
+	/**
+	 * checks Level, TMTR and Tutor learnsets
+	 */
     private function canLearnDirectly (): bool {
         $directLearnsets = $this->data->getDirectLearnsets();
         return $this->checkLearnsetType($directLearnsets, 'directly');
@@ -219,6 +252,14 @@ class BreedingTreeNode extends Pkmn {
         return $this->checkLearnsetType($oldGenLearnsets, 'old gen');
     }
 
+    /**
+     * Iterates through $learnsetList looking for Constants::$targetMove
+     * and returns whether it was found.
+     * @param Array $learnsetList
+     * @param string $learnsetType used for status logs
+     * 
+     * @return bool
+     */
     private function checkLearnsetType (Array $learnsetList, string $learnsetType): bool {
         foreach ($learnsetList as $move) {
             if ($move === Constants::$targetMove) {
@@ -229,10 +270,16 @@ class BreedingTreeNode extends Pkmn {
         return false;
     }
 
+    /**
+     * Checks whether this node has successors by counting its successors
+     * and returning amount greater 0.
+     * @return bool
+     * 
+     * todo this can probably be outsourced. FrontendPkmn and SVGPkmn use a pendant
+     * => some super class like Node if Pkmn can't be used for it
+     */
     public function hasSuccessors (): bool {
-        $successorCount = count($this->successors);
-        $hasSuccessors = $successorCount > 0;
-        return $hasSuccessors;
+        return count($this->successors) > 0;
     }
 
     public function getSuccessors (): Array {
@@ -263,8 +310,11 @@ class BreedingTreeNode extends Pkmn {
         return $this->isRoot;
     }
 
+    /**
+     * @return string BreedingTreeNode:<pkmn name>;<successor count>;<learns by event>;<learns by old gen>;<is root>;;
+     */
     public function getLogInfo (): string {
-        $msg = 'BreedingTreeNode:\'\'\''.$this->data->getName().'\'\'\';count='.count($this->successors);
+        $msg = 'BreedingTreeNode:\'\'\''.$this->data->getName().'\'\'\';'.count($this->successors);
         if (isset($this->learnsByEvent) && $this->learnsByEvent) {
             $msg .= ';learnsByEvent';
         }
@@ -277,9 +327,5 @@ class BreedingTreeNode extends Pkmn {
         $msg .= ';;';
 
         return $msg;
-    }
-
-    public function __toString (): string {
-        return $this->getLogInfo();
     }
 }
