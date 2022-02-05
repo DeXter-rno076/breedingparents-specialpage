@@ -30,12 +30,12 @@ class BreedingTreeNode extends Pkmn {
             .$this.' with eggGroupBlacklist: '.json_encode($eggGroupBlacklist));
         /*in this single spot parameter $eggGroupBlacklist MUST NOT be
         pass by reference (this would create wrong breeding trees)*/
-        if ($this->canLearnDirectly()) {
+        if ($this->data->canLearnDirectly()) {
             Logger::statusLog($this.' can learn the move directly');
             return $this;
         }
 
-        if ($this->canLearnByOldGen()) {
+        if ($this->data->canLearnByOldGen()) {
             Logger::statusLog($this.' could learn the move in an old gen');
             /*learning by old gen might be easier to get than breeding but also maybe not.
             It depends on the user, therefore learnsByOldGen is checked and marked before
@@ -44,7 +44,7 @@ class BreedingTreeNode extends Pkmn {
             $this->setLearnsByOldGen();
         }
 
-        if ($this->canInherit()) {
+        if ($this->data->canInherit()) {
             Logger::statusLog($this.' could inherit the move');
             $this->selectSuccessors($eggGroupBlacklist);
 
@@ -63,7 +63,7 @@ class BreedingTreeNode extends Pkmn {
             return $this;
         }
 
-        if ($this->canLearnByEvent()) {
+        if ($this->data->canLearnByEvent()) {
             Logger::statusLog($this.' can learn the move by event');
             $this->setLearnsByEvent();
             return $this;
@@ -210,9 +210,11 @@ class BreedingTreeNode extends Pkmn {
         if (!in_array($eggGroup1, $eggGroupBlacklist)) {
             Logger::statusLog('egg group 1 '.$eggGroup1.' found for '.$this);
             $otherEggGroup = $eggGroup1;
-        } else if (!in_array($eggGroup2, $eggGroupBlacklist)) {
+
+        } else if ($this->data->hasSecondEggGroup() && !in_array($eggGroup2, $eggGroupBlacklist)) {
             Logger::statusLog('egg group 2 '.$eggGroup2.' found for '.$this);
             $otherEggGroup = $eggGroup2;
+
         } else {
             //all egg groups blocked
             Logger::statusLog('all egg groups of '.$this. ' blocked');
@@ -221,53 +223,6 @@ class BreedingTreeNode extends Pkmn {
 
         Logger::statusLog('returning '.$otherEggGroup);
         return $otherEggGroup;
-    }
-
-	/**
-	 * checks Level, TMTR and Tutor learnsets
-	 */
-    private function canLearnDirectly (): bool {
-        $directLearnsets = $this->data->getDirectLearnsets();
-        return $this->checkLearnsetType($directLearnsets, 'directly');
-    }
-
-    private function canInherit (): bool {
-        $unbreedable = $this->data->getUnbreedable();
-        if ($unbreedable) {
-            Logger::statusLog($this.' is unbreedable');
-            return false;
-        }
-
-        $breedingLearnsets = $this->data->getBreedingLearnsets();
-        return $this->checkLearnsetType($breedingLearnsets, 'breeding');
-    }
-
-    private function canLearnByEvent (): bool {
-        $eventLearnsets = $this->data->getEventLearnsets();
-        return $this->checkLearnsetType($eventLearnsets, 'event');
-    }
-
-    private function canLearnByOldGen (): bool {
-        $oldGenLearnsets = $this->data->getOldGenLearnsets();
-        return $this->checkLearnsetType($oldGenLearnsets, 'old gen');
-    }
-
-    /**
-     * Iterates through $learnsetList looking for Constants::$targetMove
-     * and returns whether it was found.
-     * @param Array $learnsetList
-     * @param string $learnsetType used for status logs
-     * 
-     * @return bool
-     */
-    private function checkLearnsetType (Array $learnsetList, string $learnsetType): bool {
-        foreach ($learnsetList as $move) {
-            if ($move === Constants::$targetMove) {
-                Logger::statusLog('found target move in '.$learnsetType.' learnset');
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
