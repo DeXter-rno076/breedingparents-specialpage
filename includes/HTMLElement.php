@@ -63,7 +63,7 @@ class HTMLElement {
     }
 
     public function addToOutput () {
-        Constants::$out->addHTML($this->buildHTML());
+        Constants::$centralOutputPageInstance->addHTML($this->buildHTML());
     }
 
     public function __toString (): string {

@@ -33,7 +33,7 @@ class PkmnData extends Pkmn {
     private Array $oldGenLearnsets;
 
     public function __construct (String $name) {
-        $pkmnDataObj = Constants::$pkmnData->$name;
+        $pkmnDataObj = Constants::$externalPkmnJSON->$name;
         parent::__construct($name, $pkmnDataObj->id);
         $this->copyPropertys($pkmnDataObj);
     }
@@ -98,7 +98,7 @@ class PkmnData extends Pkmn {
 
     private function checkLearnsetType (Array $learnsetList, string $learnsetType): bool {
         foreach ($learnsetList as $move) {
-            if ($move === Constants::$targetMove) {
+            if ($move === Constants::$targetMoveName) {
                 Logger::statusLog('found target move in '.$learnsetType.' learnset');
                 return true;
             }

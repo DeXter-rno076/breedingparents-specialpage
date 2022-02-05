@@ -13,8 +13,8 @@ class SpecialBreedingParents extends SpecialPage {
     }
 
     public function execute ($args) {
-        Constants::$specialPage = $this;
-        Constants::$out = $this->getOutput();
+        Constants::$centralSpecialPageInstance = $this;
+        Constants::$centralOutputPageInstance = $this->getOutput();
 
         $this->setHeaders();//seems like a must have
         $this->getOutput()->setPageTitle($this->msg('breedingparents-title'));
@@ -32,9 +32,9 @@ class SpecialBreedingParents extends SpecialPage {
             return Status::newFatal('couldn\'t load data');
         }
 
-        $targetPkmn = Constants::$targetPkmn;
-        if (!isset(Constants::$pkmnData->$targetPkmn)) {
-            Constants::out($this->msg('breedingparents-unknown-pkmn', Constants::$targetPkmn));
+        $targetPkmn = Constants::$targetPkmnName;
+        if (!isset(Constants::$externalPkmnJSON->$targetPkmn)) {
+            Constants::out($this->msg('breedingparents-unknown-pkmn', Constants::$targetPkmnName));
             Logger::flush();
             return Status::newGood('unknown pkmn');
         }
@@ -49,13 +49,13 @@ class SpecialBreedingParents extends SpecialPage {
         }
         if (is_null($breedingTreeRoot)) {
             //todo check whether move has a typo or generally if it's a move
-            Constants::out($this->msg('breedingparents-cant-learn', Constants::$targetPkmn, Constants::$targetMove));
+            Constants::out($this->msg('breedingparents-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
             Logger::flush();
             return Status::newGood('cant learn');
         } else if (!$breedingTreeRoot->hasSuccessors()) {
             Constants::out($this->msg(
-                'breedingparents-can-learn-directly', Constants::$targetPkmn,
-                Constants::$targetMove));
+                'breedingparents-can-learn-directly', Constants::$targetPkmnName,
+                Constants::$targetMoveName));
             Logger::flush();
             return Status::newGood('can learn directly');
         }
@@ -71,9 +71,9 @@ class SpecialBreedingParents extends SpecialPage {
     }
 
     private function initConstants ($formData) {
-        Constants::$targetGen = $formData['genInput'];
-        Constants::$targetMove = $formData['moveInput'];
-        Constants::$targetPkmn = $formData['pkmnInput'];
+        Constants::$targetGenNumber = $formData['genInput'];
+        Constants::$targetMoveName = $formData['moveInput'];
+        Constants::$targetPkmnName = $formData['pkmnInput'];
         if (isset($formData['displayDebuglogs'])) {
             Constants::$displayDebuglogs = $formData['displayDebuglogs'];
         }
@@ -85,7 +85,7 @@ class SpecialBreedingParents extends SpecialPage {
     private function createBreedingTree (): ?BreedingTreeNode {
         $timeStart = hrtime(true);
 
-        $breedingTreeRoot = new BreedingTreeNode(Constants::$targetPkmn, true);
+        $breedingTreeRoot = new BreedingTreeNode(Constants::$targetPkmnName, true);
         Logger::statusLog('CREATING BREEDING TREE NODES');
         $breedingTreeRoot = $breedingTreeRoot->createBreedingTreeNode([]);
 
@@ -114,7 +114,7 @@ class SpecialBreedingParents extends SpecialPage {
         $timeStart = hrtime(true);
 
         $svgRoot = new SVGTag($frontendRoot);
-        Constants::$out->addModules('breedingParentsModules');
+        Constants::$centralOutputPageInstance->addModules('breedingParentsModules');
 
         $containerDiv = new HTMLElement('div', [
             'id' => 'breedingParentsSVGContainer',
@@ -208,12 +208,12 @@ class SpecialBreedingParents extends SpecialPage {
     }
 
     private function getData () {
-        $gen = Constants::$targetGen;
-        Constants::$pkmnData = $this->getPkmnData($gen);
+        $gen = Constants::$targetGenNumber;
+        Constants::$externalPkmnJSON = $this->getPkmnData($gen);
 
         $eggGroupPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
             .'/egg-groups.json';
-        Constants::$eggGroups = $this->getWikiPageContent($eggGroupPageName);
+        Constants::$externalEggGroupsJSON = $this->getWikiPageContent($eggGroupPageName);
     }
 
     private function getPkmnData (String $gen) : StdClass {

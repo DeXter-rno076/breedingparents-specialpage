@@ -18,7 +18,7 @@ class SVGRectangle extends SVGElement {
         $this->width = $width;
         $this->height = $height;
 
-        $cornerRounding = $width / Constants::SVG_RECT_PADDING;
+        $cornerRounding = $width / Constants::SVG_RECTANGLE_PADDING;
         $this->rx = $cornerRounding;
         $this->ry = $cornerRounding;
 

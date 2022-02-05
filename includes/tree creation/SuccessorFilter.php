@@ -30,8 +30,8 @@ class SuccessorFilter {
         $this->eggGroupBlacklist = $eggGroupBlacklist;
         $this->whitelistedEggGroup = $whitelistedEggGroup;
 
-        if (isset(Constants::$eggGroups->$whitelistedEggGroup)) {
-            $this->successorList = Constants::$eggGroups->$whitelistedEggGroup;
+        if (isset(Constants::$externalEggGroupsJSON->$whitelistedEggGroup)) {
+            $this->successorList = Constants::$externalEggGroupsJSON->$whitelistedEggGroup;
         } else {
             $this->successorList = [];
             Logger::elog('egg group '.$whitelistedEggGroup.' is not set');
@@ -112,7 +112,7 @@ class SuccessorFilter {
      */
     private function checkGenSpecificRequirements () {
         Logger::statusLog('removing by gen specific requirements');
-        if (Constants::$targetGen < 6) {
+        if (Constants::$targetGenNumber < 6) {
             Logger::statusLog('targetGen is < 6 => checking genders');
             //in gens 2-5 only fathers can give moves to their kids
             $this->removeFemaleOnlys();

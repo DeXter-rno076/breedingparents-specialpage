@@ -9,11 +9,11 @@ require_once 'SVGText.php';
 require_once __DIR__.'/../HTMLElement.php';
 
 class SVGPkmn {
-    private ?SVGLink $link = null;
+    private ?SVGLink $pkmnLink = null;
     private Array $lineConnections = [];
     private Array $successors = [];
+    private FrontendPkmn $nodeFrontendPkmn;
 
-    private FrontendPkmn $nodePkmn;
     private int $middleColumnX = 0;
 
     public function __construct (FrontendPkmn $pkmn) {
@@ -26,6 +26,10 @@ class SVGPkmn {
         }
     }
 
+    /**
+     * Creates and adds SVGImg and SVGLink instances for this node
+     * if the icon for this node could be loaded.
+     */
     private function addIcon () {
         $pkmn = $this->nodePkmn;
         $fileE = $pkmn->getFileError();
@@ -36,7 +40,6 @@ class SVGPkmn {
             $this->link = $link;
             return;
         }
-        Logger::statusLog($pkmn.' has file error '.$fileE.' set => adding error tetx');
     }
 
     private function addConnectionStructure () {
@@ -51,7 +54,7 @@ class SVGPkmn {
             }
         }
 
-        $this->middleColumnX = $pkmn->getMiddleX() + Constants::PKMN_MARGIN_HORI / 1.5;
+        $this->middleColumnX = $pkmn->getMiddleX() + Constants::PKMN_MARGIN_HORIZONTAL / 1.5;
         $this->addLeftHalfConnectionLines();
         $this->addMiddleSuccessorConnections();
     }
@@ -91,6 +94,14 @@ class SVGPkmn {
         array_push($this->lineConnections, $vertialLine);
     }
 
+
+    /**
+     * If this node only has one successor start and end coordinates of the
+     * vertical middle line have to be adjusted to connect the lines of 
+     * this node and its successor.
+     * @param int &$lowestY
+     * @param int &$highestY
+     */
     private function adjustCoordinatesToOnlyOneSuccessor (int &$lowestY, int &$highestY) {
         $successor = $this->nodePkmn->getSuccessors()[0];
 
@@ -101,6 +112,10 @@ class SVGPkmn {
         $highestY = max($nodeMiddleY, $successorMiddleY);
     }
 
+    /**
+     * Creates and adds the lines from the vertical middle line to the successors
+     * of this node.
+     */
     private function addMiddleSuccessorConnections () {
         foreach ($this->nodePkmn->getSuccessors() as $successor) {
             $startX = $this->middleColumnX;
@@ -112,6 +127,10 @@ class SVGPkmn {
         }
     }
 
+    /**
+     * If the root is an evolution, the connection to its lowest evo is an
+     * arrow and gets a text to additionally show that this is an evo connection. 
+     */
     private function addEvoConnection () {
         Logger::statusLog('adding evo arrow line connection for '.$this);
         $pkmn = $this->nodePkmn;
@@ -125,7 +144,8 @@ class SVGPkmn {
         $upperArrowPart = new SVGLine($startX, $y, $startX + 10, $y - 10);
         $lowerArrowPart = new SVGLine($startX, $y, $startX + 10, $y + 10);
 
-        $connectionText = new SVGText($startX + 30, $y - 2, Constants::$specialPage->msg('breedingparents-evo'));
+        $connectionText = new SVGText(
+			$startX + 30, $y - 2, Constants::$centralSpecialPageInstance->msg('breedingparents-evo'));
 
         array_push($this->lineConnections, $horizontalLine);
         array_push($this->lineConnections, $upperArrowPart);
@@ -179,15 +199,18 @@ class SVGPkmn {
         $height = $this->nodePkmn->getHeight();
 
         $eventMarker = new SVGRectangle(
-            $x - Constants::SVG_RECT_PADDING,
-            $y - Constants::SVG_RECT_PADDING,
-            $width + 2 * Constants::SVG_RECT_PADDING,
-            $height + 2 * Constants::SVG_RECT_PADDING
+            $x - Constants::SVG_RECTANGLE_PADDING,
+            $y - Constants::SVG_RECTANGLE_PADDING,
+            $width + 2 * Constants::SVG_RECTANGLE_PADDING,
+            $height + 2 * Constants::SVG_RECTANGLE_PADDING
         );
 
         return $eventMarker->toHTML($xOffset, $yOffset);
     }
 
+    /**
+     * @return string SVGPkmn:<frontendPkmn instance>
+     */
     public function getLogInfo (): string {
         return 'SVGPkmn:'.$this->nodePkmn;
     }

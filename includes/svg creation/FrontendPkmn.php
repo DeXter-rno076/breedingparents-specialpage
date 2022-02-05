@@ -33,6 +33,10 @@ class FrontendPkmn extends Pkmn {
         }
     }
 
+    /**
+     * Calculates the depth of the breeding tree by going every path and counting the longest parts together.
+     * @return int
+     */
     public function getDepth (): int {
         $highestDepth = 0;
         foreach ($this->successors as $successor) {
@@ -47,6 +51,13 @@ class FrontendPkmn extends Pkmn {
         return $highestDepth + 1;
     }
 
+    /**
+     * Just calls functions
+     *  * setIconData
+     *  * calcTreeSectionHeights
+     *  * calcYCords
+     *  * calcXCoords
+     */
     public function setTreeIconsAndCoordinates () {
         $this->setIconData();
 
@@ -56,6 +67,18 @@ class FrontendPkmn extends Pkmn {
         $this->calcXCoords();
     }
 
+    /**
+     * Calculates recursively the y coordinate of every node by using the sum
+     * of the tree section heights (tree section height of the node itself)
+     * of its successors and placing the node in the middle of its tree section.
+     * For branch ends this just sets the node at the offset.
+     * 
+     * todo this can be probably fused with calcTreeSectionHeights;
+     * 
+     * @param int $sectionOffset - y offset of this tree section
+     * 
+     * @return int height of this tree section
+     */
     private function calcYCoords (int $sectionOffset): int {
         $yCoord = $sectionOffset;
         if ($this->hasSuccessors()) {
@@ -75,14 +98,25 @@ class FrontendPkmn extends Pkmn {
         return $this->treeSectionHeight;
     }
 
+    /**
+     * Calculates x coordinates of every node by traversing through the
+     * tree layers und counting the deepness. The margin betweent each
+     * pkmn column is saved in Constants::PKMN_MARGIN_HORI.
+     * @param int $deepness
+     */
     private function calcXCoords (int $deepness = 0) {
-        $this->x = $deepness * Constants::PKMN_MARGIN_HORI - $this->getIconWidth() / 2;
+        //- getIconWidth / 2 is for centering the icons
+        $this->x = $deepness * Constants::PKMN_MARGIN_HORIZONTAL - $this->getIconWidth() / 2;
         Logger::statusLog('calculated x coordinate of '.$this);
         foreach ($this->successors as $successor) {
             $successor->calcXCoords($deepness + 1);
         }
     }
 
+    /**
+     * Tries to load the icon files for every node and sets its properties
+     * or the FileNotFoundException, depending on success.
+     */
     private function setIconData () {
         try {
             $iconFileObj = $this->getPkmnIcon($this->id);
@@ -101,6 +135,17 @@ class FrontendPkmn extends Pkmn {
         }
     }
 
+
+    /**
+     * Recursively calculates the height of each tree section.
+     * A tree section is a node with its successors.
+     * The heights are calculated by using the sum of the succesors or
+     * by using the icon height for branch ends.
+     * 
+     * todo this can probably be fused with calcYCoords
+     * 
+     * @return int
+     */
     private function calcTreeSectionHeights (): int {
         if (!$this->hasSuccessors()) {
             $height = $this->getHeight() + Constants::SVG_PKMN_SAFETY_MARGIN;
@@ -120,6 +165,16 @@ class FrontendPkmn extends Pkmn {
         return $heightSum;
     }
 
+    /**
+     * Tries to load and return the icon file object of $pkmnId and throws a
+     * FileNotFoundException if it fails.
+     * 
+     * @param string $pkmnId - pkmn id as used in PokeWiki (is a string because special forms have character postfixes)
+     * 
+     * @return File
+	 * 
+	 * @throws FileNotFoundException
+     */
     private function getPkmnIcon (string $pkmnId): File {
         $fileName = 'Pokémon-Icon '.$pkmnId.'.png';
         $fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
@@ -171,13 +226,8 @@ class FrontendPkmn extends Pkmn {
         return $this->treeSectionHeight;
     }
 
-    //==================================================
-    //getters with actual logic (:OOOOOOOOO)
-    //correction: they had logic
-
     public function getX (): int {
-        $retX = $this->x;
-        return $retX;
+        return $this->x;
     }
 
     public function getMiddleX (): int {
@@ -191,8 +241,7 @@ class FrontendPkmn extends Pkmn {
     }
 
     public function getY (): int {
-        $retY = $this->y;
-        return $retY;
+        return $this->y;
     }
 
     public function getMiddleY (): int {
@@ -214,6 +263,9 @@ class FrontendPkmn extends Pkmn {
         return $this->isRoot;
     }
 
+    /**
+     * @return string - FrontendPkmn:<pkmn name>;(<x>;<y>);<branch position>;;
+     */
     public function getLogInfo (): string {
         $msg = 'FrontendPkmn:\'\'\''.$this->name.'\'\'\';('
             .(isset($this->x) ? $this->x : '-').';'

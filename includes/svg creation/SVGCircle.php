@@ -4,27 +4,30 @@ require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../HTMLElement.php';
 
 class SVGCircle extends SVGElement {
-    private int $cx;
-    private int $cy;
-    private int $r;
+    private int $centerX;
+    private int $centerY;
+    private int $radius;
 
-    public function __construct (int $cx, int $cy, int $r) {
-        $this->cx = $cx;
-        $this->cy = $cy;
-        $this->r = $r;
+    public function __construct (int $centerX, int $centerY, int $radius) {
+        $this->centerX = $centerX;
+        $this->centerY = $centerY;
+        $this->radius = $radius;
 
         Logger::statusLog('created '.$this);
     }
 
     public function toHTML (int $xOffset, int $yOffset): HTMLElement {
         return new HTMLElement('circle', [
-            'cx' => $this->cx + $xOffset,
-            'cy' => $this->cy + $yOffset,
-            'r' => $this->r
+            'cx' => $this->centerX + $xOffset,
+            'cy' => $this->centerY + $yOffset,
+            'r' => $this->radius
         ]);
     }
 
+    /**
+     * @return string SVGCircle:(<cx>;<cy>);<r>;;
+     */
     public function getLogInfo (): string {
-        return '\'\'\'SVGCircle\'\'\':('.$this->cx.';'.$this->cy.');'.$this->r.';;';
+        return '\'\'\'SVGCircle\'\'\':('.$this->centerX.';'.$this->centerY.');'.$this->radius.';;';
     }
 }
