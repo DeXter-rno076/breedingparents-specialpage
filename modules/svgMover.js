@@ -1,21 +1,187 @@
 'use strict';
+
 const svgContainer = document.getElementById('breedingParentsSVGContainer');
 const svgTag = document.getElementById('breedingParentsSVG');
 
-//offsets of the svgTag when the user started to move it
-let yOffset = 0;
-let xOffset = 0;
+//change when screen orientation changes
+let svgWidth = svgTag.width.baseVal.value;
+let svgHeight = svgTag.height.baseVal.value;
+let containerWidth = svgContainer.clientWidth;
+let containerHeight = svgContainer.clientHeight;
 
-//mouse/touch coordinates when the user started to move the svg
-let cursorStartingX = 0;
-let cursorStartingY = 0;
+const ZOOM_IN = true;
+const ZOOM_OUT = false;
+const TOUCHES_MAXIMUM = 2;
 
-const svgWidth = svgTag.width.baseVal.value;
-const svgHeight = svgTag.height.baseVal.value;
-const containerWidth = svgContainer.clientWidth;
-const containerHeight = svgContainer.clientHeight;
+const TOUCH_MODE_MOVING = 1;
+const TOUCH_MODE_ZOOMING = 2;
+
+const debugDiv = document.getElementById('mw-debug-html');
 
 let global_currentZoom = 1;
+
+function debugOut (msg) {
+	debugDiv.innerHTML = msg + '<br />' + debugDiv.innerHTML;
+}
+
+const touchPair = {
+	touches: [],
+
+	addTouch (touchEvent) {
+		const eventTouches = touchEvent.touches;
+		if (this.isFull()) {
+			return;
+		}
+
+		if (this.isEmpty()) {
+			const firstTouch = this.getFirstTouch(eventTouches);
+			initTouchMoving(firstTouch);
+			this.touches.push(firstTouch);
+			return;
+		}
+		this.touches.push(this.getSecondTouch(eventTouches));
+	},
+
+	getFirstTouch (touches) {
+		return this.getTouchConditionally(touches, function () {
+			return true;
+		});
+	},
+
+	getSecondTouch (touches) {
+		if (this.isEmpty()) {
+			throw 'touch pair got scrambled: Attempting to add a second touch to an empty touch pair list';
+		}
+
+		return this.getTouchConditionally(touches, function (touch) {
+			return touchPair.touches[0].identifier !== touch.identifier;
+		});
+	},
+
+	getTouchConditionally (touches, condition) {
+		for (const touch of touches) {
+			if (condition(touch)) {
+				return touch;
+			}
+		}
+		return null;
+	},
+
+	getMultipleTouchesConditionally (touches, condition) {
+		const foundTouches = [];
+
+		for (const touch of touches) {
+			if (condition(touch)) {
+				foundTouches.push(touch);
+			}
+		}
+
+		return foundTouches;
+	},
+
+
+	removeTouch (touchEvent) {
+		const eventTouches = touchEvent.touches;
+		let idList = '';
+		for (let i = 0; i < eventTouches.length; i++) {
+			idList += eventTouches[i].identifier + ', ';
+		}
+
+		for (let i = 0; i < this.touches.length; i++) {
+			if (!this.touchListIncludes(eventTouches, this.touches[i])) {
+				this.touches.splice(i, 1);
+				i--;
+			}
+		}
+		if (this.isEmpty()) {
+			document.removeEventListener('touchmove', touchMove);
+		} else {
+			const firstTouch = this.getFirstTouch(this.touches);
+			initMovementVariables(firstTouch.clientX, firstTouch.clientY);
+		}
+	},
+
+	touchListIncludes (touchList, targetTouch) {
+		for (const touch of touchList) {
+			if (this.isEqualTouches(touch, targetTouch)) {
+				return true;
+			}
+		}
+		return false;
+	},
+
+	getMovedTouchCoordinatesDifference (event) {
+		const eventTouches = event.touches;
+
+		const newTouchesStates = this.getMultipleTouchesConditionally(eventTouches, function (touch) {
+			return touchPair.touchListIncludes(touchPair.touches, touch);
+		});
+
+		return this.getChangedTouch(newTouchesStates);
+	},
+
+	getChangedTouch (newTouchesStates) {
+		for (const oldTouchState of this.touches) {
+			const newTouchState = this.getTouchConditionally(newTouchesStates, function (newTouchState) {
+				return touchPair.isEqualTouches(newTouchState, oldTouchState);
+			});
+
+			const otherTouch = this.getTouchConditionally(this.touches, function (touch) {
+				return !touchPair.isEqualTouches(oldTouchState, touch);
+			})
+
+			const diff = this.calculateCoordinateSumDiff(otherTouch, oldTouchState, newTouchState);
+			if (diff !== 0) {
+				return diff;
+			}
+		}
+		return 0;
+	},
+
+	calculateCoordinateSumDiff (otherTouch, oldTouchState, newTouchState) {
+		//checking the increase or decrease of the x and y distances is enough to
+		//determine zoom in or zoom out. Exact distance is not needed.
+
+		const oldx = Math.abs(otherTouch.clientX - oldTouchState.clientX);
+		const oldy = Math.abs(otherTouch.clientY - oldTouchState.clientY);
+
+		const newx = Math.abs(otherTouch.clientX - newTouchState.clientX);
+		const newy = Math.abs(otherTouch.clientY - newTouchState.clientY);
+
+		const diffX = newx - oldx;
+		const diffY = newy - oldy;
+
+		return diffX + diffY;
+	},
+
+	isEqualTouches (a, b) {
+		return a.identifier === b.identifier;
+	},
+
+	isFull () {
+		return this.touches.length === TOUCHES_MAXIMUM;
+	},
+
+	isEmpty () {
+		return this.touches.length === 0;
+	},
+
+	getCurrentMovementMode () {
+		if (this.touches.length < 2) {
+			return TOUCH_MODE_MOVING;
+		}
+		return TOUCH_MODE_ZOOMING;
+	},
+
+	updateTouches (touchEvent) {
+		this.touches = [];
+		const eventTouches = touchEvent.touches;
+		
+		for (let i = 0; i < TOUCHES_MAXIMUM && i < eventTouches.length; i++) {
+			this.touches.push(eventTouches[i]);
+		}
+	}
+};
 
 main();
 
@@ -25,13 +191,6 @@ function main () {
     addListeners();
 }
 
-function centerSVG () {
-    const xOffset = (containerWidth - svgWidth) / 2;
-    const yOffset = (containerHeight - svgHeight) / 2;
-
-    setOffset(xOffset, yOffset);
-}
-
 function initSVGInlineStyles () {
     svgTag.style.transform = 'scale(1.00)';
     svgTag.style.left = '0px';
@@ -39,133 +198,43 @@ function initSVGInlineStyles () {
 }
 
 function addListeners () {
-    svgContainer.addEventListener('mousedown', mouseStart);
+    svgContainer.addEventListener('mousedown', initMouseMoving);
     svgContainer.addEventListener('mouseup', mouseStop);
-    svgContainer.addEventListener('touchstart', touchStart);
-    svgContainer.addEventListener('touchmove', touchMove);
+
     svgContainer.addEventListener('wheel', zoomMouse);
+
+	svgContainer.addEventListener('touchstart', addTouch);
+	svgContainer.addEventListener('touchend', removeTouch);
+
+	//screen.orientation.addEventListener('change', alignElementsForChangedScreenOrientation);
 }
 
-function mouseStart (event) {
-    startMoving('mouse', event.clientX, event.clientY);
+function addTouch (event) {
+	touchPair.addTouch(event);
 }
-
-function touchStart (event) {
-    const firstTouch = event.targetTouches[0];
-    startMoving('touch', firstTouch.clientX, firstTouch.clientY);
-}
-
-function startMoving (type, x, y) {
-    cursorStartingX = x;
-    cursorStartingY = y;
-    xOffset = parseInt(svgTag.style.left);
-    yOffset = parseInt(svgTag.style.top);
-
-    if (type === 'mouse') {
-        svgContainer.addEventListener('mousemove', moveSVG);
-    }
+function removeTouch (event) {
+	touchPair.removeTouch(event);
 }
 
 function mouseStop () {
     svgContainer.removeEventListener('mousemove', moveSVG);
 }
 
-function touchMove (event) {
-    event.preventDefault();
-    const firstTouch = event.targetTouches[0];
-    moveSVG(firstTouch);
-}
+function alignElementsForChangedScreenOrientation (event) {
+	//currently unused because it somehow doesnt exactly work as wanted
+	//is supposed to update the offsets when screen orientation is switched so that the offset dimension proportions are kept
+	const offset = getOffset();
+	const originalXProportion = offset.x / containerWidth;
+	const originalYProportion = offset.y / containerHeight;
 
-function moveSVG (event) {
-    let x = event.clientX;
-    let y = event.clientY;
+	//debugOut(originalXProportion + ' ' + originalYProportion);
 
-    let dx = cursorStartingX - x;
-    let dy = cursorStartingY - y;
+	const newXOffset = parseInt(containerHeight * originalXProportion);
+	const newYOffset = parseInt(containerWidth * originalYProportion);
 
-    let newX = xOffset - dx;
-    let newY = yOffset - dy;
+	const t = containerHeight;
+	containerHeight = containerWidth;
+	containerWidth = t;
 
-    setOffset(newX, newY);
-}
-
-function zoomMouse (event) {
-    event.preventDefault();
-    const wheelUp = event.deltaY < 0;
-    const currentTransform = svgTag.style.transform;
-    if (!/scale\(.+?\)/.test(currentTransform)) {
-        //user played around with the transform value
-        svgTag.style.transform = 'scale(1)';
-        return;
-    }
-
-    //this feels shady af, but scale is saved like that
-    const currentZoom = parseFloat(currentTransform.replace('scale(', '').replace(')', ''));
-
-    let newZoom = 1;
-    const zoomChange = currentZoom * 0.05;
-    if (wheelUp) {
-        newZoom = currentZoom + zoomChange;
-    } else {
-        newZoom = currentZoom - zoomChange;
-    }
-
-    if (isNaN(newZoom)) {
-        newZoom = 1;
-    } else if (newZoom <= 0.1) {
-        newZoom = 0.1;
-    } else if (newZoom > 5) {
-        newZoom = 5;
-    }
-
-    //todo
-    // const currentXOffset = parseInt(svgTag.style.left);
-    // const currentYOffset = parseInt(svgTag.style.top);
-
-    // const plainMx = svgTag.width.baseVal.value / 2;
-    // const plainMy = svgTag.height.baseVal.value / 2;
-
-    // const realMx = plainMx + currentXOffset;
-    // const realMy = plainMy + currentYOffset;
-
-
-    //c means cursor
-    // let cx = event.offsetX;
-    // let cy = event.offsetY;
-
-    // let xDiff = cx / prevX;
-    // prevX = cx;
-    // let zoomDiff = currentZoom / prevZoom;
-    // prevZoom = currentZoom;
-
-    // if (event.target.id === 'breedingParentsSVG') {
-    //     cx = cx * currentZoom + currentXOffset;
-    //     cy = cy * currentZoom + currentYOffset;
-    // }
-
-    // const cmx = realMx - cx;
-    // const cmy = realMy - cy;
-
-    // const xPush = cmx * (newZoom - 1);
-    // const yPush = cmy * (newZoom - 1);
-
-    global_currentZoom = newZoom;
-    svgTag.style.transform = 'scale(' + newZoom + ')';
-    //svgTag.style.left = currentXOffset + xPush + 'px';
-    //svgTag.style.top = currentYOffset + yPush + 'px';
-}
-
-function setOffset (x, y) {
-    const xPadding = 50;
-    const yPadding = 75;
-    if (Math.abs(1 - global_currentZoom) < 0.05) {
-        //todo if you get how to get the plain coordinates, implement this indipendent of the zoom
-        if (x > containerWidth - xPadding) x = containerWidth - xPadding;
-        if (y > containerHeight - yPadding) y = containerHeight - yPadding;
-        if (x < -svgWidth + xPadding) x = -svgWidth + xPadding;
-        if (y < -svgHeight + yPadding) y = -svgHeight + yPadding;
-    }
-
-    svgTag.style.left = x + 'px';
-    svgTag.style.top = y + 'px';
+	setOffset(newXOffset, newYOffset);
 }

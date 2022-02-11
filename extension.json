@@ -25,7 +25,11 @@
     },
     "ResourceModules": {
         "breedingParentsModules": {
-            "scripts": "svgMover.js",
+            "scripts": [
+				"svgMover.js",
+				"moving.js",
+				"zooming.js"
+			],
             "styles": "styles.css"
         }
     },
