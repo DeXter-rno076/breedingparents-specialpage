@@ -16,6 +16,8 @@
     "breedingparents-unknown-pkmn": "Das Pokémon $1 ist mir unbekannt. Hast du dich eventuell vertippt?",
     "breedingparents-cant-learn": "$1 kann die Attacke $2 nicht erlernen.",
     "breedingparents-can-learn-directly": "$1 kann die Attacke $2 direkt per Level-Up, TMVM/TMTP oder Attacken-Lehrer erlernen.",
+	"breedingparents-can-learn-event": "$1 kann die Attacke $2 über eine Event-Verteilung beherrschen.",
+	"breedingparents-can-learn-oldgen": "$1 kann die Attake $2 in einer älteren Spielegeneration erlernen.",
     "breedingparents-invalid-pkmn": "Ungültiges Zeichen im Pokémonnamen. Vermutlich hast du dich vertippt.",
     "breedingparents-invalid-move": "Ungültiges Zeichen im Attackennamen. Vermutlich hast du dich vertippt.",
     "breedingparents-invalid-gen": "Ungültige Eingabe für die Spielgeneration. Bitte benutze nur die Auswahl und spiele nicht in der URL rum ;)",

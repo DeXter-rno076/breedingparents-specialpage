@@ -21,6 +21,7 @@ class SpecialBreedingParents extends SpecialPage {
         $this->addForms();
     }
 
+	//todo split up
     public function reactToInputData ($data, $form) {
         $this->initConstants($data);
 
@@ -53,11 +54,20 @@ class SpecialBreedingParents extends SpecialPage {
             Logger::flush();
             return Status::newGood('cant learn');
         } else if (!$breedingTreeRoot->hasSuccessors()) {
-            Constants::out($this->msg(
-                'breedingparents-can-learn-directly', Constants::$targetPkmnName,
-                Constants::$targetMoveName));
-            Logger::flush();
-            return Status::newGood('can learn directly');
+			if ($breedingTreeRoot->getLearnsByEvent()) {
+				Constants::out($this->msg(
+					'breedingparents-can-learn-event', Constants::$targetPkmnName));
+			} else if ($breedingTreeRoot->getLearnsByOldGen()) {
+				Constants::out($this->msg(
+					'breedingparents-can-learn-oldgen', Constants::$targetPkmnName));
+			} else {
+				Constants::out($this->msg(
+					'breedingparents-can-learn-directly', Constants::$targetPkmnName,
+					Constants::$targetMoveName));
+				
+			}
+			Logger::flush();
+			return Status::newGood('can learn directly');
         }
 
         $frontendRoot = $this->createFrontendRoot($breedingTreeRoot);
@@ -70,7 +80,7 @@ class SpecialBreedingParents extends SpecialPage {
         return Status::newGood('all ok');
     }
 
-    private function initConstants ($formData) {
+	private function initConstants ($formData) {
         Constants::$targetGenNumber = $formData['genInput'];
         Constants::$targetMoveName = $formData['moveInput'];
         Constants::$targetPkmnName = $formData['pkmnInput'];

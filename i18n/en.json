@@ -16,6 +16,8 @@
     "breedingparents-unknown-pkmn": "Unknown Pokémon $1.",
     "breedingparents-cant-learn": "$1 can't learn the move $2.",
     "breedingparents-can-learn-directly": "$1 can learn the move $2 directly via level up, TMHM / TMTR or a move tutor.",
+	"breedingparents-can-learn-event": "$1 can have the move $2 in an event distribution.",
+	"breedingparents-can-learn-oldgen": "$1 can learn the move $2 in an old game generation.",
     "breedingparents-invalid-pkmn": "Invalid character in the Pokémon name. You probably made a typo somewhere.",
     "breedingparents-invalid-move": "Invalid character in the move name. You probably made a typo somewhere.",
     "breedingparents-invalid-gen": "Invalid input for the game generation. Please just use the selection and don't play around in the URL ;)",
