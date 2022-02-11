@@ -26,9 +26,8 @@ class HTMLElement {
     }
 
     public function addInnerString (string $txt) {
-        $txt = str_replace('<', '&lt;', $txt);
-        $txt = str_replace('&', '&amp;', $txt);
-        array_push($this->innerContent, $txt);
+		$cleanText = htmlentities($txt);
+        array_push($this->innerContent, $cleanText);
     }
 
     private function buildInnerContent (): string {
