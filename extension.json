@@ -25,12 +25,14 @@
     },
     "ResourceModules": {
         "breedingParentsModules": {
-            "scripts": [
-				"svgMover.js",
-				"moving.js",
-				"zooming.js"
+			"styles": [
+				"leaflet.css",
+				"styles.css"
 			],
-            "styles": "styles.css"
+            "scripts": [
+				"leaflet.js",
+				"scripts.js"
+			]
         }
     },
     "ResourceFileModulePaths": {

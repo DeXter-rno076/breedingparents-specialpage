@@ -30,25 +30,13 @@ class SVGTag extends SVGElement {
         $svgTag = new HTMLElement('svg', [
             'id' => $this->id,
             'xmlns' => 'http://www.w3.org/2000/svg',
-            'width' => $this->width,
-            'height' => $this->height
+            'viewbox' => '0 0 '.$this->width.' '.$this->height,
         ]);
         
         $topLevelSVGTags = $this->svgRoot->toHTML($xOffset, $yOffset);
 
         foreach ($topLevelSVGTags as $tag) {
             $svgTag->addInnerElement($tag);
-        }
-
-        if (Constants::$displayDebuglogs) {
-            //zoom debugging
-            $centerMarker = new HTMLElement('circle', [
-                'cx' => $this->width / 2,
-                'cy' => $this->height / 2,
-                'r' => 5,
-                'style' => 'fill:red'
-            ]);
-            $svgTag->addInnerElement($centerMarker);
         }
 
         return $svgTag;

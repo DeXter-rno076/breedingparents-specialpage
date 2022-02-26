@@ -124,20 +124,24 @@ class SpecialBreedingParents extends SpecialPage {
         $timeStart = hrtime(true);
 
         $svgRoot = new SVGTag($frontendRoot);
-        Constants::$centralOutputPageInstance->addModules('breedingParentsModules');
 
-        $containerDiv = new HTMLElement('div', [
-            'id' => 'breedingParentsSVGContainer',
-            'style' => 'overflow: hidden;'
+		$this->addCSSAndJSToOutput();
+
+        $mapDiv = new HTMLElement('div', [
+            'id' => 'breedingParentsSVGMap',
         ]);
-        $containerDiv->addInnerElement($svgRoot->toHTML());
-        $containerDiv->addToOutput();
+        $mapDiv->addToOutput();
+		$svgRoot->toHTML()->addToOutput();
 
         $timeEnd = hrtime(true);
         $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
 
         Logger::debugOut('svg creation needed: '.$timeDiff.'s');
     }
+
+	private function addCSSAndJSToOutput () {
+		Constants::$centralOutputPageInstance->addModules('breedingParentsModules');
+	}
 
     private function addMarkerExplanations () {
         require_once 'markerExamples.php';
