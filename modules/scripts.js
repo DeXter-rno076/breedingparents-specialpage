@@ -88,7 +88,9 @@ function addPkmnPopup (pkmnTag) {
 
 	const rectangle = createPkmnPopup(x, y, width, height);
 
-	rectangle.bindPopup(`<a href="${link}" rel="noreferrer noopener" target="_blank">${pkmnName}</a>`);
+	const popupLink = createPopupLinkTag(pkmnName, link);
+	
+	rectangle.bindPopup(popupLink);
 
 	rectangle.addTo(map);
 }
@@ -103,4 +105,13 @@ function createPkmnPopup (x, y, width, height) {
 			opacity: 0,
 			fillOpacity: 0
 	});
+}
+
+function createPopupLinkTag (pkmnName, link) {
+	const popupLink = document.createElement('a');
+	popupLink.href = link;
+	popupLink.target = '_blank';
+	const popupLinkText = document.createTextNode(pkmnName);
+	popupLink.appendChild(popupLinkText);
+	return popupLink;
 }
