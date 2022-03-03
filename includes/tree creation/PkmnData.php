@@ -18,6 +18,7 @@ class PkmnData extends Pkmn {
      * if this pkmn is the lowest evo in its evo line this is set to the name of this pkmn (e. g. Abra for Abra) 
      */
     private String $lowestEvolution;
+	private array $evolutions;
 
     private bool $unpairable;
     private bool $unbreedable;
@@ -49,7 +50,7 @@ class PkmnData extends Pkmn {
         $mustHavePropertysList = [
             'eggGroup1', 'eggGroup2', 'gender', 'lowestEvolution',
             'unpairable', 'unbreedable', 'directLearnsets', 'breedingLearnsets',
-            'eventLearnsets', 'oldGenLearnsets'
+            'eventLearnsets', 'oldGenLearnsets', 'evolutions'
         ];
 
         foreach ($mustHavePropertysList as $property) {
@@ -114,9 +115,17 @@ class PkmnData extends Pkmn {
         return $this->eggGroup2;
     }
 
-    public function getGender (): string {
-        return $this->gender;
-    }
+    public function isFemaleOnly (): bool {
+		return $this->gender === 'female';
+	}
+
+	public function isMaleOnly (): bool {
+		return $this->gender === 'male';
+	}
+
+	public function hasNoGender (): bool {
+		return $this->gender === 'unknown';
+	}
 
     public function getLowestEvolution (): string {
         return $this->lowestEvolution;
@@ -129,6 +138,10 @@ class PkmnData extends Pkmn {
     public function hasSecondEggGroup (): bool {
         return $this->eggGroup2 !== null;
     }
+
+	public function isEvolution (string $pkmnName): bool {
+		return in_array($pkmnName, $this->evolutions);
+	}
 
     /**
      * @return string PkmnData:<pkmn name>;;

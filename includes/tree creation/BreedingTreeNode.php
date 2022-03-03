@@ -172,7 +172,7 @@ class BreedingTreeNode extends Pkmn {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this
             .' eggGroupBlacklist: '.json_encode($eggGroupBlacklist)
             .', whitelisted: '.$whitelisted);
-        $filter = new SuccessorFilter($eggGroupBlacklist, $whitelisted);
+        $filter = new SuccessorFilter($eggGroupBlacklist, $whitelisted, $this);
         $potSuccessorList = $filter->filter();
 
         foreach ($potSuccessorList as $potSuccessor) {
@@ -264,6 +264,10 @@ class BreedingTreeNode extends Pkmn {
     public function getIsRoot (): bool {
         return $this->isRoot;
     }
+
+	public function getJSONData (): PkmnData {
+		return $this->data;
+	}
 
     /**
      * @return string BreedingTreeNode:<pkmn name>;<successor count>;<learns by event>;<learns by old gen>;<is root>;;

@@ -4,6 +4,29 @@ require_once __DIR__.'/../Constants.php';
 require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
 require_once 'PkmnData.php';
 
+/**
+ * list of relevant special cases:
+ * 		gender unknown + male only
+ *			all pkmn outside of the evo line are blacklisted
+ *
+ * 		female only
+ * 			get blacklisted in gens 2-5
+ * 
+ * 		egg groupn unknown
+ * 			have unpairable and unbreedable set to true
+ * 			have all learnsets removed
+ * 
+ * 		babys
+ * 			have unpairable set to true
+ * 			have all learnsets except of breedingLearnsets removed
+ * 
+ * 		individual Pokémon:
+ * 			Farbeagle
+ * 				has all moves of the corresponding gen set in its directLearnsets
+ *
+ * 			Manaphy
+ * 				manaphy has no breeding learnsets -> irrelevant
+ */
 class SuccessorFilter {
     private Array $eggGroupBlacklist;
 
@@ -20,15 +43,19 @@ class SuccessorFilter {
 
     private Array $successorList;
 
+	private BreedingTreeNode $currentTreeNode;
+
     public function __construct (
         Array $eggGroupBlacklist,
         String $whitelistedEggGroup,
+		BreedingTreeNode $currentTreeNode
     ) {
         Logger::statusLog('creating SuccessorFilter instance with: '
             .'eggGroupBlacklist: '.json_encode($eggGroupBlacklist)
             .'whiteListedEggGroup: '.json_encode($whitelistedEggGroup));
         $this->eggGroupBlacklist = $eggGroupBlacklist;
         $this->whitelistedEggGroup = $whitelistedEggGroup;
+		$this->currentTreeNode = $currentTreeNode;
 
         if (isset(Constants::$externalEggGroupsJSON->$whitelistedEggGroup)) {
             $this->successorList = Constants::$externalEggGroupsJSON->$whitelistedEggGroup;
@@ -40,13 +67,24 @@ class SuccessorFilter {
 
     public function filter (): Array {
         Logger::statusLog('filtering successor list');
+		$this->checkGenderSpecificRequirements();
         $this->removeBlacklistedPkmn();
         $this->removeUnpairables();
-        $this->checkGenSpecificRequirements();
+        $this->checkGenerationSpecificRequirements();
         Logger::statusLog('successor list after: '.json_encode($this->successorList));
 
         return $this->successorList;
     }
+
+	private function checkGenderSpecificRequirements () {
+		$currentTreeNodeData = $this->currentTreeNode->getJSONData();
+		if ($currentTreeNodeData->isMaleOnly() || $currentTreeNodeData->hasNoGender()) {
+			$this->remove(function (string $pkmnName) {
+				$currentTreeNodeData = $this->currentTreeNode->getJSONData();
+				return !$currentTreeNodeData->isEvolution($pkmnName);
+			});
+		}
+	}
 
     private function removeBlacklistedPkmn () {
         $pkmnIsBlacklisted = function (string $pkmn): bool {
@@ -110,7 +148,7 @@ class SuccessorFilter {
     /**
      * Checks filters that only apply in some gens, like only male pkmn can pass on moves up to gen 5.
      */
-    private function checkGenSpecificRequirements () {
+    private function checkGenerationSpecificRequirements () {
         Logger::statusLog('removing by gen specific requirements');
         if (Constants::$targetGenNumber < 6) {
             Logger::statusLog('targetGen is < 6 => checking genders');
@@ -129,10 +167,8 @@ class SuccessorFilter {
                 Constants::error($e);
                 return true;
             }
-            $gender = $pkmnData->getGender();
             //female pkmn cant pass on moves from gen 2 - 5
-            $isFemale = $gender === 'female';
-            return $isFemale;
+            return $pkmnData->isFemaleOnly();
         };
 
         $this->remove($isFemale);
