@@ -40,7 +40,7 @@ class Logger {
 
     private static function printLog (string $title, Array $log) {
         //sometimes sacrifices have to be made, here it was formatted code
-        $logContainer = '<div class="specialBreedingParentsLogContainer">
+        $logContainer = '<div class="breedingChainsLogContainer">
 '
             .'\'\'\''.$title.'\'\'\'
 ';

@@ -1,13 +1,13 @@
 <?php
 $markerExamplesTable = new HTMLElement('table', [
-    'id' => 'breedingParentsExplanationTable'
+    'id' => 'breedingChainsExplanationTable'
 ], [
-    new HTMLElement('th',['colspan' => 2], [$this->msg('breedingparents-markerexplanation-head')]),
+    new HTMLElement('th',['colspan' => 2], [$this->msg('breedingchains-markerexplanation-head')]),
     new HTMLElement('tr', [], [
         new HTMLElement('td', [], [
             new HTMLElement('svg', [
-                'id' => 'breedingParentsEventMarkerExample',
-                'class' => 'breedingParentsSVGExample',
+                'id' => 'breedingChainsEventMarkerExample',
+                'class' => 'breedingChainsSVGExample',
                 'xmlns' => 'http://www.w3.org/2000/svg',
                 'width' => 50,
                 'height' => 50
@@ -31,14 +31,14 @@ $markerExamplesTable = new HTMLElement('table', [
             ]),
         ]),
         new HTMLElement('td', [], [
-            $this->msg('breedingparents-markerexplanation-oldgen')
+            $this->msg('breedingchains-markerexplanation-oldgen')
         ])
     ]),
     new HTMLElement('tr', [], [
         new HTMLElement('td', [], [
             new HTMLElement('svg', [
-                'id' => 'breedingParentsEventMarkerExample',
-                'class' => 'breedingParentsSVGExample',
+                'id' => 'breedingChainsEventMarkerExample',
+                'class' => 'breedingChainsSVGExample',
                 'xmlns' => 'http://www.w3.org/2000/svg',
                 'width' => 50,
                 'height' => 56
@@ -65,7 +65,7 @@ $markerExamplesTable = new HTMLElement('table', [
             ])
         ]),
         new HTMLElement('td', [], [
-            $this->msg('breedingparents-markerexplanation-event')
+            $this->msg('breedingchains-markerexplanation-event')
         ])
     ])
 ]);

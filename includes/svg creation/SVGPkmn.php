@@ -133,7 +133,7 @@ class SVGPkmn {
         $lowerArrowPart = new SVGLine($startX, $y, $startX + 10, $y + 10);
 
         $connectionText = new SVGText(
-			$startX + 30, $y - 2, Constants::$centralSpecialPageInstance->msg('breedingparents-evo'));
+			$startX + 30, $y - 2, Constants::$centralSpecialPageInstance->msg('breedingchains-evo'));
 
         array_push($this->lineConnections, $horizontalLine);
         array_push($this->lineConnections, $upperArrowPart);

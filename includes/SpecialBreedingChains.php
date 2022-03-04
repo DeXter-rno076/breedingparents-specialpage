@@ -7,9 +7,9 @@ require_once 'Logger.php';
 require_once 'HTMLElement.php';
 require_once __DIR__.'/exceptions/AttributeNotFoundException.php';
 
-class SpecialBreedingParents extends SpecialPage {
+class SpecialBreedingChains extends SpecialPage {
     public function __construct () {
-        parent::__construct('BreedingParents');
+        parent::__construct('BreedingChains');
     }
 
     public function execute ($args) {
@@ -17,7 +17,7 @@ class SpecialBreedingParents extends SpecialPage {
         Constants::$centralOutputPageInstance = $this->getOutput();
 
         $this->setHeaders();//seems like a must have
-        $this->getOutput()->setPageTitle($this->msg('breedingparents-title'));
+        $this->getOutput()->setPageTitle($this->msg('breedingchains-title'));
         $this->addForms();
     }
 
@@ -35,7 +35,7 @@ class SpecialBreedingParents extends SpecialPage {
 
         $targetPkmn = Constants::$targetPkmnName;
         if (!isset(Constants::$externalPkmnJSON->$targetPkmn)) {
-            Constants::out($this->msg('breedingparents-unknown-pkmn', Constants::$targetPkmnName));
+            Constants::out($this->msg('breedingchains-unknown-pkmn', Constants::$targetPkmnName));
             Logger::flush();
             return Status::newGood('unknown pkmn');
         }
@@ -50,19 +50,19 @@ class SpecialBreedingParents extends SpecialPage {
         }
         if (is_null($breedingTreeRoot)) {
             //todo check whether move has a typo or generally if it's a move
-            Constants::out($this->msg('breedingparents-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
+            Constants::out($this->msg('breedingchains-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
             Logger::flush();
             return Status::newGood('cant learn');
         } else if (!$breedingTreeRoot->hasSuccessors()) {
 			if ($breedingTreeRoot->getLearnsByEvent()) {
 				Constants::out($this->msg(
-					'breedingparents-can-learn-event', Constants::$targetPkmnName));
+					'breedingchains-can-learn-event', Constants::$targetPkmnName));
 			} else if ($breedingTreeRoot->getLearnsByOldGen()) {
 				Constants::out($this->msg(
-					'breedingparents-can-learn-oldgen', Constants::$targetPkmnName));
+					'breedingchains-can-learn-oldgen', Constants::$targetPkmnName));
 			} else {
 				Constants::out($this->msg(
-					'breedingparents-can-learn-directly', Constants::$targetPkmnName,
+					'breedingchains-can-learn-directly', Constants::$targetPkmnName,
 					Constants::$targetMoveName));
 				
 			}
@@ -128,7 +128,7 @@ class SpecialBreedingParents extends SpecialPage {
 		$this->addCSSAndJSToOutput();
 
         $mapDiv = new HTMLElement('div', [
-            'id' => 'breedingParentsSVGMap',
+            'id' => 'breedingChainsSVGMap',
         ]);
         $mapDiv->addToOutput();
 		$svgRoot->toHTML()->addToOutput();
@@ -140,7 +140,7 @@ class SpecialBreedingParents extends SpecialPage {
     }
 
 	private function addCSSAndJSToOutput () {
-		Constants::$centralOutputPageInstance->addModules('breedingParentsModules');
+		Constants::$centralOutputPageInstance->addModules('breedingChainsModules');
 	}
 
     private function addMarkerExplanations () {
@@ -168,7 +168,7 @@ class SpecialBreedingParents extends SpecialPage {
             'ooui', $formDescriptionArray, $this->getContext());
         $form->setMethod('get');
         $form->setSubmitCallback([$this, 'reactToInputData']);
-        $form->setSubmitText($this->msg('breedingparents-submit-text')->__toString());
+        $form->setSubmitText($this->msg('breedingchains-submit-text')->__toString());
         $form->prepareForm();
 
         $form->displayForm('');
@@ -184,7 +184,7 @@ class SpecialBreedingParents extends SpecialPage {
         //these are all characters that are used in pkmn names
         $regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
         if (preg_match($regex, $value)) {
-            Constants::outputOnce($this->msg('breedingparents-invalid-pkmn'));
+            Constants::outputOnce($this->msg('breedingchains-invalid-pkmn'));
             return 'invalid pkmn';
         }
 
@@ -200,7 +200,7 @@ class SpecialBreedingParents extends SpecialPage {
         //these are all characters that are used in move names
         $regex = '/[^a-zA-ZÜßäöü\- 2]/';
         if (preg_match($regex, $value)) {
-            Constants::outputOnce($this->msg('breedingparents-invalid-move'));
+            Constants::outputOnce($this->msg('breedingchains-invalid-move'));
             return 'invalid move';
         }
 
@@ -214,7 +214,7 @@ class SpecialBreedingParents extends SpecialPage {
         }
 
         if (!is_numeric($value)) {
-            Constants::outputOnce($this->msg('breedingparents-invalid-gen'));
+            Constants::outputOnce($this->msg('breedingchains-invalid-gen'));
             return 'invalid gen';
         }
 
@@ -225,7 +225,7 @@ class SpecialBreedingParents extends SpecialPage {
         $gen = Constants::$targetGenNumber;
         Constants::$externalPkmnJSON = $this->getPkmnData($gen);
 
-        $eggGroupPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
+        $eggGroupPageName = 'MediaWiki:'.$this->msg('breedingchains').'/Gen'.$gen
             .'/egg-groups.json';
         Constants::$externalEggGroupsJSON = $this->getWikiPageContent($eggGroupPageName);
     }
@@ -236,7 +236,7 @@ class SpecialBreedingParents extends SpecialPage {
         $pageIndex = 1;
 
         do {
-            $pkmnDataPageName = 'MediaWiki:Zuchteltern/Gen'.$gen
+            $pkmnDataPageName = 'MediaWiki:'.$this->msg('breedingchains').'/Gen'.$gen
                 .'/pkmn-data'.$pageIndex.'.json';
             $pageData = $this->getWikiPageContent($pkmnDataPageName);
 

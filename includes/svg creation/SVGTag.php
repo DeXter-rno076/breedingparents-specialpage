@@ -5,7 +5,7 @@ require_once 'SVGPkmn.php';
 require_once __DIR__.'/../HTMLElement.php';
 
 class SVGTag extends SVGElement {
-    private string $id = 'breedingParentsSVG';
+    private string $id = 'breedingChainsSVG';
     private int $width;
     private int $height;
     private SVGPkmn $svgRoot;

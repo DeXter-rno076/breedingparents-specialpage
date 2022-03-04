@@ -1,6 +1,6 @@
-const svgTag = document.getElementById('breedingParentsSVG');
+const svgTag = document.getElementById('breedingChainsSVG');
 const svgChildren = svgTag.children;
-const svgMap = document.getElementById('breedingParentsSVGMap');
+const svgMap = document.getElementById('breedingChainsSVGMap');
 
 const SVG_CONTAINER_WIDTH = svgMap.clientWidth;
 const SVG_CONTAINER_HEIGHT = svgMap.clientHeight;
@@ -23,7 +23,7 @@ const overlayBounds = [
 	[SVG_HEIGHT, SVG_WIDTH]
 ];
 
-const map = L.map('breedingParentsSVGMap', {
+const map = L.map('breedingChainsSVGMap', {
 	crs: L.CRS.Simple,
 	center: calcCenterOffsets(),
 	zoom: 0,

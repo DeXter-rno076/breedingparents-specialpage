@@ -1,30 +1,30 @@
 {
-    "name" : "BreedingParents",
+    "name" : "BreedingChains",
     "version" : "0.9.0",
     "author" : "DeXter",
-    "descriptionmsg" : "breedingparents-desc",
+    "descriptionmsg" : "breedingchains-desc",
     "license-name" : "MIT",
     "type" : "specialpage",
     "SpecialPages" : {
-        "BreedingParents" : "SpecialBreedingParents"
+        "BreedingChains" : "SpecialBreedingChains"
     },
     "MessagesDirs" : {
-        "BreedingParents" : [
+        "BreedingChains" : [
             "i18n"
         ]
     },
     "AutoloadClasses": {
-        "SpecialBreedingParents": "includes/SpecialBreedingParents.php"
+        "SpecialBreedingChains": "includes/SpecialBreedingChains.php"
     },
     "ExtensionMessagesFiles": {
-        "BreedingParentsAlias": "BreedingParents.alias.php"
+        "BreedingChainsAlias": "BreedingChains.alias.php"
     },
     "manifest_version": 1,
     "requires": {
         "MediaWiki": ">= 1.25"
     },
     "ResourceModules": {
-        "breedingParentsModules": {
+        "breedingChainsModules": {
 			"styles": [
 				"leaflet.css",
 				"styles.css"
@@ -37,6 +37,6 @@
     },
     "ResourceFileModulePaths": {
         "localBasePath": "modules",
-        "remoteExtPath": "BreedingParents/modules"
+        "remoteExtPath": "BreedingChains/modules"
     }
 }

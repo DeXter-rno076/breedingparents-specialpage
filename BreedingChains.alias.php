@@ -1,6 +1,6 @@
 <?php
 /**
- * Aliases for breedingparents
+ * Aliases for breedingchains
  *
  * @file
  * @ingroup Extensions
@@ -9,10 +9,10 @@
 $specialPageAliases = [];
 
 $specialPageAliases['en'] = [
-    'BreedingParents' => [ 'BreedingParents' ],
+    'BreedingChains' => [ 'BreedingChains' ],
 ];
 
 $specialPageAliases['de'] = [
-    'BreedingParents' => [ 'Zuchteltern' ],
+    'BreedingChains' => [ 'Zuchtketten' ],
 ];
 ?>

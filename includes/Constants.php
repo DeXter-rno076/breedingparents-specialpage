@@ -31,8 +31,12 @@ class Constants {
 
     public static function error (Exception $e) {
         Constants::out(Constants::$centralSpecialPageInstance->msg(
-            'breedingparents-error', $e));
+            'breedingchains-error', Constants::getShortenedErrorMsg($e)));
     }
+
+	private static function getShortenedErrorMsg (string $e): string {
+		return substr($e, 0, strpos($e, 'Stack trace'));
+	}
 
     public static function outputOnce (string $msg) {
         static $alreadyCalled = [];
