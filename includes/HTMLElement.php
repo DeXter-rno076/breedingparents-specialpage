@@ -45,13 +45,13 @@ class HTMLElement {
     private function buildHTML (): string {
         $result = '';
         if ($this->hasInnerContent()) {
-            $start = HTML::openElement($this->tagName, $this->attributes);
+            $start = Html::openElement($this->tagName, $this->attributes);
             $middle = $this->buildInnerContent();
-            $end = HTML::closeElement($this->tagName);
+            $end = Html::closeElement($this->tagName);
 
             $result = $start.$middle.$end;
         } else {
-            $result = HTML::element($this->tagName, $this->attributes, '');
+            $result = Html::element($this->tagName, $this->attributes, '');
         }
 
         return $result;
