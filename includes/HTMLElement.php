@@ -1,6 +1,11 @@
 <?php
 require_once 'Constants.php';
 
+/**
+ * the Html class from MediaWiki has Html::element to create elements with children
+ * but this function takes the inner content only as a plain string -> no string cleaning
+ * so I made a half wrapper, half own class, that solves the issue and makes it generally handier
+ */
 class HTMLElement {
     private string $tagName;
     private array $attributes;
@@ -30,7 +35,27 @@ class HTMLElement {
         array_push($this->innerContent, $cleanText);
     }
 
-    private function buildInnerContent (): string {
+    private function buildHTML (): string {
+        if ($this->hasInnerContent()) {
+            return $this->buildHTMLWithInnerContent();
+        } else {
+            return $this->buildHTMLOfEmptyTag();
+        }
+    }
+
+    public function hasInnerContent (): bool {
+        return count($this->innerContent) > 0;
+    }
+
+	private function buildHTMLWithInnerContent (): string {
+		$start = Html::openElement($this->tagName, $this->attributes);
+        $middle = $this->buildInnerContent();
+        $end = Html::closeElement($this->tagName);
+
+        return $start.$middle.$end;
+	}
+
+	private function buildInnerContent (): string {
         $innerContentString = '';
 
         foreach ($this->innerContent as $el) {
@@ -42,24 +67,9 @@ class HTMLElement {
         return $innerContentString;
     }
 
-    private function buildHTML (): string {
-        $result = '';
-        if ($this->hasInnerContent()) {
-            $start = Html::openElement($this->tagName, $this->attributes);
-            $middle = $this->buildInnerContent();
-            $end = Html::closeElement($this->tagName);
-
-            $result = $start.$middle.$end;
-        } else {
-            $result = Html::element($this->tagName, $this->attributes, '');
-        }
-
-        return $result;
-    }
-
-    public function hasInnerContent (): bool {
-        return count($this->innerContent) > 0;
-    }
+	private function buildHTMLOfEmptyTag () {
+		return Html::element($this->tagName, $this->attributes, '');
+	}
 
     public function addToOutput () {
         Constants::$centralOutputPageInstance->addHTML($this->buildHTML());

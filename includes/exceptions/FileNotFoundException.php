@@ -16,8 +16,6 @@ class FileNotFoundException extends Exception {
     }
 
     public function getPkmnId (): string {
-        Logger::statusLog('calling '.__FUNCTION__.' on '
-            .$this.', returning '.$this->pkmnId);
         return $this->pkmnId;
     }
 }

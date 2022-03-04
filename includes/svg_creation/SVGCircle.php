@@ -1,7 +1,8 @@
 <?php
-require_once 'SVGElement.php';
 require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../HTMLElement.php';
+
+require_once 'SVGElement.php';
 
 class SVGCircle extends SVGElement {
     private int $centerX;

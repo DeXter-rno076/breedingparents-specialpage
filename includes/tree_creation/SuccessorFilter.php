@@ -1,8 +1,12 @@
 <?php
+require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
+require_once __DIR__.'/../output_messages/ErrorMessage.php';
 require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../Constants.php';
-require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
+
+
 require_once 'PkmnData.php';
+require_once 'BreedingTreeNode.php';
 
 /**
  * list of relevant special cases:
@@ -92,7 +96,8 @@ class SuccessorFilter {
             try {
                 $pkmnData = new PkmnData($pkmn);
             } catch (AttributeNotFoundException $e) {
-                Constants::error($e);
+				$errorMessage = new ErrorMessage($e);
+				$errorMessage->output();
                 return true;
             }
 
@@ -135,7 +140,8 @@ class SuccessorFilter {
             try {
                 $pkmnData = new PkmnData($pkmnName);
             } catch (AttributeNotFoundException $e) {
-                Constants::error($e);
+				$errorMessage = new ErrorMessage($e);
+                $errorMessage->output();
                 return true;
             }
             $unpairableStatus = $pkmnData->getUnpairable();
@@ -164,7 +170,8 @@ class SuccessorFilter {
             try {
                 $pkmnData = new PkmnData($pkmn);
             } catch (AttributeNotFoundException $e) {
-                Constants::error($e);
+				$errorMessage = new ErrorMessage($e);
+				$errorMessage->output();
                 return true;
             }
             //female pkmn cant pass on moves from gen 2 - 5

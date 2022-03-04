@@ -1,14 +1,16 @@
 <?php
-require_once 'tree creation/BreedingTreeNode.php';
-require_once 'svg creation/FrontendPkmn.php';
-require_once 'svg creation/SVGTag.php';
-require_once 'Constants.php';
-require_once 'Logger.php';
-require_once 'HTMLElement.php';
-require_once __DIR__.'/exceptions/AttributeNotFoundException.php';
+require_once 'exceptions/AttributeNotFoundException.php';
 require_once 'output_messages/InfoMessage.php';
 require_once 'output_messages/AlertMessage.php';
 require_once 'output_messages/ErrorMessage.php';
+require_once 'output_messages/OutputMessage.php';
+require_once 'tree_creation/BreedingTreeNode.php';
+require_once 'svg_creation/FrontendPkmn.php';
+require_once 'svg_creation/SVGTag.php';
+
+require_once 'Constants.php';
+require_once 'Logger.php';
+require_once 'HTMLElement.php';
 
 class SpecialBreedingChains extends SpecialPage {
     public function __construct () {
@@ -20,87 +22,115 @@ class SpecialBreedingChains extends SpecialPage {
         Constants::$centralOutputPageInstance = $this->getOutput();
 
         $this->setHeaders();//seems like a must have
-        $this->getOutput()->setPageTitle($this->msg('breedingchains-title'));
+        $this->getOutput()->setPageTitle(Constants::i18nMsg('breedingchains-title'));
 		$this->addCSSandJS();
         $this->addForms();
     }
 
-	//todo split up
-    public function reactToInputData ($data, $form) {
+	public function reactToInputData ($data, $form) {
+		$successCode = '';
+		try {
+			$successCode = $this->temp($data, $form);
+		} catch (Exception $e) {
+			$eMsg = new ErrorMessage($e);
+			$this->outputFinishingMessage($eMsg);
+			Logger::elog((string) $eMsg);
+            return Status::newFatal((string) $e);
+		}
+		Logger::flush();
+		return Status::newGood($successCode);
+	}
+
+    public function temp ($data, $form): string {
         $this->initConstants($data);
 
+		$findBetterName = $this->catchEasterEggs();
+		if ($findBetterName !== '') {
+			return $findBetterName;
+		}
+		
+		$this->getDataFromExternalWikipages();
+
+		$findBetterName = $this->catchUnknownPkmnName();
+        if ($findBetterName !== '') {
+			return $findBetterName;
+		}
+
+        $breedingTreeRoot = $this->createBreedingTree();
+
+		$findBetterName = $this->catchNonStandardBreedingTreeStates($breedingTreeRoot);
+        if ($findBetterName !== '') {
+			return $findBetterName;
+		}
+
+        $frontendRoot = $this->createFrontendRoot($breedingTreeRoot);
+
+		$svgMapDiv = $this->createSVGMapDiv();
+        $svgStructure = $this->createSVGStructure($frontendRoot);
+
+		$this->addVisualStructuresToOutput($svgMapDiv, $svgStructure);
+
+        return 'all ok';
+    }
+
+	private function catchEasterEggs (): string {
+		$programTermiationCode = 'easter egg';
 		if (Constants::$targetPkmnName === 'Greenchu') {
-			$infoMessage = new InfoMessage('Das Phänomen Greenchu ist noch weitgehend unerforscht. Dementsprechend wissen wir nicht, ob es $1 überhaupt erlernen kann. Selbst in der Entstehungsgeschichte bestehen noch große Lücken. Falls du dort etwas weißt, teile es uns bitte mit :D');
+			$infoMessage = new InfoMessage(Constants::i18nMsg('breedingchain-easteregg-greenchu'));
 			$infoMessage->output();
-			Logger::flush();
-			return Status::newGood('easter egg');
+			return $programTermiationCode;
 		}
 		if (Constants::$targetPkmnName === 'DeXter') {
-			$infoMessage = new InfoMessage('... Ob ich $1 erlernen kann? Ich bin vielleicht angehender professioneller Druckerreparierer, Teilzeit-Mod und Discord-Hobbypsychologe, aber ich bin (leider oder zum Glück) kein Pokémon!');
+			$messageText = Constants::i18nMsg('breedingchain-easteregg-dexter', Constants::$targetMoveName);
+			$infoMessage = new InfoMessage($messageText);
 			$infoMessage->output();
-			Logger::flush();
-			return Status::newGood('easter egg');
+			return $programTermiationCode;
 		}
+		return '';
+	}
 
-        try {
-            $this->getData();
-        } catch (Exception $e) {
-            $errorMessage = new ErrorMessage($e);
-			$errorMessage->output();
-            Logger::flush();
-            return Status::newFatal('couldn\'t load data');
-        }
-
-        $targetPkmn = Constants::$targetPkmnName;
+	private function catchUnknownPkmnName (): string {
+		$programTermiationCode = 'unknown pkmn name';
+		$targetPkmn = Constants::$targetPkmnName;
         if (!isset(Constants::$externalPkmnJSON->$targetPkmn)) {
             $alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-unknown-pkmn', Constants::$targetPkmnName));
 			$alertMessage->output();
-			Logger::flush();
-            return Status::newGood('unknown pkmn');
+            return $programTermiationCode;
         }
+		return '';
+	}
 
-        $breedingTreeRoot = null;
-        try {
-            $breedingTreeRoot = $this->createBreedingTree();
-        } catch (AttributeNotFoundException $e) {
-            $errorMessage = new ErrorMessage($e);
-			$errorMessage->output();
-            Logger::elog('couldn\'t create breeding tree, error: '.$e);
-            return Status::newFatal($e->__toString());
-        }
-        if (is_null($breedingTreeRoot)) {
+	//todo separate method
+	private function catchNonStandardBreedingTreeStates (BreedingTreeNode $breedingTreeRoot): string {
+		if (is_null($breedingTreeRoot)) {
             //todo check whether move has a typo or generally if it's a move
-            $infoMessage = new InfoMessage($this->msg('breedingchains-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
+            $infoMessage = new InfoMessage(Constants::i18nMsg('breedingchains-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
             $infoMessage->output();
-			Logger::flush();
-            return Status::newGood('cant learn');
+            return 'cant learn';
         } else if (!$breedingTreeRoot->hasSuccessors()) {
+			//todo if a lowest evo can inherit the move but no suiting parents are found, this wouldnt be handled
 			$infoMessage = null;
 			if ($breedingTreeRoot->getLearnsByEvent()) {
-				$infoMessage = new InfoMessage($this->msg(
+				$infoMessage = new InfoMessage(Constants::i18nMsg(
 					'breedingchains-can-learn-event', Constants::$targetPkmnName));
 			} else if ($breedingTreeRoot->getLearnsByOldGen()) {
-				$infoMessage = new InfoMessage($this->msg(
+				$infoMessage = new InfoMessage(Constants::i18nMsg(
 					'breedingchains-can-learn-oldgen', Constants::$targetPkmnName));
 			} else {
-				$infoMessage = new InfoMessage($this->msg(
+				$infoMessage = new InfoMessage(Constants::i18nMsg(
 					'breedingchains-can-learn-directly', Constants::$targetPkmnName,
 					Constants::$targetMoveName));	
 			}
 			$infoMessage->output();
-			Logger::flush();
-			return Status::newGood('can learn directly');
+			return 'can learn directly';
         }
+		return '';
+	}
 
-        $frontendRoot = $this->createFrontendRoot($breedingTreeRoot);
-
-        $this->addMarkerExplanations();
-
-        $this->createSVGStructure($frontendRoot);
-
-        Logger::flush();
-        return Status::newGood('all ok');
-    }
+	private function outputFinishingMessage (OutputMessage $msg) {
+		$msg->output();
+		Logger::flush();
+	}
 
 	private function initConstants ($formData) {
         Constants::$targetGenNumber = $formData['genInput'];
@@ -115,16 +145,15 @@ class SpecialBreedingChains extends SpecialPage {
     }
 
     private function createBreedingTree (): ?BreedingTreeNode {
-        $timeStart = hrtime(true);
+		Logger::statusLog('CREATING BREEDING TREE NODES');
+		$timeStart = hrtime(true);
 
         $breedingTreeRoot = new BreedingTreeNode(Constants::$targetPkmnName, true);
-        Logger::statusLog('CREATING BREEDING TREE NODES');
         $breedingTreeRoot = $breedingTreeRoot->createBreedingTreeNode([]);
 
         $timeEnd = hrtime(true);
         $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
-
-        Logger::debugOut('breeding tree creation needed: '.$timeDiff.'s');
+        Logger::outputDebugMessage('breeding tree creation needed: '.$timeDiff.'s');
 
         return $breedingTreeRoot;
     }
@@ -132,32 +161,43 @@ class SpecialBreedingChains extends SpecialPage {
     private function createFrontendRoot (BreedingTreeNode $breedingTreeRoot): FrontendPkmn {
         Logger::statusLog('CREATING FRONTENDPKMN INSTANCES');
         $timeStart = hrtime(true);
+
         $frontendRoot = new FrontendPkmn($breedingTreeRoot);
         $frontendRoot->setTreeIconsAndCoordinates();
+	
         $timeEnd = hrtime(true);
         $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
-        Logger::debugOut('creating frontend pkmn tree needed: '.$timeDiff.'s');
+        Logger::outputDebugMessage('creating frontend pkmn tree needed: '.$timeDiff.'s');
 
         return $frontendRoot;
     }
 
-    private function createSVGStructure (FrontendPkmn $frontendRoot) {
+    private function createSVGStructure (FrontendPkmn $frontendRoot): HTMLElement {
         Logger::statusLog('CREATING SVG STRUCTURE');
         $timeStart = hrtime(true);
 
         $svgRoot = new SVGTag($frontendRoot);
-
-        $mapDiv = new HTMLElement('div', [
-            'id' => 'breedingChainsSVGMap',
-        ]);
-        $mapDiv->addToOutput();
-		$svgRoot->toHTML()->addToOutput();
+		$svgStructureInHTML = $svgRoot->toHTML();
 
         $timeEnd = hrtime(true);
         $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
+        Logger::outputDebugMessage('svg creation needed: '.$timeDiff.'s');
 
-        Logger::debugOut('svg creation needed: '.$timeDiff.'s');
+		return $svgStructureInHTML;
     }
+
+	private function createSVGMapDiv (): HTMLElement {
+		$mapDiv = new HTMLElement('div', [
+            'id' => 'breedingChainsSVGMap',
+        ]);
+		return $mapDiv;
+	}
+
+	private function addVisualStructuresToOutput (HTMLElement $svgMapDiv, HTMLElement $svgStructure) {
+		$this->addMarkerExplanations();
+		$svgMapDiv->addToOutput();
+		$svgStructure->addToOutput();
+	}
 
 	private function addCSSandJS () {
 		Constants::$centralOutputPageInstance->addModules('breedingChainsModules');
@@ -188,7 +228,7 @@ class SpecialBreedingChains extends SpecialPage {
             'ooui', $formDescriptionArray, $this->getContext());
         $form->setMethod('get');
         $form->setSubmitCallback([$this, 'reactToInputData']);
-        $form->setSubmitText($this->msg('breedingchains-submit-text')->__toString());
+        $form->setSubmitText(Constants::i18nMsg('breedingchains-submit-text'));
         $form->prepareForm();
 
         $form->displayForm('');
@@ -204,7 +244,7 @@ class SpecialBreedingChains extends SpecialPage {
         //these are all characters that are used in pkmn names
         $regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
         if (preg_match($regex, $value)) {
-            $alertMessage = new AlertMessage($this->msg('breedingchains-invalid-pkmn'));
+            $alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-pkmn'));
             $alertMessage->output();
 			return 'invalid pkmn';
         }
@@ -221,7 +261,7 @@ class SpecialBreedingChains extends SpecialPage {
         //these are all characters that are used in move names
         $regex = '/[^a-zA-ZÜßäöü\- 2]/';
         if (preg_match($regex, $value)) {
-            $alertMessage = new AlertMessage($this->msg('breedingchains-invalid-move'));
+            $alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-move'));
             $alertMessage->output();
 			return 'invalid move';
         }
@@ -236,7 +276,7 @@ class SpecialBreedingChains extends SpecialPage {
         }
 
         if (!is_numeric($value)) {
-            $alertMessage = new AlertMessage($this->msg('breedingchains-invalid-gen'));
+            $alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-gen'));
             $alertMessage->output();
 			return 'invalid gen';
         }
@@ -244,11 +284,11 @@ class SpecialBreedingChains extends SpecialPage {
         return true;
     }
 
-    private function getData () {
+    private function getDataFromExternalWikipages () {
         $gen = Constants::$targetGenNumber;
         Constants::$externalPkmnJSON = $this->getPkmnData($gen);
 
-        $eggGroupPageName = 'MediaWiki:'.$this->msg('breedingchains').'/Gen'.$gen
+        $eggGroupPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'.$gen
             .'/egg-groups.json';
         Constants::$externalEggGroupsJSON = $this->getWikiPageContent($eggGroupPageName);
     }
@@ -259,7 +299,7 @@ class SpecialBreedingChains extends SpecialPage {
         $pageIndex = 1;
 
         do {
-            $pkmnDataPageName = 'MediaWiki:'.$this->msg('breedingchains').'/Gen'.$gen
+            $pkmnDataPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'.$gen
                 .'/pkmn-data'.$pageIndex.'.json';
             $pageData = $this->getWikiPageContent($pkmnDataPageName);
 

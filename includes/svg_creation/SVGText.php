@@ -1,7 +1,8 @@
 <?php
-require_once 'SVGElement.php';
-require_once __DIR__.'/../HTMLElement.php';
 require_once __DIR__.'/../Logger.php';
+require_once __DIR__.'/../HTMLElement.php';
+
+require_once 'SVGElement.php';
 
 class SVGText extends SVGElement {
     private int $x;

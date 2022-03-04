@@ -1,12 +1,16 @@
 <?php
+require_once __DIR__.'/../output_messages/ErrorMessage.php';
 require_once __DIR__.'/../Logger.php';
+require_once __DIR__.'/../HTMLElement.php';
+require_once __DIR__.'/../Constants.php';
+
 require_once 'SVGImg.php';
 require_once 'SVGLine.php';
 require_once 'SVGLink.php';
 require_once 'SVGCircle.php';
 require_once 'SVGRectangle.php';
 require_once 'SVGText.php';
-require_once __DIR__.'/../HTMLElement.php';
+require_once 'FrontendPkmn.php';
 
 class SVGPkmn {
     private ?SVGLink $pkmnLink = null;
@@ -148,7 +152,8 @@ class SVGPkmn {
         if (!is_null($this->pkmnLink)) {
             array_push($tagArray, $this->pkmnLink->toHTML($xOffset, $yOffset));
         } else {
-            Constants::error($this->nodeFrontendPkmn->getFileError());
+			$errorMessage = new ErrorMessage($this->nodeFrontendPkmn->getFileError());
+			$errorMessage->output();
         }
 
         if ($this->nodeFrontendPkmn->getLearnsByOldGen()) {

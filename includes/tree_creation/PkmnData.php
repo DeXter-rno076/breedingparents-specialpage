@@ -1,8 +1,8 @@
 <?php
+require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
 require_once __DIR__.'/../Pkmn.php';
 require_once __DIR__.'/../Constants.php';
 require_once __DIR__.'/../Logger.php';
-require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
 
 class PkmnData extends Pkmn {
     private String $eggGroup1;

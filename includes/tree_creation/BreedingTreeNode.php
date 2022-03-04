@@ -1,9 +1,11 @@
 <?php
-require_once __DIR__.'/../Pkmn.php';
-require_once 'PkmnData.php';
-require_once __DIR__.'/../Logger.php';
-require_once 'SuccessorFilter.php';
 require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
+require_once __DIR__.'/../output_messages/ErrorMessage.php';
+require_once __DIR__.'/../Pkmn.php';
+require_once __DIR__.'/../Logger.php';
+
+require_once 'PkmnData.php';
+require_once 'SuccessorFilter.php';
 
 class BreedingTreeNode extends Pkmn {
     private bool $isRoot = false;
@@ -24,12 +26,10 @@ class BreedingTreeNode extends Pkmn {
      * @param Array $eggGroupBlacklist - list of egg groups that were already used in this path
      * @return BreedingTreeNode|null BreedingTreeNode with learnability info set or null if this pkmn can't learn the move
      */
-    public function createBreedingTreeNode (
-            Array $eggGroupBlacklist): ?BreedingTreeNode {
-        Logger::statusLog('creating tree node of '
-            .$this.' with eggGroupBlacklist: '.json_encode($eggGroupBlacklist));
+    public function createBreedingTreeNode (Array $eggGroupBlacklist): ?BreedingTreeNode {
+        Logger::statusLog('creating tree node of '.$this.' with eggGroupBlacklist: '.json_encode($eggGroupBlacklist));
         /*in this single spot parameter $eggGroupBlacklist MUST NOT be
-        pass by reference (this would create wrong breeding trees)*/
+        pass by reference (this would create wrong breeding trees, more information in the documentation)*/
         if ($this->data->canLearnDirectly()) {
             Logger::statusLog($this.' can learn the move directly');
             return $this;
@@ -90,7 +90,8 @@ class BreedingTreeNode extends Pkmn {
         try {
             $lowestEvoInstance = new BreedingTreeNode($lowestEvolution, true);
         } catch (AttributeNotFoundException $e) {
-            Constants::error($e);
+			$errorMessage = new ErrorMessage($e);
+			$errorMessage->output();
             return null;
         }
 

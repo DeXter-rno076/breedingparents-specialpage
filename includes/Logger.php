@@ -8,7 +8,7 @@ class Logger {
 
     private function __construct () {}
 
-    public static function debugOut (string $msg) {
+    public static function outputDebugMessage (string $msg) {
         if (Constants::$displayDebuglogs) {
             Constants::out($msg);
         }
@@ -40,6 +40,7 @@ class Logger {
 
     private static function printLog (string $title, Array $log) {
         //sometimes sacrifices have to be made, here it was formatted code
+		//lists in MediaWiki markdown want real line breaks, not just <br /> and \n doesnt work for some reason
         $logContainer = '<div class="breedingChainsLogContainer">
 '
             .'\'\'\''.$title.'\'\'\'

@@ -2,21 +2,21 @@
 class Constants {
     public static StdClass $externalPkmnJSON;
     public static StdClass $externalEggGroupsJSON;
+
     public static String $targetPkmnName;
     public static String $targetMoveName;
     public static String $targetGenNumber;
-    public static OutputPage $centralOutputPageInstance;
+
+	public static OutputPage $centralOutputPageInstance;
     public static SpecialPage $centralSpecialPageInstance;
-    /**
-     * @var bool whether to display custom error and warnung logs, performance measurements and the svg center dot
+    
+	/**
+     * @var bool whether to display custom error and warning logs and performance measurements
      */
     public static bool $displayDebuglogs = false;
-    /**
-     * @var bool whether to display custom status logs
-     */
     public static bool $displayStatuslogs = false;
 
-    //space between each pkmn icon
+
     public const PKMN_MARGIN_HORIZONTAL = 200;
     public const PKMN_ICON_LINE_MARGIN = 10;
     public const SVG_RECTANGLE_PADDING = 5;
@@ -29,6 +29,13 @@ class Constants {
 		return Constants::$centralSpecialPageInstance->msg($msgIdentifier, ...$params);
 	}
 
+	/**
+	 * the 'default' string only ouptut method intendedly uses addWikiTextAsContent()
+	 * which parses the string as MediaWiki markdown because adding something as plain HTML
+	 * always feels risky af. HTMLForm is the only spot where direct HTML is added to the output
+	 * because the class has built in cleaning functionality and so on, which ensures that no
+	 * satanic sins are injected.
+	 */
     public static function out (String $msg) {
         Constants::$centralOutputPageInstance->addWikiTextAsContent($msg.' ');
 	}

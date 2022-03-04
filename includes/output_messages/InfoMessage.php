@@ -1,5 +1,4 @@
 <?php
-
 require_once 'OutputMessage.php';
 
 class InfoMessage extends OutputMessage {

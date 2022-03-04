@@ -1,7 +1,9 @@
 <?php
-require_once __DIR__.'/../Pkmn.php';
 require_once __DIR__.'/../exceptions/FileNotFoundException.php';
+require_once __DIR__.'/../tree_creation/BreedingTreeNode.php';
+require_once __DIR__.'/../Pkmn.php';
 require_once __DIR__.'/../Logger.php';
+require_once __DIR__.'/../Constants.php';
 
 use MediaWiki\MediaWikiServices;
 

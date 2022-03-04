@@ -1,5 +1,5 @@
 <?php
-
+require_once __DIR__.'/../Constants.php';
 require_once 'OutputMessage.php';
 
 class ErrorMessage extends OutputMessage {
