@@ -44,7 +44,7 @@
 	border-color: #3366cc;
 }
 
-.breedingChainsAlertMessage {
+.breedingChainsAlertMessage, .breedingChainsErrorMessage {
 	border-color: #fa5f43;
 }
 
