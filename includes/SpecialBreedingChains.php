@@ -18,12 +18,24 @@ class SpecialBreedingChains extends SpecialPage {
 
         $this->setHeaders();//seems like a must have
         $this->getOutput()->setPageTitle($this->msg('breedingchains-title'));
+		$this->addCSSandJS();
         $this->addForms();
     }
 
 	//todo split up
     public function reactToInputData ($data, $form) {
         $this->initConstants($data);
+
+		if (Constants::$targetPkmnName === 'Greenchu') {
+			Constants::outputInfoMessage('Das Phänomen Greenchu ist noch weitgehend unerforscht. Dementsprechend wissen wir nicht, ob es $1 überhaupt erlernen kann. Selbst in der Entstehungsgeschichte bestehen noch große Lücken. Falls du dort etwas weißt, teile es uns bitte mit :D');
+			Logger::flush();
+			return Status::newGood('easter egg');
+		}
+		if (Constants::$targetPkmnName === 'DeXter') {
+			Constants::outputInfoMessage('... Ob ich $1 erlernen kann? Ich bin vielleicht angehender professioneller Druckerreparierer, Teilzeit-Mod und Discord-Hobbypsychologe, aber ich bin (leider oder zum Glück) kein Pokémon!');
+			Logger::flush();
+			return Status::newGood('easter egg');
+		}
 
         try {
             $this->getData();
@@ -35,7 +47,7 @@ class SpecialBreedingChains extends SpecialPage {
 
         $targetPkmn = Constants::$targetPkmnName;
         if (!isset(Constants::$externalPkmnJSON->$targetPkmn)) {
-            Constants::out($this->msg('breedingchains-unknown-pkmn', Constants::$targetPkmnName));
+            Constants::outputAlertMessage($this->msg('breedingchains-unknown-pkmn', Constants::$targetPkmnName));
             Logger::flush();
             return Status::newGood('unknown pkmn');
         }
@@ -50,18 +62,18 @@ class SpecialBreedingChains extends SpecialPage {
         }
         if (is_null($breedingTreeRoot)) {
             //todo check whether move has a typo or generally if it's a move
-            Constants::out($this->msg('breedingchains-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
+            Constants::outputInfoMessage($this->msg('breedingchains-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
             Logger::flush();
             return Status::newGood('cant learn');
         } else if (!$breedingTreeRoot->hasSuccessors()) {
 			if ($breedingTreeRoot->getLearnsByEvent()) {
-				Constants::out($this->msg(
+				Constants::outputInfoMessage($this->msg(
 					'breedingchains-can-learn-event', Constants::$targetPkmnName));
 			} else if ($breedingTreeRoot->getLearnsByOldGen()) {
-				Constants::out($this->msg(
+				Constants::outputInfoMessage($this->msg(
 					'breedingchains-can-learn-oldgen', Constants::$targetPkmnName));
 			} else {
-				Constants::out($this->msg(
+				Constants::outputInfoMessage($this->msg(
 					'breedingchains-can-learn-directly', Constants::$targetPkmnName,
 					Constants::$targetMoveName));
 				
@@ -125,8 +137,6 @@ class SpecialBreedingChains extends SpecialPage {
 
         $svgRoot = new SVGTag($frontendRoot);
 
-		$this->addCSSAndJSToOutput();
-
         $mapDiv = new HTMLElement('div', [
             'id' => 'breedingChainsSVGMap',
         ]);
@@ -139,7 +149,7 @@ class SpecialBreedingChains extends SpecialPage {
         Logger::debugOut('svg creation needed: '.$timeDiff.'s');
     }
 
-	private function addCSSAndJSToOutput () {
+	private function addCSSandJS () {
 		Constants::$centralOutputPageInstance->addModules('breedingChainsModules');
 	}
 
@@ -184,7 +194,7 @@ class SpecialBreedingChains extends SpecialPage {
         //these are all characters that are used in pkmn names
         $regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
         if (preg_match($regex, $value)) {
-            Constants::outputOnce($this->msg('breedingchains-invalid-pkmn'));
+            Constants::outputOnceAlertMessage($this->msg('breedingchains-invalid-pkmn'));
             return 'invalid pkmn';
         }
 
@@ -200,7 +210,7 @@ class SpecialBreedingChains extends SpecialPage {
         //these are all characters that are used in move names
         $regex = '/[^a-zA-ZÜßäöü\- 2]/';
         if (preg_match($regex, $value)) {
-            Constants::outputOnce($this->msg('breedingchains-invalid-move'));
+            Constants::outputOnceAlertMessage($this->msg('breedingchains-invalid-move'));
             return 'invalid move';
         }
 
@@ -214,7 +224,7 @@ class SpecialBreedingChains extends SpecialPage {
         }
 
         if (!is_numeric($value)) {
-            Constants::outputOnce($this->msg('breedingchains-invalid-gen'));
+            Constants::outputOnceAlertMessage($this->msg('breedingchains-invalid-gen'));
             return 'invalid gen';
         }
 

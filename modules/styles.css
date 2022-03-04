@@ -29,3 +29,27 @@
 #breedingChainsExplanationTable td:last-child {
     max-width: 280px;
 }
+
+.breedingChainsMessageBox {
+	width: 60%;
+	margin: 1em auto;
+	border-radius: 1em;
+	padding: 0.5em;
+	border-style: solid;
+	border-width: 0.5em;
+	text-align: center;
+}
+
+.breedingChainsInfoMessage {
+	border-color: #3366cc;
+}
+
+.breedingChainsAlertMessage {
+	border-color: #fa5f43;
+}
+
+@media only screen and (max-width: 600px) {
+	.breedingChainsMessageBox {
+		width: 90%;
+	}
+}

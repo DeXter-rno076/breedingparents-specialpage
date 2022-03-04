@@ -25,24 +25,70 @@ class Constants {
     public const SVG_SAFETY_MARGIN = 50;
     public const SVG_OFFSET = 50;
 
+	public static function i18nMsg (string $msgIdentifier, ...$params): string {
+		return Constants::$centralSpecialPageInstance->msg($msgIdentifier, ...$params);
+	}
+
     public static function out (String $msg) {
         Constants::$centralOutputPageInstance->addWikiTextAsContent($msg.' ');
     }
 
     public static function error (Exception $e) {
-        Constants::out(Constants::$centralSpecialPageInstance->msg(
-            'breedingchains-error', Constants::getShortenedErrorMsg($e)));
-    }
-
-	private static function getShortenedErrorMsg (string $e): string {
-		return substr($e, 0, strpos($e, 'Stack trace'));
+		$eMsgForOutput = Constants::getShortenedErrorMsg($e);
+		$outputMsg = Constants::i18nMsg('breedingchains-error', $eMsgForOutput);
+		Constants::outputAlertMessage($outputMsg);
 	}
 
-    public static function outputOnce (string $msg) {
+	private static function getShortenedErrorMsg (Exception $e): string {
+		$eMsg = $e->__toString();
+		$wantedEndOfErrorMessage = Constants::getWantedEndOfErrorMessage($eMsg);
+		return substr($eMsg, 0, $wantedEndOfErrorMessage);
+	}
+
+	private static function getWantedEndOfErrorMessage (string $eMsg): int {
+		$msgEndMarker = 'Stack trace';
+		$msgEndMarkerIndex = strpos($eMsg, $msgEndMarker);
+		if (!$msgEndMarkerIndex) {
+			return strlen($eMsg);
+		}
+		return $msgEndMarkerIndex;
+	}
+
+    public static function outputOnceAlertMessage (string $msg) {
         static $alreadyCalled = [];
         if (!isset($alreadyCalled[$msg])) {
             $alreadyCalled[$msg] = 1;
-            Constants::out($msg);
+			Constants::outputAlertMessage($msg);
         }
     }
+
+	public static function outputInfoMessage (string $msg) {
+		Constants::outputMessageBox($msg, 'info');
+	}
+
+	public static function outputAlertMessage (string $msg) {
+		Constants::outputMessageBox($msg, 'alert');
+	}
+
+	private static function outputMessageBox (string $msg, string $boxType) {
+		$box = new HTMLElement('div', [
+			'class' => Constants::getMessageBoxClass($boxType)
+		], [$msg]);
+		$box->addToOutput();
+	}
+
+	private static function getMessageBoxClass (string $type): string {
+		$classes = 'breedingChainsMessageBox';
+
+		switch ($type) {
+			case 'alert':
+				$classes .= ' breedingChainsAlertMessage';
+				break;
+			case 'info':
+				$classes .= ' breedingChainsInfoMessage';
+				break;
+		}
+
+		return $classes;
+	}
 }
