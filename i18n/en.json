@@ -12,17 +12,20 @@
     "breedingchains-move": "Move (for now german translation)",
     "breedingchains-gen": "Generation: ",
     "breedingchains-evo": "evolution",
-    "breedingchains-error": "Oh no :O, this should not have happened. Please report this on our Discord server or [[PokéWiki:Auskunft|here]]. Error: $1.",
+    "breedingchains-error": "Oh no :O, this should not have happened. Please report this on our Discord server or [[PokéWiki:Auskunft|here]]. Error: $1",
     "breedingchains-unknown-pkmn": "Unknown Pokémon $1.",
-    "breedingchains-cant-learn": "$1 can't learn the move $2.",
+    "breedingchains-cant-learn": "$1 '''cannot''' learn the move $2.",
     "breedingchains-can-learn-directly": "$1 can learn the move $2 directly via level up, TMHM / TMTR or a move tutor.",
 	"breedingchains-can-learn-event": "$1 can have the move $2 in an event distribution.",
 	"breedingchains-can-learn-oldgen": "$1 can learn the move $2 in an old game generation.",
     "breedingchains-invalid-pkmn": "Invalid character in the Pokémon name. You probably made a typo somewhere.",
     "breedingchains-invalid-move": "Invalid character in the move name. You probably made a typo somewhere.",
     "breedingchains-invalid-gen": "Invalid input for the game generation. Please just use the selection and don't play around in the URL ;)",
-    "breedingchains-submit-text": "DO IT!",
+    "breedingchains-submit-text": "search",
     "breedingchains-markerexplanation-head": "Legend:",
     "breedingchains-markerexplanation-oldgen": "If Mewtu could learn the move in an '''old generation''', it would look like this.",
-    "breedingchains-markerexplanation-event": "If Mewtu could have the move from an '''event distribution''', it would look like this."
+    "breedingchains-markerexplanation-event": "If Mewtu could have the move from an '''event distribution''', it would look like this.",
+	"breedingchains-easteregg-greenchu": "Das Phänomen Greenchu ist noch weitgehend unerforscht. Dementsprechend wissen wir nicht, ob es $1 überhaupt erlernen kann. Selbst in der Entstehungsgeschichte bestehen noch große Lücken. Falls du dort etwas weißt, teile es uns bitte mit :D",
+	"breedingchains-easteregg-dexter": "... Ob ich $1 erlernen kann? Ich bin vielleicht angehender professioneller Druckerreparierer, Teilzeit-Mod und Discord-Hobbypsychologe, aber ich bin (leider oder zum Glück) kein Pokémon!"
+
 }
