@@ -9,10 +9,10 @@
 $specialPageAliases = [];
 
 $specialPageAliases['en'] = [
-    'BreedingChains' => [ 'BreedingChains' ],
+	'BreedingChains' => [ 'BreedingChains' ],
 ];
 
 $specialPageAliases['de'] = [
-    'BreedingChains' => [ 'Zuchtketten' ],
+	'BreedingChains' => [ 'Zuchtketten' ],
 ];
 ?>

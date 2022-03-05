@@ -13,19 +13,19 @@ require_once 'Logger.php';
 require_once 'HTMLElement.php';
 
 class SpecialBreedingChains extends SpecialPage {
-    public function __construct () {
-        parent::__construct('BreedingChains');
-    }
+	public function __construct () {
+		parent::__construct('BreedingChains');
+	}
 
-    public function execute ($args) {
-        Constants::$centralSpecialPageInstance = $this;
-        Constants::$centralOutputPageInstance = $this->getOutput();
+	public function execute ($args) {
+		Constants::$centralSpecialPageInstance = $this;
+		Constants::$centralOutputPageInstance = $this->getOutput();
 
-        $this->setHeaders();//seems like a must have
-        $this->getOutput()->setPageTitle(Constants::i18nMsg('breedingchains-title'));
+		$this->setHeaders();//seems like a must have
+		$this->getOutput()->setPageTitle(Constants::i18nMsg('breedingchains-title'));
 		$this->addCSSandJS();
-        $this->addForms();
-    }
+		$this->addForms();
+	}
 
 	public function reactToInputData ($data, $form) {
 		$successCode = '';
@@ -35,14 +35,14 @@ class SpecialBreedingChains extends SpecialPage {
 			$eMsg = new ErrorMessage($e);
 			$this->outputFinishingMessage($eMsg);
 			Logger::elog((string) $eMsg);
-            return Status::newFatal((string) $e);
+			return Status::newFatal((string) $e);
 		}
 		Logger::flush();
 		return Status::newGood($successCode);
 	}
 
-    public function temp ($data, $form): string {
-        $this->initConstants($data);
+	public function temp ($data, $form): string {
+		$this->initConstants($data);
 
 		$findBetterName = $this->catchEasterEggs();
 		if ($findBetterName !== '') {
@@ -52,26 +52,26 @@ class SpecialBreedingChains extends SpecialPage {
 		$this->getDataFromExternalWikipages();
 
 		$findBetterName = $this->catchUnknownPkmnName();
-        if ($findBetterName !== '') {
+		if ($findBetterName !== '') {
 			return $findBetterName;
 		}
 
-        $breedingTreeRoot = $this->createBreedingTree();
+		$breedingTreeRoot = $this->createBreedingTree();
 
 		$findBetterName = $this->catchNonStandardBreedingTreeStates($breedingTreeRoot);
-        if ($findBetterName !== '') {
+		if ($findBetterName !== '') {
 			return $findBetterName;
 		}
 
-        $frontendRoot = $this->createFrontendRoot($breedingTreeRoot);
+		$frontendRoot = $this->createFrontendRoot($breedingTreeRoot);
 
 		$svgMapDiv = $this->createSVGMapDiv();
-        $svgStructure = $this->createSVGStructure($frontendRoot);
+		$svgStructure = $this->createSVGStructure($frontendRoot);
 
 		$this->addVisualStructuresToOutput($svgMapDiv, $svgStructure);
 
-        return 'all ok';
-    }
+		return 'all ok';
+	}
 
 	private function catchEasterEggs (): string {
 		$programTermiationCode = 'easter egg';
@@ -92,22 +92,22 @@ class SpecialBreedingChains extends SpecialPage {
 	private function catchUnknownPkmnName (): string {
 		$programTermiationCode = 'unknown pkmn name';
 		$targetPkmn = Constants::$targetPkmnName;
-        if (!isset(Constants::$externalPkmnJSON->$targetPkmn)) {
-            $alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-unknown-pkmn', Constants::$targetPkmnName));
+		if (!isset(Constants::$externalPkmnJSON->$targetPkmn)) {
+			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-unknown-pkmn', Constants::$targetPkmnName));
 			$alertMessage->output();
-            return $programTermiationCode;
-        }
+			return $programTermiationCode;
+		}
 		return '';
 	}
 
 	//todo separate method
 	private function catchNonStandardBreedingTreeStates (BreedingTreeNode $breedingTreeRoot): string {
 		if (is_null($breedingTreeRoot)) {
-            //todo check whether move has a typo or generally if it's a move
-            $infoMessage = new InfoMessage(Constants::i18nMsg('breedingchains-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
-            $infoMessage->output();
-            return 'cant learn';
-        } else if (!$breedingTreeRoot->hasSuccessors()) {
+			//todo check whether move has a typo or generally if it's a move
+			$infoMessage = new InfoMessage(Constants::i18nMsg('breedingchains-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
+			$infoMessage->output();
+			return 'cant learn';
+		} else if (!$breedingTreeRoot->hasSuccessors()) {
 			//todo if a lowest evo can inherit the move but no suiting parents are found, this wouldnt be handled
 			$infoMessage = null;
 			if ($breedingTreeRoot->getLearnsByEvent()) {
@@ -123,7 +123,7 @@ class SpecialBreedingChains extends SpecialPage {
 			}
 			$infoMessage->output();
 			return 'can learn directly';
-        }
+		}
 		return '';
 	}
 
@@ -133,63 +133,63 @@ class SpecialBreedingChains extends SpecialPage {
 	}
 
 	private function initConstants ($formData) {
-        Constants::$targetGenNumber = $formData['genInput'];
-        Constants::$targetMoveName = $formData['moveInput'];
-        Constants::$targetPkmnName = $formData['pkmnInput'];
-        if (isset($formData['displayDebuglogs'])) {
-            Constants::$displayDebuglogs = $formData['displayDebuglogs'];
-        }
-        if (isset($formData['displayStatuslogs'])) {
-            Constants::$displayStatuslogs = $formData['displayStatuslogs'];
-        }
-    }
+		Constants::$targetGenNumber = $formData['genInput'];
+		Constants::$targetMoveName = $formData['moveInput'];
+		Constants::$targetPkmnName = $formData['pkmnInput'];
+		if (isset($formData['displayDebuglogs'])) {
+			Constants::$displayDebuglogs = $formData['displayDebuglogs'];
+		}
+		if (isset($formData['displayStatuslogs'])) {
+			Constants::$displayStatuslogs = $formData['displayStatuslogs'];
+		}
+	}
 
-    private function createBreedingTree (): ?BreedingTreeNode {
+	private function createBreedingTree (): ?BreedingTreeNode {
 		Logger::statusLog('CREATING BREEDING TREE NODES');
 		$timeStart = hrtime(true);
 
-        $breedingTreeRoot = new BreedingTreeNode(Constants::$targetPkmnName, true);
-        $breedingTreeRoot = $breedingTreeRoot->createBreedingTreeNode([]);
+		$breedingTreeRoot = new BreedingTreeNode(Constants::$targetPkmnName, true);
+		$breedingTreeRoot = $breedingTreeRoot->createBreedingTreeNode([]);
 
-        $timeEnd = hrtime(true);
-        $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
-        Logger::outputDebugMessage('breeding tree creation needed: '.$timeDiff.'s');
+		$timeEnd = hrtime(true);
+		$timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
+		Logger::outputDebugMessage('breeding tree creation needed: '.$timeDiff.'s');
 
-        return $breedingTreeRoot;
-    }
+		return $breedingTreeRoot;
+	}
 
-    private function createFrontendRoot (BreedingTreeNode $breedingTreeRoot): FrontendPkmn {
-        Logger::statusLog('CREATING FRONTENDPKMN INSTANCES');
-        $timeStart = hrtime(true);
+	private function createFrontendRoot (BreedingTreeNode $breedingTreeRoot): FrontendPkmn {
+		Logger::statusLog('CREATING FRONTENDPKMN INSTANCES');
+		$timeStart = hrtime(true);
 
-        $frontendRoot = new FrontendPkmn($breedingTreeRoot);
-        $frontendRoot->setTreeIconsAndCoordinates();
+		$frontendRoot = new FrontendPkmn($breedingTreeRoot);
+		$frontendRoot->setTreeIconsAndCoordinates();
 	
-        $timeEnd = hrtime(true);
-        $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
-        Logger::outputDebugMessage('creating frontend pkmn tree needed: '.$timeDiff.'s');
+		$timeEnd = hrtime(true);
+		$timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
+		Logger::outputDebugMessage('creating frontend pkmn tree needed: '.$timeDiff.'s');
 
-        return $frontendRoot;
-    }
+		return $frontendRoot;
+	}
 
-    private function createSVGStructure (FrontendPkmn $frontendRoot): HTMLElement {
-        Logger::statusLog('CREATING SVG STRUCTURE');
-        $timeStart = hrtime(true);
+	private function createSVGStructure (FrontendPkmn $frontendRoot): HTMLElement {
+		Logger::statusLog('CREATING SVG STRUCTURE');
+		$timeStart = hrtime(true);
 
-        $svgRoot = new SVGTag($frontendRoot);
+		$svgRoot = new SVGTag($frontendRoot);
 		$svgStructureInHTML = $svgRoot->toHTML();
 
-        $timeEnd = hrtime(true);
-        $timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
-        Logger::outputDebugMessage('svg creation needed: '.$timeDiff.'s');
+		$timeEnd = hrtime(true);
+		$timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
+		Logger::outputDebugMessage('svg creation needed: '.$timeDiff.'s');
 
 		return $svgStructureInHTML;
-    }
+	}
 
 	private function createSVGMapDiv (): HTMLElement {
 		$mapDiv = new HTMLElement('div', [
-            'id' => 'breedingChainsSVGMap',
-        ]);
+			'id' => 'breedingChainsSVGMap',
+		]);
 		return $mapDiv;
 	}
 
@@ -203,131 +203,131 @@ class SpecialBreedingChains extends SpecialPage {
 		Constants::$centralOutputPageInstance->addModules('breedingChainsModules');
 	}
 
-    private function addMarkerExplanations () {
-        require_once 'markerExamples.php';
-        $markerExamplesTable->addToOutput();
-    }
+	private function addMarkerExplanations () {
+		require_once 'markerExamples.php';
+		$markerExamplesTable->addToOutput();
+	}
 
-    private function addForms () {
-        require_once 'formDescriptor.php';
+	private function addForms () {
+		require_once 'formDescriptor.php';
 
-        $formDescriptionArray = $formDescriptor;
-        $user = $this->getUser();
-        $userGroups = $user->getGroupMemberships();
-        //todo put the group names in some kind of config file
-        if (isset($userGroups['voting'])) {
-            $formDescriptionArray = array_merge($formDescriptionArray,
-                $debuglogsCheckBox);
-        }
-        if (isset($userGroups['trusted'])) {
-            $formDescriptionArray = array_merge($formDescriptionArray,
-                $statuslogsCheckBox);
-        }
+		$formDescriptionArray = $formDescriptor;
+		$user = $this->getUser();
+		$userGroups = $user->getGroupMemberships();
+		//todo put the group names in some kind of config file
+		if (isset($userGroups['voting'])) {
+			$formDescriptionArray = array_merge($formDescriptionArray,
+				$debuglogsCheckBox);
+		}
+		if (isset($userGroups['trusted'])) {
+			$formDescriptionArray = array_merge($formDescriptionArray,
+				$statuslogsCheckBox);
+		}
 
-        $form = HTMLForm::factory(
-            'ooui', $formDescriptionArray, $this->getContext());
-        $form->setMethod('get');
-        $form->setSubmitCallback([$this, 'reactToInputData']);
-        $form->setSubmitText(Constants::i18nMsg('breedingchains-submit-text'));
-        $form->prepareForm();
+		$form = HTMLForm::factory(
+			'ooui', $formDescriptionArray, $this->getContext());
+		$form->setMethod('get');
+		$form->setSubmitCallback([$this, 'reactToInputData']);
+		$form->setSubmitText(Constants::i18nMsg('breedingchains-submit-text'));
+		$form->prepareForm();
 
-        $form->displayForm('');
-        $form->trySubmit();
-    }
+		$form->displayForm('');
+		$form->trySubmit();
+	}
 
-    //has to be public
-    public function validatePkmn ($value, $allData) {
-        if ($value === '' || $value === null) {
-            return true;
-        }
+	//has to be public
+	public function validatePkmn ($value, $allData) {
+		if ($value === '' || $value === null) {
+			return true;
+		}
 
-        //these are all characters that are used in pkmn names
-        $regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
-        if (preg_match($regex, $value)) {
-            $alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-pkmn'));
-            $alertMessage->output();
+		//these are all characters that are used in pkmn names
+		$regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
+		if (preg_match($regex, $value)) {
+			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-pkmn'));
+			$alertMessage->output();
 			return 'invalid pkmn';
-        }
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    //has to be public
-    public function validateMove ($value, $allData) {
-        if ($value === '' || $value === null) {
-            return true;
-        }
+	//has to be public
+	public function validateMove ($value, $allData) {
+		if ($value === '' || $value === null) {
+			return true;
+		}
 
-        //these are all characters that are used in move names
-        $regex = '/[^a-zA-ZÜßäöü\- 2]/';
-        if (preg_match($regex, $value)) {
-            $alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-move'));
-            $alertMessage->output();
+		//these are all characters that are used in move names
+		$regex = '/[^a-zA-ZÜßäöü\- 2]/';
+		if (preg_match($regex, $value)) {
+			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-move'));
+			$alertMessage->output();
 			return 'invalid move';
-        }
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    //has to be public
-    public function validateGen ($value, $allData) {
-        if ($value === '' || $value === null) {
-            return true;
-        }
+	//has to be public
+	public function validateGen ($value, $allData) {
+		if ($value === '' || $value === null) {
+			return true;
+		}
 
-        if (!is_numeric($value)) {
-            $alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-gen'));
-            $alertMessage->output();
+		if (!is_numeric($value)) {
+			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-gen'));
+			$alertMessage->output();
 			return 'invalid gen';
-        }
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    private function getDataFromExternalWikipages () {
-        $gen = Constants::$targetGenNumber;
-        Constants::$externalPkmnJSON = $this->getPkmnData($gen);
+	private function getDataFromExternalWikipages () {
+		$gen = Constants::$targetGenNumber;
+		Constants::$externalPkmnJSON = $this->getPkmnData($gen);
 
-        $eggGroupPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'.$gen
-            .'/egg-groups.json';
-        Constants::$externalEggGroupsJSON = $this->getWikiPageContent($eggGroupPageName);
-    }
+		$eggGroupPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'.$gen
+			.'/egg-groups.json';
+		Constants::$externalEggGroupsJSON = $this->getWikiPageContent($eggGroupPageName);
+	}
 
-    private function getPkmnData (String $gen) : StdClass {
-        $pkmnDataArr = [];
-        $pageData = null;
-        $pageIndex = 1;
+	private function getPkmnData (String $gen) : StdClass {
+		$pkmnDataArr = [];
+		$pageData = null;
+		$pageIndex = 1;
 
-        do {
-            $pkmnDataPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'.$gen
-                .'/pkmn-data'.$pageIndex.'.json';
-            $pageData = $this->getWikiPageContent($pkmnDataPageName);
+		do {
+			$pkmnDataPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'.$gen
+				.'/pkmn-data'.$pageIndex.'.json';
+			$pageData = $this->getWikiPageContent($pkmnDataPageName);
 
-            $pageDataArray = (array) $pageData;
-            $pkmnDataArr = array_merge($pkmnDataArr, $pageDataArray);
+			$pageDataArray = (array) $pageData;
+			$pkmnDataArr = array_merge($pkmnDataArr, $pageDataArray);
 
-            $pageIndex++;
-        } while (isset($pageData->continue));
+			$pageIndex++;
+		} while (isset($pageData->continue));
 
-        $pkmnDataObj = (object) $pkmnDataArr;
+		$pkmnDataObj = (object) $pkmnDataArr;
 
-        return $pkmnDataObj;
-    }
+		return $pkmnDataObj;
+	}
 
-    /*original code written by Buo and code
-    without deprecated parts written by Robbi (thanks ^^)
+	/*original code written by Buo and code
+	without deprecated parts written by Robbi (thanks ^^)
 
-    returns JSON objects and arrays
-    -> needs 2 return types which needs php 8*/
-    public function getWikiPageContent (string $title) {
-        $page = WikiPage::factory(Title::newFromText($title));
+	returns JSON objects and arrays
+	-> needs 2 return types which needs php 8*/
+	public function getWikiPageContent (string $title) {
+		$page = WikiPage::factory(Title::newFromText($title));
 
-        if(!$page->exists()) {
-            throw new Exception('wiki page '.$title.' not found');
-        }
+		if(!$page->exists()) {
+			throw new Exception('wiki page '.$title.' not found');
+		}
 
-        $pageData = ContentHandler::getContentText($page->getContent());
+		$pageData = ContentHandler::getContentText($page->getContent());
 
-        return json_decode($pageData);
-    }
+		return json_decode($pageData);
+	}
 }

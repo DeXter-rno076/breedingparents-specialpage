@@ -5,117 +5,117 @@ require_once __DIR__.'/../Constants.php';
 require_once __DIR__.'/../Logger.php';
 
 class PkmnData extends Pkmn {
-    private String $eggGroup1;
-    private ?String $eggGroup2;
+	private String $eggGroup1;
+	private ?String $eggGroup2;
 
-    /**
-     * @var String gender of this pkmn; male | female | both | unknown
-     */
-    private String $gender;
+	/**
+	 * @var String gender of this pkmn; male | female | both | unknown
+	 */
+	private String $gender;
 
-    /**
-     * @var String lowest evolution of this pkmn (e. g. Charmander for Charizard); 
-     * if this pkmn is the lowest evo in its evo line this is set to the name of this pkmn (e. g. Abra for Abra) 
-     */
-    private String $lowestEvolution;
+	/**
+	 * @var String lowest evolution of this pkmn (e. g. Charmander for Charizard); 
+	 * if this pkmn is the lowest evo in its evo line this is set to the name of this pkmn (e. g. Abra for Abra) 
+	 */
+	private String $lowestEvolution;
 	private array $evolutions;
 
-    private bool $unpairable;
-    private bool $unbreedable;
+	private bool $unpairable;
+	private bool $unbreedable;
 
-    /**
-     * @var Array level up, TMHM/TMTR and tutor learnsets of this pkmn
-     * todo maybe tutor learnsets get their own list in the future
-     */
-    private Array $directLearnsets;
-    private Array $breedingLearnsets;
+	/**
+	 * @var Array level up, TMHM/TMTR and tutor learnsets of this pkmn
+	 * todo maybe tutor learnsets get their own list in the future
+	 */
+	private Array $directLearnsets;
+	private Array $breedingLearnsets;
 
-    private Array $eventLearnsets;
-    private Array $oldGenLearnsets;
+	private Array $eventLearnsets;
+	private Array $oldGenLearnsets;
 
-    public function __construct (String $name) {
-        $pkmnDataObj = Constants::$externalPkmnJSON->$name;
-        parent::__construct($name, $pkmnDataObj->id);
-        $this->copyPropertys($pkmnDataObj);
-    }
+	public function __construct (String $name) {
+		$pkmnDataObj = Constants::$externalPkmnJSON->$name;
+		parent::__construct($name, $pkmnDataObj->id);
+		$this->copyPropertys($pkmnDataObj);
+	}
 
-    /**
-     * Copies values from the JSON obj of this pkmn to this instance.
-     * If a must have value is not set in the JSON obj, this throws an AttributeNotFoundException
-     * @param StdClass $pkmnDataObj obj from the external JSON data
-     * 
+	/**
+	 * Copies values from the JSON obj of this pkmn to this instance.
+	 * If a must have value is not set in the JSON obj, this throws an AttributeNotFoundException
+	 * @param StdClass $pkmnDataObj obj from the external JSON data
+	 * 
 	 * @throws AttributeNotFoundException
-     */
-    private function copyPropertys (StdClass $pkmnDataObj) {
-        $mustHavePropertysList = [
-            'eggGroup1', 'eggGroup2', 'gender', 'lowestEvolution',
-            'unpairable', 'unbreedable', 'directLearnsets', 'breedingLearnsets',
-            'eventLearnsets', 'oldGenLearnsets', 'evolutions'
-        ];
+	 */
+	private function copyPropertys (StdClass $pkmnDataObj) {
+		$mustHavePropertysList = [
+			'eggGroup1', 'eggGroup2', 'gender', 'lowestEvolution',
+			'unpairable', 'unbreedable', 'directLearnsets', 'breedingLearnsets',
+			'eventLearnsets', 'oldGenLearnsets', 'evolutions'
+		];
 
-        foreach ($mustHavePropertysList as $property) {
-            if (!isset($pkmnDataObj->$property)) {
-                Logger::elog('data object of '.$this->name
-                    .' is missing property '.$property);
-                throw new AttributeNotFoundException($this, $property);
-            }
-            $this->$property = $pkmnDataObj->$property;
-        }
+		foreach ($mustHavePropertysList as $property) {
+			if (!isset($pkmnDataObj->$property)) {
+				Logger::elog('data object of '.$this->name
+					.' is missing property '.$property);
+				throw new AttributeNotFoundException($this, $property);
+			}
+			$this->$property = $pkmnDataObj->$property;
+		}
 
-        $optionalPropertys = [];
+		$optionalPropertys = [];
 
-        foreach ($optionalPropertys as $property) {
-            if (isset($pkmnDataObj->$property)) {
-                $this->$property = $pkmnDataObj->$property;
-                continue;
-            }
-            $this->$property = null;
-        }
-    }
+		foreach ($optionalPropertys as $property) {
+			if (isset($pkmnDataObj->$property)) {
+				$this->$property = $pkmnDataObj->$property;
+				continue;
+			}
+			$this->$property = null;
+		}
+	}
 
 	/**
 	 * checks Level, TMTR and Tutor learnsets
 	 */
-    public function canLearnDirectly (): bool {
-        return $this->checkLearnsetType($this->directLearnsets, 'directly');
-    }
+	public function canLearnDirectly (): bool {
+		return $this->checkLearnsetType($this->directLearnsets, 'directly');
+	}
 
-    public function canInherit (): bool {
-        if ($this->unbreedable) {
-            Logger::statusLog($this.' is unbreedable');
-            return false;
-        }
+	public function canInherit (): bool {
+		if ($this->unbreedable) {
+			Logger::statusLog($this.' is unbreedable');
+			return false;
+		}
 
-        return $this->checkLearnsetType($this->breedingLearnsets, 'breeding');
-    }
+		return $this->checkLearnsetType($this->breedingLearnsets, 'breeding');
+	}
 
-    public function canLearnByEvent (): bool {
-        return $this->checkLearnsetType($this->eventLearnsets, 'event');
-    }
+	public function canLearnByEvent (): bool {
+		return $this->checkLearnsetType($this->eventLearnsets, 'event');
+	}
 
-    public function canLearnByOldGen (): bool {
-        return $this->checkLearnsetType($this->oldGenLearnsets, 'old gen');
-    }
+	public function canLearnByOldGen (): bool {
+		return $this->checkLearnsetType($this->oldGenLearnsets, 'old gen');
+	}
 
-    private function checkLearnsetType (Array $learnsetList, string $learnsetType): bool {
-        foreach ($learnsetList as $move) {
-            if ($move === Constants::$targetMoveName) {
-                Logger::statusLog('found target move in '.$learnsetType.' learnset');
-                return true;
-            }
-        }
-        return false;
-    }
+	private function checkLearnsetType (Array $learnsetList, string $learnsetType): bool {
+		foreach ($learnsetList as $move) {
+			if ($move === Constants::$targetMoveName) {
+				Logger::statusLog('found target move in '.$learnsetType.' learnset');
+				return true;
+			}
+		}
+		return false;
+	}
 
-    public function getEggGroup1 (): string {
-        return $this->eggGroup1;
-    }
+	public function getEggGroup1 (): string {
+		return $this->eggGroup1;
+	}
 
-    public function getEggGroup2 (): ?string {
-        return $this->eggGroup2;
-    }
+	public function getEggGroup2 (): ?string {
+		return $this->eggGroup2;
+	}
 
-    public function isFemaleOnly (): bool {
+	public function isFemaleOnly (): bool {
 		return $this->gender === 'female';
 	}
 
@@ -127,28 +127,28 @@ class PkmnData extends Pkmn {
 		return $this->gender === 'unknown';
 	}
 
-    public function getLowestEvolution (): string {
-        return $this->lowestEvolution;
-    }
+	public function getLowestEvolution (): string {
+		return $this->lowestEvolution;
+	}
 
-    public function getUnpairable (): bool {
-        return $this->unpairable;
-    }
+	public function getUnpairable (): bool {
+		return $this->unpairable;
+	}
 
-    public function hasSecondEggGroup (): bool {
-        return $this->eggGroup2 !== null;
-    }
+	public function hasSecondEggGroup (): bool {
+		return $this->eggGroup2 !== null;
+	}
 
 	public function isEvolution (string $pkmnName): bool {
 		return in_array($pkmnName, $this->evolutions);
 	}
 
-    /**
-     * @return string PkmnData:<pkmn name>;;
-     * Is never used, because PkmnData instances are created all the time
-     * and would flood the status log.
-     */
-    public function getLogInfo(): string {
-        return 'PkmnData:'.$this->name.';;';
-    }
+	/**
+	 * @return string PkmnData:<pkmn name>;;
+	 * Is never used, because PkmnData instances are created all the time
+	 * and would flood the status log.
+	 */
+	public function getLogInfo(): string {
+		return 'PkmnData:'.$this->name.';;';
+	}
 }

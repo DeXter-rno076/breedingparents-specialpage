@@ -1,42 +1,42 @@
 {
-    "name" : "BreedingChains",
-    "version" : "0.9.0",
-    "author" : "DeXter",
-    "descriptionmsg" : "breedingchains-desc",
-    "license-name" : "MIT",
-    "type" : "specialpage",
-    "SpecialPages" : {
-        "BreedingChains" : "SpecialBreedingChains"
-    },
-    "MessagesDirs" : {
-        "BreedingChains" : [
-            "i18n"
-        ]
-    },
-    "AutoloadClasses": {
-        "SpecialBreedingChains": "includes/SpecialBreedingChains.php"
-    },
-    "ExtensionMessagesFiles": {
-        "BreedingChainsAlias": "BreedingChains.alias.php"
-    },
-    "manifest_version": 1,
-    "requires": {
-        "MediaWiki": ">= 1.25"
-    },
-    "ResourceModules": {
-        "breedingChainsModules": {
+	"name" : "BreedingChains",
+	"version" : "0.9.0",
+	"author" : "DeXter",
+	"descriptionmsg" : "breedingchains-desc",
+	"license-name" : "MIT",
+	"type" : "specialpage",
+	"SpecialPages" : {
+		"BreedingChains" : "SpecialBreedingChains"
+	},
+	"MessagesDirs" : {
+		"BreedingChains" : [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"SpecialBreedingChains": "includes/SpecialBreedingChains.php"
+	},
+	"ExtensionMessagesFiles": {
+		"BreedingChainsAlias": "BreedingChains.alias.php"
+	},
+	"requires": {
+		"MediaWiki": ">= 1.25"
+	},
+	"ResourceModules": {
+		"breedingChainsModules": {
 			"styles": [
 				"leaflet.css",
 				"styles.css"
 			],
-            "scripts": [
+			"scripts": [
 				"leaflet.js",
 				"scripts.js"
 			]
-        }
-    },
-    "ResourceFileModulePaths": {
-        "localBasePath": "modules",
-        "remoteExtPath": "BreedingChains/modules"
-    }
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "modules",
+		"remoteExtPath": "BreedingChains/modules"
+	},
+	"manifest_version": 1
 }

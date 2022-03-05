@@ -2,20 +2,20 @@
 require_once __DIR__.'/../Logger.php';
 
 class FileNotFoundException extends Exception {
-    private string $msg;
-    private string $pkmnId;
+	private string $msg;
+	private string $pkmnId;
 
-    public function __construct (string $pkmnId, Throwable $previous = null) {
-        $this->msg = 'couldn\'t load pkmn icon of ' + $pkmnId;
-        $this->pkmnId = $pkmnId;
-        parent::__construct($this->msg, 0, $previous);
-    }
+	public function __construct (string $pkmnId, Throwable $previous = null) {
+		$this->msg = 'couldn\'t load pkmn icon of ' + $pkmnId;
+		$this->pkmnId = $pkmnId;
+		parent::__construct($this->msg, 0, $previous);
+	}
 
-    public function __toString (): string {
-        return 'FileNotFoundException: '.$this->msg;
-    }
+	public function __toString (): string {
+		return 'FileNotFoundException: '.$this->msg;
+	}
 
-    public function getPkmnId (): string {
-        return $this->pkmnId;
-    }
+	public function getPkmnId (): string {
+		return $this->pkmnId;
+	}
 }

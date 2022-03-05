@@ -1,30 +1,30 @@
 {
-    "@metadata": {
-        "authors": [
-            "DeXter"
-        ]
-    },
-    "breedingchains": "Zuchtketten",
-    "breedingchains-title": "Spezial:Zuchtketten",
-    "breedingchains-desc": "[[Special:BreedingChains|Zeigt]] den Zuchteltern-Baum eines Pokémon für eine Attacke in einer Generation.",
+	"@metadata": {
+		"authors": [
+			"DeXter"
+		]
+	},
+	"breedingchains": "Zuchtketten",
+	"breedingchains-title": "Spezial:Zuchtketten",
+	"breedingchains-desc": "[[Special:BreedingChains|Zeigt]] den Zuchteltern-Baum eines Pokémon für eine Attacke in einer Generation.",
 
-    "breedingchains-pkmn": "Pokémon",
-    "breedingchains-move": "Attacke",
-    "breedingchains-gen": "Generation: ",
-    "breedingchains-evo": "Entwicklung",
-    "breedingchains-error": "Oh nein, das hätte nicht passieren sollen :( Bitte melde das auf unserem Discordserver oder in der [[PokéWiki:Auskunft|Auskunft]].<br /> Fehler: $1",
-    "breedingchains-unknown-pkmn": "Das Pokémon $1 ist mir unbekannt. Hast du dich eventuell vertippt?",
-    "breedingchains-cant-learn": "$1 kann die Attacke $2 '''nicht''' erlernen.",
-    "breedingchains-can-learn-directly": "$1 kann die Attacke $2 direkt per Level-Up, TMVM/TMTP oder Attacken-Lehrer erlernen.",
+	"breedingchains-pkmn": "Pokémon",
+	"breedingchains-move": "Attacke",
+	"breedingchains-gen": "Generation: ",
+	"breedingchains-evo": "Entwicklung",
+	"breedingchains-error": "Oh nein, das hätte nicht passieren sollen :( Bitte melde das auf unserem Discordserver oder in der [[PokéWiki:Auskunft|Auskunft]].<br /> Fehler: $1",
+	"breedingchains-unknown-pkmn": "Das Pokémon $1 ist mir unbekannt. Hast du dich eventuell vertippt?",
+	"breedingchains-cant-learn": "$1 kann die Attacke $2 '''nicht''' erlernen.",
+	"breedingchains-can-learn-directly": "$1 kann die Attacke $2 direkt per Level-Up, TMVM/TMTP oder Attacken-Lehrer erlernen.",
 	"breedingchains-can-learn-event": "$1 kann die Attacke $2 über eine Event-Verteilung beherrschen.",
 	"breedingchains-can-learn-oldgen": "$1 kann die Attake $2 in einer älteren Spielegeneration erlernen.",
-    "breedingchains-invalid-pkmn": "Ungültiges Zeichen im Pokémonnamen. Vermutlich hast du dich vertippt.",
-    "breedingchains-invalid-move": "Ungültiges Zeichen im Attackennamen. Vermutlich hast du dich vertippt.",
-    "breedingchains-invalid-gen": "Ungültige Eingabe für die Spielgeneration. Bitte benutze nur die Auswahl und spiele nicht in der URL rum ;)",
-    "breedingchains-submit-text": "suchen",
-    "breedingchains-markerexplanation-head": "Legende:",
-    "breedingchains-markerexplanation-event": "Könnte Mewtu die Attacke von einer '''Event-Verteilung''' beherrschen, würde es so markiert sein.",
-    "breedingchains-markerexplanation-oldgen": "Könnte Mewtu die Attacke in einer '''älteren Generation''' erlernen, würde es so markiert sein.",
+	"breedingchains-invalid-pkmn": "Ungültiges Zeichen im Pokémonnamen. Vermutlich hast du dich vertippt.",
+	"breedingchains-invalid-move": "Ungültiges Zeichen im Attackennamen. Vermutlich hast du dich vertippt.",
+	"breedingchains-invalid-gen": "Ungültige Eingabe für die Spielgeneration. Bitte benutze nur die Auswahl und spiele nicht in der URL rum ;)",
+	"breedingchains-submit-text": "suchen",
+	"breedingchains-markerexplanation-head": "Legende:",
+	"breedingchains-markerexplanation-event": "Könnte Mewtu die Attacke von einer '''Event-Verteilung''' beherrschen, würde es so markiert sein.",
+	"breedingchains-markerexplanation-oldgen": "Könnte Mewtu die Attacke in einer '''älteren Generation''' erlernen, würde es so markiert sein.",
 	"breedingchains-easteregg-greenchu": "Das Phänomen Greenchu ist noch weitgehend unerforscht. Dementsprechend wissen wir nicht, ob es $1 überhaupt erlernen kann. Selbst in der Entstehungsgeschichte bestehen noch große Lücken. Falls du dort etwas weißt, teile es uns bitte mit :D",
 	"breedingchains-easteregg-dexter": "... Ob ich $1 erlernen kann? Ich bin vielleicht angehender professioneller Druckerreparierer, Teilzeit-Mod und Discord-Hobbypsychologe, aber ich bin (leider oder zum Glück) kein Pokémon!"
 }
