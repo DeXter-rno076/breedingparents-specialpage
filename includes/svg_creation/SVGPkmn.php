@@ -54,14 +54,13 @@ class SVGPkmn {
 
 		if (!$nodeFrontendPkmn->hasSuccessors()) {
 			Logger::statusLog($nodeFrontendPkmn.' has no successors => not adding any lines');
-			return;
 		} else if (count($nodeFrontendPkmn->getSuccessors()) === 1) {
 			$this->addEvoConnectionIfNeeded();
+		} else {
+			$this->setMiddleColumnX();
+			$this->addLeftHalfConnectionLines();
+			$this->addMiddleToSuccessorConnections();
 		}
-
-		$this->setMiddleColumnX();
-		$this->addLeftHalfConnectionLines();
-		$this->addMiddleToSuccessorConnections();
 	}
 
 	private function addEvoConnectionIfNeeded () {
