@@ -84,9 +84,8 @@ class SVGPkmn {
 	private function createEvoConnectionParts (): array {
 		$evoFrontendPkmnInstance = $this->nodeFrontendPkmn->getSuccessors()[0];
 
-		$startX = $this->nodeFrontendPkmn->getX() + $this->nodeFrontendPkmn->getIconWidth()
-			+ Constants::PKMN_ICON_LINE_MARGIN;
-		$endX = $evoFrontendPkmnInstance->getX() - Constants::PKMN_ICON_LINE_MARGIN;
+		$startX = $this->calculateNodeConnectionMarginRight();
+		$endX = $this->calculateNodeConnectionMarginLeft($evoFrontendPkmnInstance);
 		$y = $this->nodeFrontendPkmn->getMiddleY();
 
 		$horizontalLine = new SVGLine($startX, $y, $endX, $y);
@@ -100,6 +99,11 @@ class SVGPkmn {
 			$horizontalLine, $upperArrowPart, $lowerArrowPart,
 			$connectionText	//todo mixing a SVGText with SVGLines is unclean af
 		];
+	}
+
+	private function calculateNodeConnectionMarginLeft (FrontendPkmn $successor): int {
+		return $successor->getMiddleX() - $successor->calculateDiagonal()/2 
+			- Constants::SVG_CIRCLE_MARGIN + Constants::SVG_CIRCLE_LINE_WIDTH/2;
 	}
 
 	private function addConnections (array $connections) {
@@ -123,14 +127,18 @@ class SVGPkmn {
 	}
 
 	private function createPkmnMiddleConnection (): SVGLine {
-		$horiStartX = $this->nodeFrontendPkmn->getX() + $this->nodeFrontendPkmn->getIconWidth()
-			+ Constants::PKMN_ICON_LINE_MARGIN;
-		$horiY = $this->nodeFrontendPkmn->getMiddleY();
+		$startX = $this->calculateNodeConnectionMarginRight();
+		$startY = $this->nodeFrontendPkmn->getMiddleY();
 		$horizontalLine = new SVGLine(
-			$horiStartX, $horiY,
-			$this->middleColumnX, $horiY);
+			$startX, $startY,
+			$this->middleColumnX, $startY);
 		
 		return $horizontalLine;
+	}
+
+	private function calculateNodeConnectionMarginRight (): int {
+		return $this->nodeFrontendPkmn->getMiddleX() + $this->nodeFrontendPkmn->calculateDiagonal()/2 
+			+ Constants::SVG_CIRCLE_MARGIN;
 	}
 
 	private function addMiddleLine () {
@@ -187,8 +195,8 @@ class SVGPkmn {
 	}
 
 	private function createMiddleToSuccessorConnection (FrontendPkmn $successor): SVGLine {
-		$startX = $this->middleColumnX;
-		$endX = $successor->getX() - Constants::PKMN_ICON_LINE_MARGIN;
+		$startX = $this->middleColumnX - Constants::SVG_CIRCLE_LINE_WIDTH/2;
+		$endX = $this->calculateNodeConnectionMarginLeft($successor);
 		$y = $successor->getMiddleY();
 
 		$line = new SVGLine($startX, $y, $endX, $y);
@@ -241,11 +249,18 @@ class SVGPkmn {
 	private function createOldGenMarker (int $xOffset, int $yOffset): HTMLElement {
 		$middleX = $this->nodeFrontendPkmn->getMiddleX();
 		$middleY = $this->nodeFrontendPkmn->getMiddleY();
-		$width = $this->nodeFrontendPkmn->getWidth();
+		$radius = $this->calculateOldGenMarkerRadius();
 
-		$oldGenMarker = new SVGCircle($middleX, $middleY, $width / 2 + Constants::SVG_CIRCLE_MARGIN);
+		$oldGenMarker = new SVGCircle($middleX, $middleY, $radius);
 
 		return $oldGenMarker->toHTML($xOffset, $yOffset);
+	}
+
+	private function calculateOldGenMarkerRadius (): int {
+		$diagonal = $this->nodeFrontendPkmn->calculateDiagonal();
+		$distanceFromMiddleToCorners = $diagonal / 2;
+
+		return $distanceFromMiddleToCorners + Constants::SVG_CIRCLE_MARGIN;
 	}
 
 	private function createEventMarker (int $xOffset, int $yOffset): HTMLElement {

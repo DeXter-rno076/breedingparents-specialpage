@@ -114,13 +114,28 @@ class FrontendPkmn extends Pkmn {
 	}
 
 	private function calculateTreeSectionHeightForEndNode (): int {
-		$height = $this->getHeight() + Constants::SVG_PKMN_SAFETY_MARGIN;
+		$height = $this->calculateEndNodeHeight();
 
 		Logger::statusLog($this.' has no successors => setting and returning minimal height '.$height);
 
 		$this->treeSectionHeight = $height;
 
 		return $height;
+	}
+
+	private function calculateEndNodeHeight (): int {
+		$pureHeight = -1;
+		if ($this->learnsByEvent || $this->learnsByOldGen) {
+			$pureHeight = $this->calculateDiagonal();
+		} else {
+			$pureHeight = $this->getHeight();
+		}
+
+		return $pureHeight + 2*Constants::SVG_CIRCLE_MARGIN;
+	}
+
+	public function calculateDiagonal (): int {
+		return sqrt(pow($this->getHeight(), 2) +  pow($this->getWidth(), 2));
 	}
 
 	private function calculateTreeSectionHeightForMiddleNode (FrontendPkmn $successor): int {
@@ -132,12 +147,9 @@ class FrontendPkmn extends Pkmn {
 	 * todo this can be probably fused with calcTreeSectionHeights;
 	 */
 	private function calcYCoords (int $sectionYOffset): int {
-		$yCoord = $sectionYOffset;
-		if ($this->hasSuccessors()) {
-			$yCoord += $this->calculateYCoordinateOfEndNode();
-		}
-		Logger::statusLog('calculated y '.$yCoord.' of '.$this);
-		$this->y = $yCoord;
+		$this->y = $this->calculateYCoordinateOfNode($sectionYOffset);
+
+		Logger::statusLog('calculated y '.$this->y.' of '.$this);
 
 		$successorOffset = $sectionYOffset;
 		foreach ($this->successors as $successor) {
@@ -150,8 +162,8 @@ class FrontendPkmn extends Pkmn {
 		return $this->treeSectionHeight;
 	}
 
-	private function calculateYCoordinateOfEndNode () {
-		return $this->treeSectionHeight / 2 - $this->getIconHeight() / 2;
+	private function calculateYCoordinateOfNode (int $sectionYOffset): int {
+		return $sectionYOffset + ($this->treeSectionHeight - $this->getIconHeight())/2;
 	}
 
 	/**
@@ -224,7 +236,6 @@ class FrontendPkmn extends Pkmn {
 
 	public function getMiddleX (): int {
 		$middleX = $this->getX() + $this->getWidth() / 2;
-		Logger::statusLog('returning '.$middleX.' in getMiddleX call of '.$this);
 		return $middleX;
 	}
 
@@ -238,8 +249,6 @@ class FrontendPkmn extends Pkmn {
 
 	public function getMiddleY (): int {
 		$middleY = $this->getY() + $this->getHeight() / 2;
-		Logger::statusLog('returning middle y '
-			.$middleY.' in getMiddleY call on '.$this);
 		return $middleY;
 	}
 
