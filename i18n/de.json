@@ -23,8 +23,9 @@
 	"breedingchains-invalid-gen": "Ungültige Eingabe für die Spielgeneration. Bitte benutze nur die Auswahl und spiele nicht in der URL rum ;)",
 	"breedingchains-submit-text": "suchen",
 	"breedingchains-markerexplanation-head": "Legende:",
-	"breedingchains-markerexplanation-event": "Könnte Mewtu die Attacke von einer '''Event-Verteilung''' beherrschen, würde es so markiert sein.",
-	"breedingchains-markerexplanation-oldgen": "Könnte Mewtu die Attacke in einer '''älteren Generation''' erlernen, würde es so markiert sein.",
+	"breedingchains-markerexplanation-event": "Könnte Mewtu die Attacke nur von einer '''Event-Verteilung''' beherrschen, würde es so markiert sein.",
+	"breedingchains-markerexplanation-oldgen": "Könnte Mewtu die Attacke nur in einer '''älteren Generation''' erlernen, würde es so markiert sein.",
+	"breedingchains-markerexplanation-bottomnote": "Die Markierungen schließen eine zusätzliche mögliche Erlernbarkeit durch Zucht nicht aus.",
 	"breedingchains-easteregg-greenchu": "Das Phänomen Greenchu ist noch weitgehend unerforscht. Dementsprechend wissen wir nicht, ob es $1 überhaupt erlernen kann. Selbst in der Entstehungsgeschichte bestehen noch große Lücken. Falls du dort etwas weißt, teile es uns bitte mit :D",
 	"breedingchains-easteregg-dexter": "... Ob ich $1 erlernen kann? Ich bin vielleicht angehender professioneller Druckerreparierer, Teilzeit-Mod und Discord-Hobbypsychologe, aber ich bin (leider oder zum Glück) kein Pokémon!",
 	"breedingchains-learnsetpage-link": "$1/Attacken#$2. Generation"

@@ -2,7 +2,7 @@
 $markerExamplesTable = new HTMLElement('table', [
 	'id' => 'breedingChainsExplanationTable'
 ], [
-	new HTMLElement('th',['colspan' => 2], [$this->msg('breedingchains-markerexplanation-head')]),
+	new HTMLElement('th',['colspan' => 2], [Constants::i18nMsg('breedingchains-markerexplanation-head')]),
 	new HTMLElement('tr', [], [
 		new HTMLElement('td', [], [
 			new HTMLElement('svg', [
@@ -31,7 +31,7 @@ $markerExamplesTable = new HTMLElement('table', [
 			]),
 		]),
 		new HTMLElement('td', [], [
-			$this->msg('breedingchains-markerexplanation-oldgen')
+			Constants::i18nMsg('breedingchains-markerexplanation-oldgen')
 		])
 	]),
 	new HTMLElement('tr', [], [
@@ -65,7 +65,15 @@ $markerExamplesTable = new HTMLElement('table', [
 			])
 		]),
 		new HTMLElement('td', [], [
-			$this->msg('breedingchains-markerexplanation-event')
+			Constants::i18nMsg('breedingchains-markerexplanation-event')
+		])
+	]),
+	new HTMLElement('tr', [], [
+		new HTMLElement('td', [
+			'colspan' => 2,
+			'id' => 'breedingChainsMarkerExplanationsBottomNote'
+		], [
+			Constants::i18nMsg('breedingchains-markerexplanation-bottomnote')
 		])
 	])
 ]);

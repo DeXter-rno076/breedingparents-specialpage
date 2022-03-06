@@ -30,6 +30,10 @@
 	max-width: 280px;
 }
 
+#breedingChainsMarkerExplanationsBottomNote {
+	text-align: center;
+}
+
 .breedingChainsMessageBox {
 	width: 60%;
 	margin: 1em auto;
