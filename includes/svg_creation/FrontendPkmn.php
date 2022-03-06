@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__.'/../exceptions/FileNotFoundException.php';
 require_once __DIR__.'/../tree_creation/BreedingTreeNode.php';
+require_once __DIR__.'/../tree_creation/PkmnData.php';
 require_once __DIR__.'/../Pkmn.php';
 require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../Constants.php';
@@ -12,6 +13,8 @@ class FrontendPkmn extends Pkmn {
 	private bool $learnsByOldGen;
 	private array $successors = [];
 	private bool $isRoot;
+
+	private PkmnData $pkmnData;
 
 	private int $x;
 	private int $y;
@@ -28,6 +31,7 @@ class FrontendPkmn extends Pkmn {
 		$this->learnsByEvent = $breedingTreeNode->getLearnsByEvent();
 		$this->learnsByOldGen = $breedingTreeNode->getLearnsByOldGen();
 		$this->isRoot = $breedingTreeNode->isRoot();
+		$this->pkmnData = $breedingTreeNode->getJSONPkmnData();
 
 		foreach ($breedingTreeNode->getSuccessors() as $successorTreeNode) {
 			$successorFrontendObj = new FrontendPkmn($successorTreeNode);
@@ -262,6 +266,10 @@ class FrontendPkmn extends Pkmn {
 
 	public function isRoot (): bool {
 		return $this->isRoot;
+	}
+
+	public function getJSONPkmnData (): PkmnData {
+		return $this->pkmnData;
 	}
 
 	/**

@@ -50,24 +50,29 @@ class SVGPkmn {
 	}
 
 	private function addConnectionStructure () {
+		Logger::statusLog('adding connection structure after '.$this);
 		$nodeFrontendPkmn = $this->nodeFrontendPkmn;
 
 		if (!$nodeFrontendPkmn->hasSuccessors()) {
 			Logger::statusLog($nodeFrontendPkmn.' has no successors => not adding any lines');
-		} else if (count($nodeFrontendPkmn->getSuccessors()) === 1) {
-			$this->addEvoConnectionIfNeeded();
+		} else if ($this->hasEvoConnection()) {
+			$this->addEvoConnection();
 		} else {
+			Logger::statusLog($this.' has no evo connection -> adding standard line structure');
 			$this->setMiddleColumnX();
 			$this->addLeftHalfConnectionLines();
 			$this->addMiddleToSuccessorConnections();
 		}
 	}
 
-	private function addEvoConnectionIfNeeded () {
-		if ($this->nodeFrontendPkmn->isRoot() 
-				&& $this->nodeFrontendPkmn->getSuccessors()[0]->isRoot()) {
-			$this->addEvoConnection();
-		}
+	private function hasEvoConnection (): bool {
+		$firstSuccessor = $this->nodeFrontendPkmn->getSuccessors()[0];
+		$firstSuccessorJSONData = $firstSuccessor->getJSONPkmnData();
+
+		$firstSuccessorIsLowestEvoOfThis = $firstSuccessorJSONData->isLowestEvolution() 
+			&& $firstSuccessorJSONData->hasAsEvolution($this->nodeFrontendPkmn->getName());
+		
+		return $this->nodeFrontendPkmn->isRoot() && $firstSuccessor->isRoot() && $firstSuccessorIsLowestEvoOfThis;
 	}
 
 	/**
@@ -122,6 +127,7 @@ class SVGPkmn {
 	}
 
 	private function addPkmnMiddleConnection () {
+		Logger::statusLog('adding line from '.$this.' middle line');
 		$horizontalLine = $this->createPkmnMiddleConnection();
 		$this->addConnections([$horizontalLine]);
 	}
@@ -142,6 +148,7 @@ class SVGPkmn {
 	}
 
 	private function addMiddleLine () {
+		Logger::statusLog('adding middle line after '.$this);
 		$middleLine = $this->createMiddleLine();
 		$this->addConnections([$middleLine]);
 	}
@@ -174,6 +181,7 @@ class SVGPkmn {
 	}
 
 	private function adjustCoordinatesToOnlyOneSuccessor (int &$lowestY, int &$highestY) {
+		Logger::statusLog('adjusting coordinates to only one successor');
 		$successor = $this->nodeFrontendPkmn->getSuccessors()[0];
 
 		$nodeMiddleY = $this->nodeFrontendPkmn->getMiddleY();
@@ -190,6 +198,7 @@ class SVGPkmn {
 	}
 
 	private function addMiddleToSuccessorConnection (FrontendPkmn $successor) {
+		Logger::statusLog('adding connection from middle to '.$successor);
 		$middleToSuccessorConnection = $this->createMiddleToSuccessorConnection($successor);
 		$this->addConnections([$middleToSuccessorConnection]);
 	}
@@ -234,11 +243,13 @@ class SVGPkmn {
 
 	private function addSpecialLearnsetMarkerToHTMLTagArray (array &$htmlTagCreationOptions) {
 		if ($this->nodeFrontendPkmn->getLearnsByOldGen()) {
+			Logger::statusLog('adding old gen marker to '.$this);
 			array_push(
 				$htmlTagCreationOptions['tagArray'],
 				$this->createOldGenMarker($htmlTagCreationOptions['xOffset'], $htmlTagCreationOptions['yOffset'])
 			);
 		} else if ($this->nodeFrontendPkmn->getLearnsByEvent()) {
+			Logger::statusLog('adding event marker to '.$this);
 			array_push(
 				$htmlTagCreationOptions['tagArray'],
 				$this->createEventMarker($htmlTagCreationOptions['xOffset'], $htmlTagCreationOptions['yOffset'])
