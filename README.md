@@ -11,8 +11,6 @@ The name of this specialpage was changed to BreedingChains / Zuchtketten at the 
 * selectSuccessors call warnings stuff
 
 # bugs
-* for evo connections the lowest evo appears twice in the tree
-* evo connection arrows somehow is messed up
 
 # other stuff
 
