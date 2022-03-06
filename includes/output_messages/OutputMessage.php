@@ -5,8 +5,6 @@ abstract class OutputMessage {
 	protected string $msg;
 	public const STANDARD_BOX_CLASSES = 'breedingChainsMessageBox';
 
-	protected static $alreadyOutputtedOneTimeMessages = [];
-
 	public function __construct ($msg) {
 		$this->msg = (string) $msg;
 	}
@@ -16,23 +14,12 @@ abstract class OutputMessage {
 		$this->addBoxToOutput($box);
 	}
 
-	public function outputOnce () {
-		if ($this->oneTimeMessageGotAlreadyOutputted()) {
-			return;
-		}
-		$this->addMessageToOneTimeMessageLog();
-		$this->output();
-	}
-
-	private function oneTimeMessageGotAlreadyOutputted (): bool {
-		return isset($this->getOneTimeMessageOutputLog[$this->msg]);
-	}
-
-	protected abstract function getOneTimeMessageOutputLog (): array;
-
-	private function addMessageToOneTimeMessageLog () {
-		$this->getOneTimeMessageOutputLog[$this->msg] = 1;
-	}
+	/**
+	 * Is abstract because handling the static arrays in subclasses didn't work.
+	 * I first tried to implement outputOnce in the super class with an abstract 
+	 * function, that returns the static array, but changes to the arrays were ignored.
+	 */
+	public abstract function outputOnce ();
 
 	private function addBoxToOutput (HTMLElement $box) {
 		$box->addToOutput();
@@ -48,4 +35,8 @@ abstract class OutputMessage {
 	}
 
 	protected abstract function getMessageBoxCSSClasses (): string;
+
+	public function __toString (): string {
+		return $this->msg;
+	}
 }

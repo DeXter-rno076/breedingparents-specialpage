@@ -4,20 +4,20 @@ require_once __DIR__.'/../Pkmn.php';
 require_once __DIR__.'/../Constants.php';
 require_once __DIR__.'/../Logger.php';
 
-class PkmnData extends Pkmn {
-	private String $eggGroup1;
-	private ?String $eggGroup2;
+require_once 'BreedingTreeNode.php';
 
-	/**
-	 * @var String gender of this pkmn; male | female | both | unknown
-	 */
-	private String $gender;
+class PkmnData extends Pkmn {
+	private string $eggGroup1;
+	private ?string $eggGroup2;
+
+	// male | female | both | unknown
+	private string $gender;
 
 	/**
 	 * @var String lowest evolution of this pkmn (e. g. Charmander for Charizard); 
 	 * if this pkmn is the lowest evo in its evo line this is set to the name of this pkmn (e. g. Abra for Abra) 
 	 */
-	private String $lowestEvolution;
+	private string $lowestEvolution;
 	private array $evolutions;
 
 	private bool $unpairable;
@@ -27,15 +27,17 @@ class PkmnData extends Pkmn {
 	 * @var Array level up, TMHM/TMTR and tutor learnsets of this pkmn
 	 * todo maybe tutor learnsets get their own list in the future
 	 */
-	private Array $directLearnsets;
-	private Array $breedingLearnsets;
+	private array $directLearnsets;
+	private array $breedingLearnsets;
 
-	private Array $eventLearnsets;
-	private Array $oldGenLearnsets;
+	private array $eventLearnsets;
+	private array $oldGenLearnsets;
 
-	public function __construct (String $name) {
+	public function __construct (string $name) {
 		$pkmnDataObj = Constants::$externalPkmnJSON->$name;
+
 		parent::__construct($name, $pkmnDataObj->id);
+
 		$this->copyPropertys($pkmnDataObj);
 	}
 
@@ -55,8 +57,6 @@ class PkmnData extends Pkmn {
 
 		foreach ($mustHavePropertysList as $property) {
 			if (!isset($pkmnDataObj->$property)) {
-				Logger::elog('data object of '.$this->name
-					.' is missing property '.$property);
 				throw new AttributeNotFoundException($this, $property);
 			}
 			$this->$property = $pkmnDataObj->$property;
@@ -67,9 +67,9 @@ class PkmnData extends Pkmn {
 		foreach ($optionalPropertys as $property) {
 			if (isset($pkmnDataObj->$property)) {
 				$this->$property = $pkmnDataObj->$property;
-				continue;
+			} else {
+				$this->$property = null;
 			}
-			$this->$property = null;
 		}
 	}
 
@@ -80,9 +80,18 @@ class PkmnData extends Pkmn {
 		return $this->checkLearnsetType($this->directLearnsets, 'directly');
 	}
 
+	private function checkLearnsetType (Array $learnsetList, string $learnsetType): bool {
+		foreach ($learnsetList as $move) {
+			if ($move === Constants::$targetMoveName) {
+				Logger::statusLog('found target move in '.$learnsetType.' learnset');
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public function canInherit (): bool {
 		if ($this->unbreedable) {
-			Logger::statusLog($this.' is unbreedable');
 			return false;
 		}
 
@@ -95,16 +104,6 @@ class PkmnData extends Pkmn {
 
 	public function canLearnByOldGen (): bool {
 		return $this->checkLearnsetType($this->oldGenLearnsets, 'old gen');
-	}
-
-	private function checkLearnsetType (Array $learnsetList, string $learnsetType): bool {
-		foreach ($learnsetList as $move) {
-			if ($move === Constants::$targetMoveName) {
-				Logger::statusLog('found target move in '.$learnsetType.' learnset');
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public function getEggGroup1 (): string {
@@ -127,11 +126,15 @@ class PkmnData extends Pkmn {
 		return $this->gender === 'unknown';
 	}
 
-	public function getLowestEvolution (): string {
-		return $this->lowestEvolution;
+	public function isLowestEvolution (): bool {
+		return $this->lowestEvolution === $this->name;
 	}
 
-	public function getUnpairable (): bool {
+	public function getLowestEvolutionBreedingTreeInstance (bool $isRoot = false): BreedingTreeNode {
+		return new BreedingTreeNode($this->lowestEvolution, $isRoot);
+	}
+
+	public function isUnpairable (): bool {
 		return $this->unpairable;
 	}
 
@@ -139,7 +142,7 @@ class PkmnData extends Pkmn {
 		return $this->eggGroup2 !== null;
 	}
 
-	public function isEvolution (string $pkmnName): bool {
+	public function hasAsEvolution (string $pkmnName): bool {
 		return in_array($pkmnName, $this->evolutions);
 	}
 

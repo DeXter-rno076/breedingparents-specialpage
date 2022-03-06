@@ -10,7 +10,7 @@ use MediaWiki\MediaWikiServices;
 class FrontendPkmn extends Pkmn {
 	private bool $learnsByEvent;
 	private bool $learnsByOldGen;
-	private Array $successors = [];
+	private array $successors = [];
 	private bool $isRoot;
 
 	private int $x;
@@ -27,7 +27,7 @@ class FrontendPkmn extends Pkmn {
 
 		$this->learnsByEvent = $breedingTreeNode->getLearnsByEvent();
 		$this->learnsByOldGen = $breedingTreeNode->getLearnsByOldGen();
-		$this->isRoot = $breedingTreeNode->getIsRoot();
+		$this->isRoot = $breedingTreeNode->isRoot();
 
 		foreach ($breedingTreeNode->getSuccessors() as $successorTreeNode) {
 			$successorFrontendObj = new FrontendPkmn($successorTreeNode);
@@ -35,10 +35,6 @@ class FrontendPkmn extends Pkmn {
 		}
 	}
 
-	/**
-	 * Calculates the depth of the breeding tree by going every path and counting the longest parts together.
-	 * @return int
-	 */
 	public function getDepth (): int {
 		$highestDepth = 0;
 		foreach ($this->successors as $successor) {
@@ -53,13 +49,6 @@ class FrontendPkmn extends Pkmn {
 		return $highestDepth + 1;
 	}
 
-	/**
-	 * Just calls functions
-	 *  * setIconData
-	 *  * calcTreeSectionHeights
-	 *  * calcYCords
-	 *  * calcXCoords
-	 */
 	public function setTreeIconsAndCoordinates () {
 		$this->setIconData();
 
@@ -69,67 +58,11 @@ class FrontendPkmn extends Pkmn {
 		$this->calcXCoords();
 	}
 
-	/**
-	 * Calculates recursively the y coordinate of every node by using the sum
-	 * of the tree section heights (tree section height of the node itself)
-	 * of its successors and placing the node in the middle of its tree section.
-	 * For branch ends this just sets the node at the offset.
-	 * 
-	 * todo this can be probably fused with calcTreeSectionHeights;
-	 * 
-	 * @param int $sectionOffset - y offset of this tree section
-	 * 
-	 * @return int height of this tree section
-	 */
-	private function calcYCoords (int $sectionOffset): int {
-		$yCoord = $sectionOffset;
-		if ($this->hasSuccessors()) {
-			$yCoord += $this->treeSectionHeight / 2 - $this->getIconHeight() / 2;
-		}
-		Logger::statusLog('calculated y '.$yCoord.' of '.$this);
-		$this->y = $yCoord;
-
-		$successorOffset = $sectionOffset;
-		foreach ($this->successors as $successor) {
-			$successorSectionHeight = $successor->calcYCoords($successorOffset);
-			$successorOffset += $successorSectionHeight;
-		}
-
-		Logger::statusLog('returning tree section height '
-			.$this->treeSectionHeight.' of '.$this);
-		return $this->treeSectionHeight;
-	}
-
-	/**
-	 * Calculates x coordinates of every node by traversing through the
-	 * tree layers und counting the deepness. The margin betweent each
-	 * pkmn column is saved in Constants::PKMN_MARGIN_HORI.
-	 * @param int $deepness
-	 */
-	private function calcXCoords (int $deepness = 0) {
-		//- getIconWidth / 2 is for centering the icons
-		$this->x = $deepness * Constants::PKMN_MARGIN_HORIZONTAL - $this->getIconWidth() / 2;
-		Logger::statusLog('calculated x coordinate of '.$this);
-		foreach ($this->successors as $successor) {
-			$successor->calcXCoords($deepness + 1);
-		}
-	}
-
-	/**
-	 * Tries to load the icon files for every node and sets its properties
-	 * or the FileNotFoundException, depending on success.
-	 */
 	private function setIconData () {
 		try {
-			$iconFileObj = $this->getPkmnIcon($this->id);
-			Logger::statusLog('icon file for '.$this.' successfully loaded');
-
-			$this->iconUrl = $iconFileObj->getUrl();
-			$this->iconWidth = $iconFileObj->getWidth();
-			$this->iconHeight = $iconFileObj->getHeight();
+			$this->tryLoadAndSetIconData();
 		} catch (FileNotFoundException $e) {
-			Logger::statusLog('couldnt load file obj of '.$this.', setting file error');
-			$this->fileError = $e;
+			$this->setFileError($e);
 		}
 
 		foreach ($this->successors as $successor) {
@@ -137,46 +70,15 @@ class FrontendPkmn extends Pkmn {
 		}
 	}
 
+	private function tryLoadAndSetIconData () {
+		$iconFileObj = $this->getPkmnIcon($this->id);
+		Logger::statusLog('icon file for '.$this.' successfully loaded');
 
-	/**
-	 * Recursively calculates the height of each tree section.
-	 * A tree section is a node with its successors.
-	 * The heights are calculated by using the sum of the succesors or
-	 * by using the icon height for branch ends.
-	 * 
-	 * todo this can probably be fused with calcYCoords
-	 * 
-	 * @return int
-	 */
-	private function calcTreeSectionHeights (): int {
-		if (!$this->hasSuccessors()) {
-			$height = $this->getHeight() + Constants::SVG_PKMN_SAFETY_MARGIN;
-			Logger::statusLog(
-				$this.' has no successors => setting and returning minimal height '.$height);
-			$this->treeSectionHeight = $height;
-			return $height;
-		}
-
-		$heightSum = 0;
-		foreach ($this->successors as $successor) {
-			$successorTreeSectionHeight = $successor->calcTreeSectionHeights();
-			$heightSum += $successorTreeSectionHeight;
-		}
-		Logger::statusLog('calculated tree section height '.$heightSum.' of '.$this);
-		$this->treeSectionHeight = $heightSum;
-		return $heightSum;
+		$this->iconUrl = $iconFileObj->getUrl();
+		$this->iconWidth = $iconFileObj->getWidth();
+		$this->iconHeight = $iconFileObj->getHeight();
 	}
 
-	/**
-	 * Tries to load and return the icon file object of $pkmnId and throws a
-	 * FileNotFoundException if it fails.
-	 * 
-	 * @param string $pkmnId - pkmn id as used in PokeWiki (is a string because special forms have character postfixes)
-	 * 
-	 * @return File
-	 * 
-	 * @throws FileNotFoundException
-	 */
 	private function getPkmnIcon (string $pkmnId): File {
 		$fileName = 'Pokémon-Icon '.$pkmnId.'.png';
 		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
@@ -188,6 +90,94 @@ class FrontendPkmn extends Pkmn {
 		return $fileObj;
 	}
 
+	private function setFileError (FileNotFoundException $e) {
+		Logger::statusLog('couldnt load file obj of '.$this);
+		$this->fileError = $e;
+	}
+
+	/**
+	 * todo this can probably be fused with calcYCoords
+	 */
+	private function calcTreeSectionHeights (): int {
+		if (!$this->hasSuccessors()) {
+			return $this->calculateTreeSectionHeightForEndNode();
+		}
+
+		$heightSum = 0;
+		foreach ($this->successors as $successor) {
+			$heightSum += $this->calculateTreeSectionHeightForMiddleNode($successor);
+		}
+
+		Logger::statusLog('calculated tree section height '.$heightSum.' of '.$this);
+		$this->treeSectionHeight = $heightSum;
+		return $heightSum;
+	}
+
+	private function calculateTreeSectionHeightForEndNode (): int {
+		$height = $this->getHeight() + Constants::SVG_PKMN_SAFETY_MARGIN;
+
+		Logger::statusLog($this.' has no successors => setting and returning minimal height '.$height);
+
+		$this->treeSectionHeight = $height;
+
+		return $height;
+	}
+
+	private function calculateTreeSectionHeightForMiddleNode (FrontendPkmn $successor): int {
+		$successorTreeSectionHeight = $successor->calcTreeSectionHeights();
+		return $successorTreeSectionHeight;
+	}
+
+	/**
+	 * todo this can be probably fused with calcTreeSectionHeights;
+	 */
+	private function calcYCoords (int $sectionYOffset): int {
+		$yCoord = $sectionYOffset;
+		if ($this->hasSuccessors()) {
+			$yCoord += $this->calculateYCoordinateOfEndNode();
+		}
+		Logger::statusLog('calculated y '.$yCoord.' of '.$this);
+		$this->y = $yCoord;
+
+		$successorOffset = $sectionYOffset;
+		foreach ($this->successors as $successor) {
+			$successorSectionHeight = $successor->calcYCoords($successorOffset);
+			$successorOffset += $successorSectionHeight;
+		}
+
+		Logger::statusLog('returning tree section height '
+			.$this->treeSectionHeight.' of '.$this);
+		return $this->treeSectionHeight;
+	}
+
+	private function calculateYCoordinateOfEndNode () {
+		return $this->treeSectionHeight / 2 - $this->getIconHeight() / 2;
+	}
+
+	/**
+	 * Calculates x coordinates of every node by traversing through the
+	 * tree layers und counting the deepness. The margin betweent each
+	 * pkmn column is saved in Constants::PKMN_MARGIN_HORI.
+	 * @param int $deepness
+	 */
+	private function calcXCoords (int $deepness = 0) {
+		$this->x = $this->calculateCenteredXCoordinate($deepness);
+		Logger::statusLog('calculated x coordinate of '.$this);
+
+		foreach ($this->successors as $successor) {
+			$successor->calcXCoords($deepness + 1);
+		}
+	}
+	
+	private function calculateCenteredXCoordinate (int $deepness): int {
+		$uncenteredX = $deepness * Constants::PKMN_MARGIN_HORIZONTAL;
+		return $this->centerXCoordinate($uncenteredX);
+	}
+
+	private function centerXCoordinate (int $x): int {
+		return $x - $this->getIconWidth() / 2; 
+	}
+
 	public function addSuccessor (FrontendPkmn $successor) {
 		array_push($this->successors, $successor);
 	}
@@ -196,7 +186,7 @@ class FrontendPkmn extends Pkmn {
 		return count($this->successors) > 0;
 	}
 
-	public function getSuccessors (): Array {
+	public function getSuccessors (): array {
 		return $this->successors;
 	}
 
@@ -261,7 +251,7 @@ class FrontendPkmn extends Pkmn {
 		return $this->iconHeight;
 	}
 
-	public function getIsRoot (): bool {
+	public function isRoot (): bool {
 		return $this->isRoot;
 	}
 

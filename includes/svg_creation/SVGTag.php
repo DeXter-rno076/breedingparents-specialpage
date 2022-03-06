@@ -17,13 +17,19 @@ class SVGTag extends SVGElement {
 		parent::__construct('svg');
 		Logger::statusLog('creating SVGRoot instance');
 
-		$treeDepth = $pkmnRoot->getDepth();
-		$this->width = ($treeDepth - 1) * Constants::PKMN_MARGIN_HORIZONTAL + Constants::SVG_OFFSET
-			+ Constants::SVG_SAFETY_MARGIN;
-		$this->height = $pkmnRoot->getTreeSectionHeight() + Constants::SVG_OFFSET
-			+ Constants::SVG_SAFETY_MARGIN;
+		$this->width = $this->calculateWidth($pkmnRoot->getDepth());
+		$this->height = $this->calculateHeight($pkmnRoot->getTreeSectionHeight());
 
 		$this->svgRoot = new SVGPkmn($pkmnRoot);
+	}
+
+	private function calculateWidth (int $treeDepth): int {
+		return ($treeDepth - 1) * Constants::PKMN_MARGIN_HORIZONTAL + Constants::SVG_OFFSET
+		+ Constants::SVG_SAFETY_MARGIN;
+	}
+
+	private function calculateHeight (int $treeSectionHeight): int {
+		return $treeSectionHeight + Constants::SVG_OFFSET + Constants::SVG_SAFETY_MARGIN;
 	}
 
 	public function toHTML (

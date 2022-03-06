@@ -5,7 +5,7 @@ $formDescriptor = [
 		'class' => 'HTMLTextField',
 		'placeholder' => $this->msg('breedingchains-pkmn'),
 		'size' => 20,
-		'validation-callback' => [ $this, 'validatePkmn' ],
+		'validation-callback' => [ $this, 'validatePkmnInput' ],
 		'required' => true
 	],
 	'moveInput' => [
@@ -13,7 +13,7 @@ $formDescriptor = [
 		'class' => 'HTMLTextField',
 		'placeholder' => $this->msg('breedingchains-move'),
 		'size' => 20,
-		'validation-callback' => [ $this, 'validateMove' ],
+		'validation-callback' => [ $this, 'validateMoveInput' ],
 		'required' => true
 	],
 	'genInput' => [
@@ -29,7 +29,7 @@ $formDescriptor = [
 			'3' => 3,
 			'2' => 2,
 		],
-		'validation-callback' => [ $this, 'validateGen' ]
+		'validation-callback' => [ $this, 'validateGenInput' ]
 	]
 ];
 

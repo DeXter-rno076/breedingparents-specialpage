@@ -12,11 +12,7 @@ class HTMLElement {
 	//innerContent is a mix of HTMLElements and strings
 	private array $innerContent;
 
-	public function __construct (
-		string $tagName,
-		array $attribs = [],
-		array $innerElements = []
-	) {
+	public function __construct (string $tagName, array $attribs = [], array $innerElements = []) {
 		$this->tagName = $tagName;
 		$this->attributes = $attribs;
 		$this->innerContent = $innerElements;

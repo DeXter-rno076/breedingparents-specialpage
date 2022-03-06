@@ -14,8 +14,8 @@ require_once 'FrontendPkmn.php';
 
 class SVGPkmn {
 	private ?SVGLink $pkmnLink = null;
-	private Array $lineConnections = [];
-	private Array $successors = [];
+	private array $lineConnections = [];
+	private array $successors = [];
 	private FrontendPkmn $nodeFrontendPkmn;
 
 	private int $middleColumnX = 0;
@@ -24,43 +24,93 @@ class SVGPkmn {
 		$this->nodeFrontendPkmn = $pkmn;
 		$this->addIcon();
 		$this->addConnectionStructure();
+
 		foreach ($this->nodeFrontendPkmn->getSuccessors() as $successor) {
 			$svgSuccessor = new SVGPkmn($successor);
 			array_push($this->successors, $svgSuccessor);
 		}
 	}
 
-	/**
-	 * Creates and adds SVGImg and SVGLink instances for this node
-	 * if the icon for this node could be loaded.
-	 */
 	private function addIcon () {
-		$pkmn = $this->nodeFrontendPkmn;
-		$fileE = $pkmn->getFileError();
-		if (is_null($fileE)) {
-			Logger::statusLog($pkmn.' has no file error set => can add icon');
-			$pkmnIcon = new SVGImg($pkmn);
-			$link = new SVGLink($pkmn->getName(), $pkmnIcon);
-			$this->pkmnLink = $link;
-			return;
+		$fileError = $this->nodeFrontendPkmn->getFileError();
+		if ($this->fileWasLoaded($fileError)) {
+			$this->setPkmnIcon();
 		}
 	}
 
-	private function addConnectionStructure () {
-		$pkmn = $this->nodeFrontendPkmn;
+	private function fileWasLoaded (?FileNotFoundException $fileError): bool {
+		return is_null($fileError);
+	}
 
-		if (!$pkmn->hasSuccessors()) {
-			Logger::statusLog($pkmn.' has no successors => not adding any lines');
+	private function setPkmnIcon () {
+		Logger::statusLog($this->nodeFrontendPkmn.' has no file error set => can add icon');
+		$pkmnIconSVG = new SVGImg($this->nodeFrontendPkmn);
+		$linkSVG = new SVGLink($this->nodeFrontendPkmn->getName(), $pkmnIconSVG);
+		$this->pkmnLink = $linkSVG;
+	}
+
+	private function addConnectionStructure () {
+		$nodeFrontendPkmn = $this->nodeFrontendPkmn;
+
+		if (!$nodeFrontendPkmn->hasSuccessors()) {
+			Logger::statusLog($nodeFrontendPkmn.' has no successors => not adding any lines');
 			return;
-		} else if (count($pkmn->getSuccessors()) === 1) {
-			if ($pkmn->getIsRoot() && $pkmn->getSuccessors()[0]->getIsRoot()) {
-				$this->addEvoConnection();
-			}
+		} else if (count($nodeFrontendPkmn->getSuccessors()) === 1) {
+			$this->addEvoConnectionIfNeeded();
 		}
 
-		$this->middleColumnX = $pkmn->getMiddleX() + Constants::PKMN_MARGIN_HORIZONTAL / 1.5;
+		$this->setMiddleColumnX();
 		$this->addLeftHalfConnectionLines();
-		$this->addMiddleSuccessorConnections();
+		$this->addMiddleToSuccessorConnections();
+	}
+
+	private function addEvoConnectionIfNeeded () {
+		if ($this->nodeFrontendPkmn->isRoot() 
+				&& $this->nodeFrontendPkmn->getSuccessors()[0]->isRoot()) {
+			$this->addEvoConnection();
+		}
+	}
+
+	/**
+	 * If the root is an evolution, the connection to its lowest evo is an
+	 * arrow and gets a text to additionally show that this is an evo connection. 
+	 */
+	private function addEvoConnection () {
+		Logger::statusLog('adding evo arrow line connection for '.$this);
+		
+		$connectionParts = $this->createEvoConnectionParts();
+		$this->addConnections($connectionParts);
+	}
+
+	private function createEvoConnectionParts (): array {
+		$evoFrontendPkmnInstance = $this->nodeFrontendPkmn->getSuccessors()[0];
+
+		$startX = $this->nodeFrontendPkmn->getX() + $this->nodeFrontendPkmn->getIconWidth()
+			+ Constants::PKMN_ICON_LINE_MARGIN;
+		$endX = $evoFrontendPkmnInstance->getX() - Constants::PKMN_ICON_LINE_MARGIN;
+		$y = $this->nodeFrontendPkmn->getMiddleY();
+
+		$horizontalLine = new SVGLine($startX, $y, $endX, $y);
+		$upperArrowPart = new SVGLine($startX, $y, $startX + 10, $y - 10);
+		$lowerArrowPart = new SVGLine($startX, $y, $startX + 10, $y + 10);
+
+		$connectionText = new SVGText(
+			$startX + 30, $y - 2, Constants::$centralSpecialPageInstance->msg('breedingchains-evo'));
+
+		return [
+			$horizontalLine, $upperArrowPart, $lowerArrowPart,
+			$connectionText	//todo mixing a SVGText with SVGLines is unclean af
+		];
+	}
+
+	private function addConnections (array $connections) {
+		foreach ($connections as $connection) {
+			array_push($this->lineConnections, $connection);
+		}
+	}
+
+	private function setMiddleColumnX () {
+		$this->middleColumnX = $this->nodeFrontendPkmn->getMiddleX() + Constants::PKMN_MARGIN_HORIZONTAL / 1.5;
 	}
 
 	private function addLeftHalfConnectionLines () {
@@ -69,33 +119,51 @@ class SVGPkmn {
 	}
 
 	private function addPkmnMiddleConnection () {
-		$pkmn = $this->nodeFrontendPkmn;
-		$horiStartX = $pkmn->getX() + $pkmn->getIconWidth()
+		$horizontalLine = $this->createPkmnMiddleConnection();
+		$this->addConnections([$horizontalLine]);
+	}
+
+	private function createPkmnMiddleConnection (): SVGLine {
+		$horiStartX = $this->nodeFrontendPkmn->getX() + $this->nodeFrontendPkmn->getIconWidth()
 			+ Constants::PKMN_ICON_LINE_MARGIN;
-		$horiY = $pkmn->getMiddleY();
+		$horiY = $this->nodeFrontendPkmn->getMiddleY();
 		$horizontalLine = new SVGLine(
 			$horiStartX, $horiY,
 			$this->middleColumnX, $horiY);
-		array_push($this->lineConnections, $horizontalLine);
+		
+		return $horizontalLine;
 	}
 
 	private function addMiddleLine () {
-		$pkmn = $this->nodeFrontendPkmn;
-		$successors = $pkmn->getSuccessors();
-		$firstSuccessor = $successors[0];
-		$lastSuccessor = $successors[count($successors) - 1];
+		$middleLine = $this->createMiddleLine();
+		$this->addConnections([$middleLine]);
+	}
 
-		$lowestY = $firstSuccessor->getMiddleY();
-		$highestY = $lastSuccessor->getMiddleY();
+	private function createMiddleLine (): SVGLine {
+		$lowestY = $this->getLowestYCoordinateFromTreeSection();
+		$highestY = $this->getHighestYCoordinateFromTreeSection();
 
-		if (count($successors) === 1) {
+		if (count($this->nodeFrontendPkmn->getSuccessors()) === 1) {
 			$this->adjustCoordinatesToOnlyOneSuccessor($lowestY, $highestY);
 		}
 
-		$vertialLine = new SVGLine(
+		$verticalLine = new SVGLine(
 			$this->middleColumnX, $lowestY,
 			$this->middleColumnX, $highestY);
-		array_push($this->lineConnections, $vertialLine);
+		
+		return $verticalLine;
+	}
+
+	private function getLowestYCoordinateFromTreeSection (): int {
+		$successors = $this->nodeFrontendPkmn->getSuccessors();
+		$firstSuccessor = $successors[0];
+		return $firstSuccessor->getMiddleY();
+	}
+
+	private function getHighestYCoordinateFromTreeSection (): int {
+		$successors = $this->nodeFrontendPkmn->getSuccessors();
+		$lastSuccessor = $successors[count($successors) - 1];
+		return $lastSuccessor->getMiddleY();
 	}
 
 	private function adjustCoordinatesToOnlyOneSuccessor (int &$lowestY, int &$highestY) {
@@ -108,71 +176,67 @@ class SVGPkmn {
 		$highestY = max($nodeMiddleY, $successorMiddleY);
 	}
 
-	private function addMiddleSuccessorConnections () {
+	private function addMiddleToSuccessorConnections () {
 		foreach ($this->nodeFrontendPkmn->getSuccessors() as $successor) {
-			$startX = $this->middleColumnX;
-			$endX = $successor->getX() - Constants::PKMN_ICON_LINE_MARGIN;
-			$y = $successor->getMiddleY();
-
-			$line = new SVGLine($startX, $y, $endX, $y);
-			array_push($this->lineConnections, $line);
+			$this->addMiddleToSuccessorConnection($successor);
 		}
 	}
 
-	/**
-	 * If the root is an evolution, the connection to its lowest evo is an
-	 * arrow and gets a text to additionally show that this is an evo connection. 
-	 */
-	private function addEvoConnection () {
-		Logger::statusLog('adding evo arrow line connection for '.$this);
-		$pkmn = $this->nodeFrontendPkmn;
-		$evo = $pkmn->getSuccessors()[0];
+	private function addMiddleToSuccessorConnection (FrontendPkmn $successor) {
+		$middleToSuccessorConnection = $this->createMiddleToSuccessorConnection($successor);
+		$this->addConnections([$middleToSuccessorConnection]);
+	}
 
-		$startX = $pkmn->getX() + $pkmn->getIconWidth()
-			+ Constants::PKMN_ICON_LINE_MARGIN;
-		$endX = $evo->getX() - Constants::PKMN_ICON_LINE_MARGIN;
-		$y = $pkmn->getMiddleY();
-		$horizontalLine = new SVGLine($startX, $y, $endX, $y);
-		$upperArrowPart = new SVGLine($startX, $y, $startX + 10, $y - 10);
-		$lowerArrowPart = new SVGLine($startX, $y, $startX + 10, $y + 10);
+	private function createMiddleToSuccessorConnection (FrontendPkmn $successor): SVGLine {
+		$startX = $this->middleColumnX;
+		$endX = $successor->getX() - Constants::PKMN_ICON_LINE_MARGIN;
+		$y = $successor->getMiddleY();
 
-		$connectionText = new SVGText(
-			$startX + 30, $y - 2, Constants::$centralSpecialPageInstance->msg('breedingchains-evo'));
-
-		array_push($this->lineConnections, $horizontalLine);
-		array_push($this->lineConnections, $upperArrowPart);
-		array_push($this->lineConnections, $lowerArrowPart);
-
-		//todo this is unclean af
-		array_push($this->lineConnections, $connectionText);
+		$line = new SVGLine($startX, $y, $endX, $y);
+		return $line;
 	}
 
 	public function toHTML (int $xOffset, int $yOffset): array {
 		$tagArray = [];
+
+		$htmlTagCreationOptions = [
+			'tagArray' => &$tagArray,
+			'xOffset' => $xOffset,
+			'yOffset' => $yOffset
+		];
+
+		$this->addIconOrFileErrorToHTMLTagArray($htmlTagCreationOptions);
+		$this->addSpecialLearnsetMarkerToHTMLTagArray($htmlTagCreationOptions);
+		$this->addLineConnectionsToHTMLTagArray($htmlTagCreationOptions);
+		$this->addSuccessorsToHTMLTagArray($htmlTagCreationOptions);
+
+		return $tagArray;
+	}
+
+	private function addIconOrFileErrorToHTMLTagArray (array &$htmlTagCreationOptions) {
 		if (!is_null($this->pkmnLink)) {
-			array_push($tagArray, $this->pkmnLink->toHTML($xOffset, $yOffset));
+			array_push(
+				$htmlTagCreationOptions['tagArray'],
+				$this->pkmnLink->toHTML($htmlTagCreationOptions['xOffset'], $htmlTagCreationOptions['yOffset'])
+			);
 		} else {
 			$errorMessage = new ErrorMessage($this->nodeFrontendPkmn->getFileError());
 			$errorMessage->output();
 		}
+	}
 
+	private function addSpecialLearnsetMarkerToHTMLTagArray (array &$htmlTagCreationOptions) {
 		if ($this->nodeFrontendPkmn->getLearnsByOldGen()) {
-			array_push($tagArray, $this->createOldGenMarker($xOffset, $yOffset));
+			array_push(
+				$htmlTagCreationOptions['tagArray'],
+				$this->createOldGenMarker($htmlTagCreationOptions['xOffset'], $htmlTagCreationOptions['yOffset'])
+			);
 		} else if ($this->nodeFrontendPkmn->getLearnsByEvent()) {
-			array_push($tagArray, $this->createEventMarker($xOffset, $yOffset));
+			array_push(
+				$htmlTagCreationOptions['tagArray'],
+				$this->createEventMarker($htmlTagCreationOptions['xOffset'], $htmlTagCreationOptions['yOffset'])
+			);
 		}
-
-		foreach ($this->lineConnections as $line) {
-			array_push($tagArray, $line->toHTML($xOffset, $yOffset));
-		}
-
-		foreach ($this->successors as $successor) {
-			foreach ($successor->toHTML($xOffset, $yOffset) as $tag) {
-				array_push($tagArray, $tag);
-			}
-		}
-
-		return $tagArray;
 	}
 
 	private function createOldGenMarker (int $xOffset, int $yOffset): HTMLElement {
@@ -199,6 +263,31 @@ class SVGPkmn {
 		);
 
 		return $eventMarker->toHTML($xOffset, $yOffset);
+	}
+
+	private function addLineConnectionsToHTMLTagArray (array &$htmlTagCreationOptions) {
+		foreach ($this->lineConnections as $line) {
+			array_push(
+				$htmlTagCreationOptions['tagArray'],
+				$line->toHTML($htmlTagCreationOptions['xOffset'], $htmlTagCreationOptions['yOffset'])
+			);
+		}
+	}
+
+	private function addSuccessorsToHTMLTagArray (array &$htmlTagCreationOptions) {
+		foreach ($this->successors as $successor) {
+			$this->addSuccessorTagsToHTMLTagArray($htmlTagCreationOptions, $successor);
+		}
+	}
+
+	private function addSuccessorTagsToHTMLTagArray (array &$htmlTagCreationOptions, SVGPkmn $successor) {
+		$successorHTMLTags = $successor->toHTML(
+			$htmlTagCreationOptions['xOffset'],
+			$htmlTagCreationOptions['yOffset']
+		);
+		foreach ($successorHTMLTags as $tag) {
+			array_push($htmlTagCreationOptions['tagArray'], $tag);
+		}
 	}
 
 	/**

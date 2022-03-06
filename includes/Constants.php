@@ -3,9 +3,9 @@ class Constants {
 	public static StdClass $externalPkmnJSON;
 	public static StdClass $externalEggGroupsJSON;
 
-	public static String $targetPkmnName;
-	public static String $targetMoveName;
-	public static String $targetGenNumber;
+	public static string $targetPkmnName;
+	public static string $targetMoveName;
+	public static string $targetGenNumber;
 
 	public static OutputPage $centralOutputPageInstance;
 	public static SpecialPage $centralSpecialPageInstance;
@@ -15,7 +15,6 @@ class Constants {
 	 */
 	public static bool $displayDebuglogs = false;
 	public static bool $displayStatuslogs = false;
-
 
 	public const PKMN_MARGIN_HORIZONTAL = 200;
 	public const PKMN_ICON_LINE_MARGIN = 10;
@@ -36,7 +35,7 @@ class Constants {
 	 * because the class has built in cleaning functionality and so on, which ensures that no
 	 * satanic sins are injected.
 	 */
-	public static function out (String $msg) {
+	public static function out (string $msg) {
 		Constants::$centralOutputPageInstance->addWikiTextAsContent($msg.' ');
 	}
 }

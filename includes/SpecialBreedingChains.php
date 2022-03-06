@@ -21,45 +21,45 @@ class SpecialBreedingChains extends SpecialPage {
 		Constants::$centralSpecialPageInstance = $this;
 		Constants::$centralOutputPageInstance = $this->getOutput();
 
+		Constants::$centralOutputPageInstance->setPageTitle(Constants::i18nMsg('breedingchains-title'));
 		$this->setHeaders();//seems like a must have
-		$this->getOutput()->setPageTitle(Constants::i18nMsg('breedingchains-title'));
 		$this->addCSSandJS();
 		$this->addForms();
 	}
 
-	public function reactToInputData ($data, $form) {
+	public function submitCallback ($data, $form) {
 		$successCode = '';
 		try {
-			$successCode = $this->temp($data, $form);
+			$successCode = $this->reactToInput($data, $form);
 		} catch (Exception $e) {
 			$eMsg = new ErrorMessage($e);
-			$this->outputFinishingMessage($eMsg);
-			Logger::elog((string) $eMsg);
+			$eMsg->output();
+			Logger::flush();
 			return Status::newFatal((string) $e);
 		}
 		Logger::flush();
 		return Status::newGood($successCode);
 	}
 
-	public function temp ($data, $form): string {
+	public function reactToInput ($data, $form): string {
 		$this->initConstants($data);
 
 		$findBetterName = $this->catchEasterEggs();
-		if ($findBetterName !== '') {
+		if ($this->specialPageProcessIsFinished($findBetterName)) {
 			return $findBetterName;
 		}
-		
+
 		$this->getDataFromExternalWikipages();
 
 		$findBetterName = $this->catchUnknownPkmnName();
-		if ($findBetterName !== '') {
+		if ($this->specialPageProcessIsFinished($findBetterName)) {
 			return $findBetterName;
 		}
 
 		$breedingTreeRoot = $this->createBreedingTree();
 
 		$findBetterName = $this->catchNonStandardBreedingTreeStates($breedingTreeRoot);
-		if ($findBetterName !== '') {
+		if ($this->specialPageProcessIsFinished($findBetterName)) {
 			return $findBetterName;
 		}
 
@@ -67,69 +67,9 @@ class SpecialBreedingChains extends SpecialPage {
 
 		$svgMapDiv = $this->createSVGMapDiv();
 		$svgStructure = $this->createSVGStructure($frontendRoot);
-
 		$this->addVisualStructuresToOutput($svgMapDiv, $svgStructure);
 
 		return 'all ok';
-	}
-
-	private function catchEasterEggs (): string {
-		$programTermiationCode = 'easter egg';
-		if (Constants::$targetPkmnName === 'Greenchu') {
-			$infoMessage = new InfoMessage(Constants::i18nMsg('breedingchain-easteregg-greenchu'));
-			$infoMessage->output();
-			return $programTermiationCode;
-		}
-		if (Constants::$targetPkmnName === 'DeXter') {
-			$messageText = Constants::i18nMsg('breedingchain-easteregg-dexter', Constants::$targetMoveName);
-			$infoMessage = new InfoMessage($messageText);
-			$infoMessage->output();
-			return $programTermiationCode;
-		}
-		return '';
-	}
-
-	private function catchUnknownPkmnName (): string {
-		$programTermiationCode = 'unknown pkmn name';
-		$targetPkmn = Constants::$targetPkmnName;
-		if (!isset(Constants::$externalPkmnJSON->$targetPkmn)) {
-			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-unknown-pkmn', Constants::$targetPkmnName));
-			$alertMessage->output();
-			return $programTermiationCode;
-		}
-		return '';
-	}
-
-	//todo separate method
-	private function catchNonStandardBreedingTreeStates (BreedingTreeNode $breedingTreeRoot): string {
-		if (is_null($breedingTreeRoot)) {
-			//todo check whether move has a typo or generally if it's a move
-			$infoMessage = new InfoMessage(Constants::i18nMsg('breedingchains-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
-			$infoMessage->output();
-			return 'cant learn';
-		} else if (!$breedingTreeRoot->hasSuccessors()) {
-			//todo if a lowest evo can inherit the move but no suiting parents are found, this wouldnt be handled
-			$infoMessage = null;
-			if ($breedingTreeRoot->getLearnsByEvent()) {
-				$infoMessage = new InfoMessage(Constants::i18nMsg(
-					'breedingchains-can-learn-event', Constants::$targetPkmnName));
-			} else if ($breedingTreeRoot->getLearnsByOldGen()) {
-				$infoMessage = new InfoMessage(Constants::i18nMsg(
-					'breedingchains-can-learn-oldgen', Constants::$targetPkmnName));
-			} else {
-				$infoMessage = new InfoMessage(Constants::i18nMsg(
-					'breedingchains-can-learn-directly', Constants::$targetPkmnName,
-					Constants::$targetMoveName));	
-			}
-			$infoMessage->output();
-			return 'can learn directly';
-		}
-		return '';
-	}
-
-	private function outputFinishingMessage (OutputMessage $msg) {
-		$msg->output();
-		Logger::flush();
 	}
 
 	private function initConstants ($formData) {
@@ -142,6 +82,77 @@ class SpecialBreedingChains extends SpecialPage {
 		if (isset($formData['displayStatuslogs'])) {
 			Constants::$displayStatuslogs = $formData['displayStatuslogs'];
 		}
+	}
+
+	private function specialPageProcessIsFinished (string $code): bool {
+		return $code !== '';
+	}
+
+	private function catchEasterEggs (): string {
+		$programTerminationCode = 'easter egg';
+
+		if (Constants::$targetPkmnName === 'Greenchu') {
+			$messageText = Constants::i18nMsg('breedingchains-easteregg-greenchu', Constants::$targetMoveName);
+			$infoMessage = new InfoMessage($messageText);
+			$infoMessage->output();
+			return $programTerminationCode;
+		}
+
+		if (Constants::$targetPkmnName === 'DeXter') {
+			$messageText = Constants::i18nMsg('breedingchains-easteregg-dexter', Constants::$targetMoveName);
+			$infoMessage = new InfoMessage($messageText);
+			$infoMessage->output();
+			return $programTerminationCode;
+		}
+
+		return '';
+	}
+
+	private function catchUnknownPkmnName (): string {
+		$programTerminationCode = 'unknown pkmn name';
+		$targetPkmn = Constants::$targetPkmnName;
+		if (!isset(Constants::$externalPkmnJSON->$targetPkmn)) {
+			$messageText = Constants::i18nMsg('breedingchains-unknown-pkmn', Constants::$targetPkmnName);
+			$alertMessage = new AlertMessage($messageText);
+			$alertMessage->output();
+			return $programTerminationCode;
+		}
+		return '';
+	}
+
+	//todo separate method
+	private function catchNonStandardBreedingTreeStates (?BreedingTreeNode $breedingTreeRoot): string {
+		if (is_null($breedingTreeRoot)) {
+			return $this->catchEmptyBreedingTree();
+		} else if (!$breedingTreeRoot->hasSuccessors()) {
+			return $this->catchBreedingTreeRootLearnsDirectly($breedingTreeRoot);
+		}
+		return '';
+	}
+
+	private function catchEmptyBreedingTree (): string {
+		//todo check whether move has a typo or generally if it's a move
+		$infoMessage = new InfoMessage(Constants::i18nMsg('breedingchains-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
+		$infoMessage->output();
+		return 'cant learn';
+	}
+
+	private function catchBreedingTreeRootLearnsDirectly (BreedingTreeNode $breedingTreeRoot): string {
+		//todo if a lowest evo can inherit the move but no suiting parents are found, this wouldnt be handled
+		$infoMessage = null;
+		if ($breedingTreeRoot->getLearnsByEvent()) {
+			$infoMessage = new InfoMessage(Constants::i18nMsg(
+				'breedingchains-can-learn-event', Constants::$targetPkmnName));
+		} else if ($breedingTreeRoot->getLearnsByOldGen()) {
+			$infoMessage = new InfoMessage(Constants::i18nMsg(
+				'breedingchains-can-learn-oldgen', Constants::$targetPkmnName));
+		} else {
+			$infoMessage = new InfoMessage(Constants::i18nMsg(
+				'breedingchains-can-learn-directly', Constants::$targetPkmnName,
+				Constants::$targetMoveName));	
+		}
+		$infoMessage->output();
+		return 'can learn directly';
 	}
 
 	private function createBreedingTree (): ?BreedingTreeNode {
@@ -199,35 +210,22 @@ class SpecialBreedingChains extends SpecialPage {
 		$svgStructure->addToOutput();
 	}
 
-	private function addCSSandJS () {
-		Constants::$centralOutputPageInstance->addModules('breedingChainsModules');
-	}
-
 	private function addMarkerExplanations () {
 		require_once 'markerExamples.php';
 		$markerExamplesTable->addToOutput();
 	}
 
-	private function addForms () {
-		require_once 'formDescriptor.php';
+	private function addCSSandJS () {
+		Constants::$centralOutputPageInstance->addModules('breedingChainsModules');
+	}
 
-		$formDescriptionArray = $formDescriptor;
-		$user = $this->getUser();
-		$userGroups = $user->getGroupMemberships();
-		//todo put the group names in some kind of config file
-		if (isset($userGroups['voting'])) {
-			$formDescriptionArray = array_merge($formDescriptionArray,
-				$debuglogsCheckBox);
-		}
-		if (isset($userGroups['trusted'])) {
-			$formDescriptionArray = array_merge($formDescriptionArray,
-				$statuslogsCheckBox);
-		}
+	private function addForms () {
+		$formDescriptionArray = $this->getUserGroupSpecificFormDescription();
 
 		$form = HTMLForm::factory(
 			'ooui', $formDescriptionArray, $this->getContext());
 		$form->setMethod('get');
-		$form->setSubmitCallback([$this, 'reactToInputData']);
+		$form->setSubmitCallback([$this, 'submitCallback']);
 		$form->setSubmitText(Constants::i18nMsg('breedingchains-submit-text'));
 		$form->prepareForm();
 
@@ -235,8 +233,28 @@ class SpecialBreedingChains extends SpecialPage {
 		$form->trySubmit();
 	}
 
+	private function getUserGroupSpecificFormDescription () {
+		require_once 'formDescriptor.php';
+
+		$user = $this->getUser();
+		$userGroups = $user->getGroupMemberships();
+
+		//todo put the group names in some kind of config file
+		if (isset($userGroups['voting'])) {
+			$formDescriptor = array_merge($formDescriptor,
+				$debuglogsCheckBox);
+		}
+
+		if (isset($userGroups['trusted'])) {
+			$formDescriptor = array_merge($formDescriptor,
+				$statuslogsCheckBox);
+		}
+
+		return $formDescriptor;
+	}
+
 	//has to be public
-	public function validatePkmn ($value, $allData) {
+	public function validatePkmnInput ($value, $allData) {
 		if ($value === '' || $value === null) {
 			return true;
 		}
@@ -245,7 +263,7 @@ class SpecialBreedingChains extends SpecialPage {
 		$regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
 		if (preg_match($regex, $value)) {
 			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-pkmn'));
-			$alertMessage->output();
+			$alertMessage->outputOnce();
 			return 'invalid pkmn';
 		}
 
@@ -253,7 +271,7 @@ class SpecialBreedingChains extends SpecialPage {
 	}
 
 	//has to be public
-	public function validateMove ($value, $allData) {
+	public function validateMoveInput ($value, $allData) {
 		if ($value === '' || $value === null) {
 			return true;
 		}
@@ -262,7 +280,7 @@ class SpecialBreedingChains extends SpecialPage {
 		$regex = '/[^a-zA-ZÜßäöü\- 2]/';
 		if (preg_match($regex, $value)) {
 			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-move'));
-			$alertMessage->output();
+			$alertMessage->outputOnce();
 			return 'invalid move';
 		}
 
@@ -270,14 +288,14 @@ class SpecialBreedingChains extends SpecialPage {
 	}
 
 	//has to be public
-	public function validateGen ($value, $allData) {
+	public function validateGenInput ($value, $allData) {
 		if ($value === '' || $value === null) {
 			return true;
 		}
 
 		if (!is_numeric($value)) {
 			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-gen'));
-			$alertMessage->output();
+			$alertMessage->outputOnce();
 			return 'invalid gen';
 		}
 
@@ -285,22 +303,21 @@ class SpecialBreedingChains extends SpecialPage {
 	}
 
 	private function getDataFromExternalWikipages () {
-		$gen = Constants::$targetGenNumber;
-		Constants::$externalPkmnJSON = $this->getPkmnData($gen);
+		Constants::$externalPkmnJSON = $this->getExternalJSONPkmnData();
 
-		$eggGroupPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'.$gen
-			.'/egg-groups.json';
+		$eggGroupPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'
+			.Constants::$targetGenNumber.'/egg-groups.json';
 		Constants::$externalEggGroupsJSON = $this->getWikiPageContent($eggGroupPageName);
 	}
 
-	private function getPkmnData (String $gen) : StdClass {
+	private function getExternalJSONPkmnData () : StdClass {
 		$pkmnDataArr = [];
 		$pageData = null;
 		$pageIndex = 1;
 
 		do {
-			$pkmnDataPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'.$gen
-				.'/pkmn-data'.$pageIndex.'.json';
+			$pkmnDataPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'
+				.Constants::$targetGenNumber.'/pkmn-data'.$pageIndex.'.json';
 			$pageData = $this->getWikiPageContent($pkmnDataPageName);
 
 			$pageDataArray = (array) $pageData;

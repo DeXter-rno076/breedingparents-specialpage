@@ -12,6 +12,8 @@ class AttributeNotFoundException extends Exception {
 		$this->pkmnId = $pkmnId;
 		$this->missingAttribute = $attr;
 		parent::__construct($this->msg, 0, $previous);
+
+		Logger::elog($this->__toString());
 	}
 
 	public function __toString (): string {
