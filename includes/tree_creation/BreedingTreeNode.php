@@ -85,7 +85,6 @@ class BreedingTreeNode extends Pkmn {
 
 	private function selectSuccessorsOfRootNode (array &$eggGroupBlacklist) {
 		$eggGroup1 = $this->data->getEggGroup1();
-		$eggGroup2 = $this->data->getEggGroup2();
 
 		/*root pkmn is at the start => it is the only pkmn that
 		doesnt need an egg group for a connection to a predecessor
@@ -93,6 +92,7 @@ class BreedingTreeNode extends Pkmn {
 		$eggGroupBlacklist[] = $eggGroup1;
 
 		if ($this->data->hasSecondEggGroup()) {
+			$eggGroup2 = $this->data->getEggGroup2();
 			/*egg group 2 has to be called first because
 			both method calls need both egg groups in the blacklist*/
 			$eggGroupBlacklist[] = $eggGroup2;

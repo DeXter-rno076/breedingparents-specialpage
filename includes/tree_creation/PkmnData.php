@@ -8,7 +8,7 @@ require_once 'BreedingTreeNode.php';
 
 class PkmnData extends Pkmn {
 	private string $eggGroup1;
-	private ?string $eggGroup2;
+	private string $eggGroup2;
 
 	// male | female | both | unknown
 	private string $gender;
@@ -110,7 +110,7 @@ class PkmnData extends Pkmn {
 		return $this->eggGroup1;
 	}
 
-	public function getEggGroup2 (): ?string {
+	public function getEggGroup2 (): string {
 		return $this->eggGroup2;
 	}
 
@@ -139,7 +139,7 @@ class PkmnData extends Pkmn {
 	}
 
 	public function hasSecondEggGroup (): bool {
-		return $this->eggGroup2 !== null;
+		return $this->eggGroup2 !== '';
 	}
 
 	public function hasAsEvolution (string $pkmnName): bool {
