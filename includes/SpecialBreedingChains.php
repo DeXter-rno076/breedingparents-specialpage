@@ -142,14 +142,14 @@ class SpecialBreedingChains extends SpecialPage {
 		$infoMessage = null;
 		if ($breedingTreeRoot->getLearnsByEvent()) {
 			$infoMessage = new InfoMessage(Constants::i18nMsg(
-				'breedingchains-can-learn-event', Constants::$targetPkmnName));
+				'breedingchains-can-learn-event', Constants::$targetPkmnName, Constants::$targetMoveName));
 		} else if ($breedingTreeRoot->getLearnsByOldGen()) {
 			$infoMessage = new InfoMessage(Constants::i18nMsg(
-				'breedingchains-can-learn-oldgen', Constants::$targetPkmnName));
+				'breedingchains-can-learn-oldgen', Constants::$targetPkmnName, Constants::$targetMoveName));
 		} else {
 			$infoMessage = new InfoMessage(Constants::i18nMsg(
 				'breedingchains-can-learn-directly', Constants::$targetPkmnName,
-				Constants::$targetMoveName));	
+				Constants::$targetMoveName));
 		}
 		$infoMessage->output();
 		return 'can learn directly';
