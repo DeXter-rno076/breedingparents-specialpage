@@ -249,6 +249,9 @@ class BreedingTreeNode extends Pkmn {
 	}
 
 	private function breedingChainOverLowestEvolutionHasAnAdvantage (BreedingTreeNode $lowestEvoNode) {
+		if ($lowestEvoNode->hasSuccessors()) {
+			return true;
+		}
 		/*NOT ( this learns by old gen AND evo learns by old gen or event)
 		without negation at the beginning:
 		-> this does not learn via old gen or evo learns neither by old gen nor event*/
