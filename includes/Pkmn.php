@@ -1,7 +1,7 @@
 <?php
 abstract class Pkmn {
-	protected string $name;
-	protected string $id;
+	protected $name;
+	protected $id;
 
 	protected function __construct (string $name, string $id) {
 		$this->name = $name;

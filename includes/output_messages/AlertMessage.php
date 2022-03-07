@@ -2,7 +2,7 @@
 require_once 'OutputMessage.php';
 
 class AlertMessage extends OutputMessage {
-	private static array $alreadyOutputtedOneTimeMessages = [];
+	private static $alreadyOutputtedOneTimeMessages = [];
 
 	public function __construct (string $msg) {
 		parent::__construct($msg);

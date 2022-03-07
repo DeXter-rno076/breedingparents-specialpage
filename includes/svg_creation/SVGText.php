@@ -5,9 +5,9 @@ require_once __DIR__.'/../HTMLElement.php';
 require_once 'SVGElement.php';
 
 class SVGText extends SVGElement {
-	private int $x;
-	private int $y;
-	private string $text;
+	private $x;
+	private $y;
+	private $text;
 
 	public function __construct (int $x, int $y, string $text) {
 		$this->x = $x;

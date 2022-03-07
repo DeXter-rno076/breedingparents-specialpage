@@ -31,7 +31,7 @@ require_once 'BreedingTreeNode.php';
  * 				manaphy has no breeding learnsets -> irrelevant
  */
 class SuccessorFilter {
-	private array $eggGroupBlacklist;
+	private $eggGroupBlacklist;
 
 	/**
 	 * @var String egg group whose pkmn are checked and added after this filter did its job
@@ -42,11 +42,11 @@ class SuccessorFilter {
 	 * egg group could include the second egg group which would result in
 	 * redundancies or a wrong tree section.
 	 */
-	private string $whitelistedEggGroup;
+	private $whitelistedEggGroup;
 
-	private array $successorList;
+	private $successorList;
 
-	private BreedingTreeNode $currentTreeNode;
+	private $currentTreeNode;
 
 	public function __construct (array $eggGroupBlacklist, string $whitelistedEggGroup,
 									BreedingTreeNode $currentTreeNode) {

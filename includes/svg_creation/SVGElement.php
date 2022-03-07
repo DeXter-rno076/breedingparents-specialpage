@@ -2,7 +2,7 @@
 require_once __DIR__.'/../HTMLElement.php';
 
 abstract class SVGElement {
-	protected string $tagType;
+	protected $tagType;
 
 	protected function __construct (string $tagType) {
 		$this->tagType = $tagType;

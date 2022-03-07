@@ -5,9 +5,9 @@ require_once __DIR__.'/../HTMLElement.php';
 require_once 'SVGElement.php';
 
 class SVGCircle extends SVGElement {
-	private int $centerX;
-	private int $centerY;
-	private int $radius;
+	private $centerX;
+	private $centerY;
+	private $radius;
 
 	public function __construct (int $centerX, int $centerY, int $radius) {
 		$this->centerX = $centerX;

@@ -2,9 +2,9 @@
 require_once 'Constants.php';
 
 class Logger {
-	private static array $elogCache = [];
-	private static array $wlogCache = [];
-	private static array $statusLogCache = [];
+	private static $elogCache = [];
+	private static $wlogCache = [];
+	private static $statusLogCache = [];
 
 	private function __construct () {}
 

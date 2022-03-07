@@ -13,12 +13,12 @@ require_once 'SVGText.php';
 require_once 'FrontendPkmn.php';
 
 class SVGPkmn {
-	private ?SVGLink $pkmnLink = null;
-	private array $lineConnections = [];
-	private array $successors = [];
-	private FrontendPkmn $nodeFrontendPkmn;
+	private $pkmnLink = null;
+	private $lineConnections = [];
+	private $successors = [];
+	private $nodeFrontendPkmn;
 
-	private int $middleColumnX = 0;
+	private $middleColumnX = 0;
 
 	public function __construct (FrontendPkmn $pkmn) {
 		$this->nodeFrontendPkmn = $pkmn;

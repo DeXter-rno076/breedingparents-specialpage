@@ -6,11 +6,11 @@ require_once 'SVGElement.php';
 require_once 'FrontendPkmn.php';
 
 class SVGImg extends SVGElement {
-	private int $x;
-	private int $y;
-	private int $width;
-	private int $height;
-	private string $href;
+	private $x;
+	private $y;
+	private $width;
+	private $height;
+	private $href;
 
 	public function __construct (FrontendPkmn $frontendPkmn) {
 		parent::__construct('image');

@@ -7,10 +7,10 @@ require_once 'Constants.php';
  * so I made a half wrapper, half own class, that solves the issue and makes it generally handier
  */
 class HTMLElement {
-	private string $tagName;
-	private array $attributes;
+	private $tagName;
+	private $attributes;
 	//innerContent is a mix of HTMLElements and strings
-	private array $innerContent;
+	private $innerContent;
 
 	public function __construct (string $tagName, array $attribs = [], array $innerElements = []) {
 		$this->tagName = $tagName;

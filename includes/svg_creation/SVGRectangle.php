@@ -6,13 +6,13 @@ require_once __DIR__.'/../Constants.php';
 require_once 'SVGElement.php';
 
 class SVGRectangle extends SVGElement {
-	private int $x;
-	private int $y;
-	private int $width;
-	private int $height;
+	private $x;
+	private $y;
+	private $width;
+	private $height;
 	//rounded corners
-	private int $rx;
-	private int $ry;
+	private $rx;
+	private $ry;
 
 	public function __construct (int $x, int $y, int $width, int $height) {
 		$this->x = $x;

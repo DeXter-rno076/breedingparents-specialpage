@@ -1,20 +1,20 @@
 <?php
 class Constants {
-	public static StdClass $externalPkmnJSON;
-	public static StdClass $externalEggGroupsJSON;
+	public static $externalPkmnJSON;
+	public static $externalEggGroupsJSON;
 
-	public static string $targetPkmnName;
-	public static string $targetMoveName;
-	public static string $targetGenNumber;
+	public static $targetPkmnName;
+	public static $targetMoveName;
+	public static $targetGenNumber;
 
-	public static OutputPage $centralOutputPageInstance;
-	public static SpecialPage $centralSpecialPageInstance;
+	public static $centralOutputPageInstance;
+	public static $centralSpecialPageInstance;
 	
 	/**
 	 * @var bool whether to display custom error and warning logs and performance measurements
 	 */
-	public static bool $displayDebuglogs = false;
-	public static bool $displayStatuslogs = false;
+	public static $displayDebuglogs = false;
+	public static $displayStatuslogs = false;
 
 	public const PKMN_MARGIN_HORIZONTAL = 200;
 	public const PKMN_ICON_LINE_MARGIN = 10;

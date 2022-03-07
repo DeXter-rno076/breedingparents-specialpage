@@ -8,13 +8,13 @@ require_once 'PkmnData.php';
 require_once 'SuccessorFilter.php';
 
 class BreedingTreeNode extends Pkmn {
-	private bool $isRoot = false;
-	private array $successors = [];
+	private $isRoot = false;
+	private $successors = [];
 
-	private PkmnData $data;
+	private $data;
 
-	private bool $learnsByEvent = false;
-	private bool $learnsByOldGen = false;
+	private $learnsByEvent = false;
+	private $learnsByOldGen = false;
 
 	public function __construct (string $pkmnName, bool $isRoot = false) {
 		$this->data = new PkmnData($pkmnName);

@@ -2,7 +2,7 @@
 require_once __DIR__.'/../HTMLElement.php';
 
 abstract class OutputMessage {
-	protected string $msg;
+	protected $msg;
 	public const STANDARD_BOX_CLASSES = 'breedingChainsMessageBox';
 
 	public function __construct ($msg) {

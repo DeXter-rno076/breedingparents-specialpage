@@ -9,21 +9,21 @@ require_once __DIR__.'/../Constants.php';
 use MediaWiki\MediaWikiServices;
 
 class FrontendPkmn extends Pkmn {
-	private bool $learnsByEvent;
-	private bool $learnsByOldGen;
-	private array $successors = [];
-	private bool $isRoot;
+	private $learnsByEvent;
+	private $learnsByOldGen;
+	private $successors = [];
+	private $isRoot;
 
-	private PkmnData $pkmnData;
+	private $pkmnData;
 
-	private int $x;
-	private int $y;
-	private int $treeSectionHeight;
+	private $x;
+	private $y;
+	private $treeSectionHeight;
 
-	private string $iconUrl;
-	private int $iconWidth;
-	private int $iconHeight;
-	private ?FileNotFoundException $fileError = null;
+	private $iconUrl;
+	private $iconWidth;
+	private $iconHeight;
+	private $fileError = null;
 
 	public function __construct (BreedingTreeNode $breedingTreeNode) {
 		parent::__construct($breedingTreeNode->getName(), $breedingTreeNode->getID());

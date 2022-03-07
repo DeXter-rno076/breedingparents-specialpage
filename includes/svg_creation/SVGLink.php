@@ -7,8 +7,8 @@ require_once 'SVGElement.php';
 require_once 'SVGImg.php';
 
 class SVGLink extends SVGElement {
-	private string $href;
-	private SVGImg $innerEl;
+	private $href;
+	private $innerEl;
 
 	public function __construct(string $pkmnName, SVGImg $innerEl) {
 		parent::__construct('a');

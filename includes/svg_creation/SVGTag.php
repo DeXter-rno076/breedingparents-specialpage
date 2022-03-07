@@ -8,10 +8,10 @@ require_once 'SVGPkmn.php';
 require_once 'FrontendPkmn.php';
 
 class SVGTag extends SVGElement {
-	private string $id = 'breedingChainsSVG';
-	private int $width;
-	private int $height;
-	private SVGPkmn $svgRoot;
+	private $id = 'breedingChainsSVG';
+	private $width;
+	private $height;
+	private $svgRoot;
 
 	public function __construct (FrontendPkmn $pkmnRoot) {
 		parent::__construct('svg');

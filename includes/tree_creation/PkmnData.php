@@ -7,31 +7,31 @@ require_once __DIR__.'/../Logger.php';
 require_once 'BreedingTreeNode.php';
 
 class PkmnData extends Pkmn {
-	private string $eggGroup1;
-	private string $eggGroup2;
+	private $eggGroup1;
+	private $eggGroup2;
 
 	// male | female | both | unknown
-	private string $gender;
+	private $gender;
 
 	/**
 	 * @var String lowest evolution of this pkmn (e. g. Charmander for Charizard); 
 	 * if this pkmn is the lowest evo in its evo line this is set to the name of this pkmn (e. g. Abra for Abra) 
 	 */
-	private string $lowestEvolution;
-	private array $evolutions;
+	private $lowestEvolution;
+	private $evolutions;
 
-	private bool $unpairable;
-	private bool $unbreedable;
+	private $unpairable;
+	private $unbreedable;
 
 	/**
 	 * @var Array level up, TMHM/TMTR and tutor learnsets of this pkmn
 	 * todo maybe tutor learnsets get their own list in the future
 	 */
-	private array $directLearnsets;
-	private array $breedingLearnsets;
+	private $directLearnsets;
+	private $breedingLearnsets;
 
-	private array $eventLearnsets;
-	private array $oldGenLearnsets;
+	private $eventLearnsets;
+	private $oldGenLearnsets;
 
 	public function __construct (string $name) {
 		$pkmnDataObj = Constants::$externalPkmnJSON->$name;

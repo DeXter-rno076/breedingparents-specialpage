@@ -5,10 +5,10 @@ require_once __DIR__.'/../HTMLElement.php';
 require_once 'SVGElement.php';
 
 class SVGLine extends SVGElement {
-	private int $x1;
-	private int $y1;
-	private int $x2;
-	private int $y2;
+	private $x1;
+	private $y1;
+	private $x2;
+	private $y2;
 
 	public function __construct (int $x1, int $y1, int $x2, int $y2) {
 		parent::__construct('line');

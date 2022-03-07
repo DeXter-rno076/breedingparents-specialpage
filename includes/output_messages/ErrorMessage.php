@@ -3,7 +3,7 @@ require_once __DIR__.'/../Constants.php';
 require_once 'OutputMessage.php';
 
 class ErrorMessage extends OutputMessage {
-	private static array $alreadyOutputtedOneTimeMessages = [];
+	private static $alreadyOutputtedOneTimeMessages = [];
 
 	public function __construct (Exception $e) {
 		$errorMessageForOutput = $this->shortenErrorMessage((string) $e);
