@@ -120,7 +120,6 @@ class SpecialBreedingChains extends SpecialPage {
 		return '';
 	}
 
-	//todo separate method
 	private function catchNonStandardBreedingTreeStates (?BreedingTreeNode $breedingTreeRoot): string {
 		if (is_null($breedingTreeRoot)) {
 			return $this->catchEmptyBreedingTree();
@@ -305,7 +304,7 @@ class SpecialBreedingChains extends SpecialPage {
 	private function getDataFromExternalWikipages () {
 		Constants::$externalPkmnJSON = $this->getExternalJSONPkmnData();
 
-		$eggGroupPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'
+		$eggGroupPageName = 'MediaWiki:BreedingChains/Gen'
 			.Constants::$targetGenNumber.'/egg-groups.json';
 		Constants::$externalEggGroupsJSON = $this->getWikiPageContent($eggGroupPageName);
 	}
@@ -316,7 +315,7 @@ class SpecialBreedingChains extends SpecialPage {
 		$pageIndex = 1;
 
 		do {
-			$pkmnDataPageName = 'MediaWiki:'.Constants::i18nMsg('breedingchains').'/Gen'
+			$pkmnDataPageName = 'MediaWiki:BreedingChains/Gen'
 				.Constants::$targetGenNumber.'/pkmn-data'.$pageIndex.'.json';
 			$pageData = $this->getWikiPageContent($pkmnDataPageName);
 
