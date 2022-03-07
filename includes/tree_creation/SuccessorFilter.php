@@ -23,7 +23,7 @@ require_once 'BreedingTreeNode.php';
  * 			have unpairable set to true
  * 			have all learnsets except of breedingLearnsets removed
  * 
- * 		individual Pokémon:
+ * 		individual Pokemon:
  * 			Farbeagle
  * 				has all moves of the corresponding gen set in its directLearnsets
  *
@@ -157,15 +157,15 @@ class SuccessorFilter {
 		$this->remove($pkmnIsBlacklisted);
 	}
 
-	private function eggGroupIsWhiteListed (?string $eggGroup): bool {
-		if (is_null($eggGroup)) {
+	private function eggGroupIsWhiteListed (string $eggGroup): bool {
+		if ($eggGroup === '') {
 			return false;
 		}
 		return $this->whitelistedEggGroup === $eggGroup;
 	}
 
-	private function eggGroupIsBlacklisted (?string $eggGroup): bool {
-		if (is_null($eggGroup)) {
+	private function eggGroupIsBlacklisted (string $eggGroup): bool {
+		if ($eggGroup === '') {
 			return true;
 		}
 		return in_array($eggGroup, $this->eggGroupBlacklist);
