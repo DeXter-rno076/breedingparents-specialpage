@@ -163,7 +163,7 @@ class SpecialBreedingChains extends SpecialPage {
 		$breedingTreeRoot = $breedingTreeRoot->createBreedingTreeNode([]);
 
 		$timeEnd = hrtime(true);
-		$timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
+		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
 		Logger::outputDebugMessage('breeding tree creation needed: '.$timeDiff.'s');
 
 		return $breedingTreeRoot;
@@ -177,7 +177,7 @@ class SpecialBreedingChains extends SpecialPage {
 		$frontendRoot->setTreeIconsAndCoordinates();
 	
 		$timeEnd = hrtime(true);
-		$timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
+		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
 		Logger::outputDebugMessage('creating frontend pkmn tree needed: '.$timeDiff.'s');
 
 		return $frontendRoot;
@@ -191,7 +191,7 @@ class SpecialBreedingChains extends SpecialPage {
 		$svgStructureInHTML = $svgRoot->toHTML();
 
 		$timeEnd = hrtime(true);
-		$timeDiff = ($timeEnd - $timeStart) / 1_000_000_000;
+		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
 		Logger::outputDebugMessage('svg creation needed: '.$timeDiff.'s');
 
 		return $svgStructureInHTML;
