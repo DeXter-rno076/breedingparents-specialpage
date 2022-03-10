@@ -244,7 +244,7 @@ class SpecialBreedingChains extends SpecialPage {
 				$debuglogsCheckBox);
 		}
 
-		if (isset($userGroups['trusted'])) {
+		if (isset($userGroups['leader'])) {
 			$formDescriptor = array_merge($formDescriptor,
 				$statuslogsCheckBox);
 		}
