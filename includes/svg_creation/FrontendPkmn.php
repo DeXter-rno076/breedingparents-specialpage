@@ -75,7 +75,7 @@ class FrontendPkmn extends Pkmn {
 	}
 
 	private function tryLoadAndSetIconData () {
-		$iconFileObj = $this->getPkmnIcon($this->id);
+		$iconFileObj = FrontendPkmn::getPkmnIcon($this->id);
 		Logger::statusLog('icon file for '.$this.' successfully loaded');
 
 		$this->iconUrl = $iconFileObj->getUrl();
@@ -83,7 +83,7 @@ class FrontendPkmn extends Pkmn {
 		$this->iconHeight = $iconFileObj->getHeight();
 	}
 
-	private function getPkmnIcon (string $pkmnId): File {
+	public static function getPkmnIcon (string $pkmnId): File {
 		$fileName = 'Pokémon-Icon '.$pkmnId.'.png';
 		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
 

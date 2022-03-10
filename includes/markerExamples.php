@@ -1,4 +1,18 @@
 <?php
+
+$iconFile = null;
+$iconFileLink = '';
+try {
+	$iconFile = FrontendPkmn::getPkmnIcon('150');
+} catch (FileNotFoundException $e) {
+	$errorMsg = new ErrorMessage($e);
+	$errorMsg->output();
+}
+
+if (!is_null($iconFile)) {
+	$iconFileLink = $iconFile->getUrl();
+}
+
 $markerExamplesTable = new HTMLElement('table', [
 	'id' => 'breedingChainsExplanationTable'
 ], [
@@ -25,7 +39,7 @@ $markerExamplesTable = new HTMLElement('table', [
 						'y' => 5,
 						'width' => 32,
 						'height' => 42,
-						'xlink:href' => '/localwiki/images/9/92/Pok%C3%A9mon-Icon_150.png'
+						'xlink:href' => $iconFileLink
 					])
 				])
 			]),
@@ -59,7 +73,7 @@ $markerExamplesTable = new HTMLElement('table', [
 						'y' => 7,
 						'width' => 32,
 						'height' => 42,
-						'xlink:href' => '/localwiki/images/9/92/Pok%C3%A9mon-Icon_150.png'
+						'xlink:href' => $iconFileLink
 					])
 				])
 			])
