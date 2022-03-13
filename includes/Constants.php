@@ -21,9 +21,11 @@ class Constants {
 	public const SVG_RECTANGLE_PADDING = 5;
 	public const SVG_PKMN_SAFETY_MARGIN = 10;
 	public const SVG_CIRCLE_MARGIN = 4;
-	public const SVG_CIRCLE_LINE_WIDTH = 2;
+	public const SVG_LINE_WIDTH = 2;
 	public const SVG_SAFETY_MARGIN = 50;
 	public const SVG_OFFSET = 50;
+	public const APPROXIMATE_STRING_HEIGHT = 16;
+	public const SVG_TEXT_LINE_MARGIN = 4;
 
 	public static function i18nMsg (string $msgIdentifier, ...$params): string {
 		return Constants::$centralSpecialPageInstance->msg($msgIdentifier, ...$params);

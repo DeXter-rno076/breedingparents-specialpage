@@ -42,7 +42,7 @@ class SVGTag extends SVGElement {
 			'viewbox' => '0 0 '.$this->width.' '.$this->height,
 		]);
 		
-		$topLevelSVGTags = $this->svgRoot->toHTML($xOffset, $yOffset);
+		$topLevelSVGTags = $this->svgRoot->toHTMLElements($xOffset, $yOffset);
 
 		foreach ($topLevelSVGTags as $tag) {
 			$svgTag->addInnerElement($tag);

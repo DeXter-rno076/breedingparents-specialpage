@@ -5,16 +5,16 @@ require_once __DIR__.'/../HTMLElement.php';
 require_once __DIR__.'/../Constants.php';
 
 require_once 'SVGImg.php';
-require_once 'SVGLine.php';
 require_once 'SVGLink.php';
 require_once 'SVGCircle.php';
 require_once 'SVGRectangle.php';
 require_once 'SVGText.php';
 require_once 'FrontendPkmn.php';
+require_once 'SVGPkmnConnection.php';
 
 class SVGPkmn {
 	private $pkmnLink = null;
-	private $lineConnections = [];
+	private $pkmnConnections = [];
 	private $successors = [];
 	private $nodeFrontendPkmn;
 
@@ -94,31 +94,29 @@ class SVGPkmn {
 		$y = $this->nodeFrontendPkmn->getMiddleY();
 
 		$horizontalLine = new SVGLine($startX, $y, $endX, $y);
-		$upperArrowPart = new SVGLine($startX, $y, $startX + 10, $y - 10);
-		$lowerArrowPart = new SVGLine($startX, $y, $startX + 10, $y + 10);
+		$upperArrowPart = SVGPkmnConnection::constructWithoutText($startX, $y, $startX + 10, $y - 10);
+		$lowerArrowPart = SVGPkmnConnection::constructWithoutText($startX, $y, $startX + 10, $y + 10);
 
-		$connectionText = new SVGText(
-			$startX + 30, $y - 2, Constants::$centralSpecialPageInstance->msg('breedingchains-evo'));
+		$horizontalConnection = new SVGPkmnConnection($horizontalLine, Constants::i18nMsg('breedingchains-evo'));
 
 		return [
-			$horizontalLine, $upperArrowPart, $lowerArrowPart,
-			$connectionText	//todo mixing a SVGText with SVGLines is unclean af
+			$horizontalConnection, $upperArrowPart, $lowerArrowPart
 		];
 	}
 
 	private function calculateNodeConnectionMarginLeft (FrontendPkmn $successor): int {
 		return $successor->getMiddleX() - $successor->calculateDiagonal()/2 
-			- Constants::SVG_CIRCLE_MARGIN + Constants::SVG_CIRCLE_LINE_WIDTH/2;
+			- Constants::SVG_CIRCLE_MARGIN + Constants::SVG_LINE_WIDTH/2;
 	}
 
 	private function addConnections (array $connections) {
 		foreach ($connections as $connection) {
-			array_push($this->lineConnections, $connection);
+			array_push($this->pkmnConnections, $connection);
 		}
 	}
 
 	private function setMiddleColumnX () {
-		$this->middleColumnX = $this->nodeFrontendPkmn->getMiddleX() + Constants::PKMN_MARGIN_HORIZONTAL / 1.5;
+		$this->middleColumnX = $this->nodeFrontendPkmn->getMiddleX() + Constants::PKMN_MARGIN_HORIZONTAL / 3;
 	}
 
 	private function addLeftHalfConnectionLines () {
@@ -132,10 +130,10 @@ class SVGPkmn {
 		$this->addConnections([$horizontalLine]);
 	}
 
-	private function createPkmnMiddleConnection (): SVGLine {
+	private function createPkmnMiddleConnection (): SVGPkmnConnection {
 		$startX = $this->calculateNodeConnectionMarginRight();
 		$startY = $this->nodeFrontendPkmn->getMiddleY();
-		$horizontalLine = new SVGLine(
+		$horizontalLine = SVGPkmnConnection::constructWithoutText(
 			$startX, $startY,
 			$this->middleColumnX, $startY);
 		
@@ -153,7 +151,7 @@ class SVGPkmn {
 		$this->addConnections([$middleLine]);
 	}
 
-	private function createMiddleLine (): SVGLine {
+	private function createMiddleLine (): SVGPkmnConnection {
 		$lowestY = $this->getLowestYCoordinateFromTreeSection();
 		$highestY = $this->getHighestYCoordinateFromTreeSection();
 
@@ -161,7 +159,7 @@ class SVGPkmn {
 			$this->adjustCoordinatesToOnlyOneSuccessor($lowestY, $highestY);
 		}
 
-		$verticalLine = new SVGLine(
+		$verticalLine = SVGPkmnConnection::constructWithoutText(
 			$this->middleColumnX, $lowestY,
 			$this->middleColumnX, $highestY);
 		
@@ -203,16 +201,16 @@ class SVGPkmn {
 		$this->addConnections([$middleToSuccessorConnection]);
 	}
 
-	private function createMiddleToSuccessorConnection (FrontendPkmn $successor): SVGLine {
-		$startX = $this->middleColumnX - Constants::SVG_CIRCLE_LINE_WIDTH/2;
+	private function createMiddleToSuccessorConnection (FrontendPkmn $successor): SVGPkmnConnection {
+		$startX = $this->middleColumnX - Constants::SVG_LINE_WIDTH/2;
 		$endX = $this->calculateNodeConnectionMarginLeft($successor);
 		$y = $successor->getMiddleY();
 
-		$line = new SVGLine($startX, $y, $endX, $y);
+		$line = SVGPkmnConnection::constructWithoutText($startX, $y, $endX, $y);
 		return $line;
 	}
 
-	public function toHTML (int $xOffset, int $yOffset): array {
+	public function toHTMLElements (int $xOffset, int $yOffset): array {
 		$tagArray = [];
 
 		$htmlTagCreationOptions = [
@@ -223,7 +221,7 @@ class SVGPkmn {
 
 		$this->addIconOrFileErrorToHTMLTagArray($htmlTagCreationOptions);
 		$this->addSpecialLearnsetMarkerToHTMLTagArray($htmlTagCreationOptions);
-		$this->addLineConnectionsToHTMLTagArray($htmlTagCreationOptions);
+		$this->addPkmnConnectionsToHTMLTagArray($htmlTagCreationOptions);
 		$this->addSuccessorsToHTMLTagArray($htmlTagCreationOptions);
 
 		return $tagArray;
@@ -290,12 +288,18 @@ class SVGPkmn {
 		return $eventMarker->toHTML($xOffset, $yOffset);
 	}
 
-	private function addLineConnectionsToHTMLTagArray (array &$htmlTagCreationOptions) {
-		foreach ($this->lineConnections as $line) {
-			array_push(
-				$htmlTagCreationOptions['tagArray'],
-				$line->toHTML($htmlTagCreationOptions['xOffset'], $htmlTagCreationOptions['yOffset'])
+	private function addPkmnConnectionsToHTMLTagArray (array &$htmlTagCreationOptions) {
+		foreach ($this->pkmnConnections as $connection) {
+			$connectionParts = $connection->toHTMLElements(
+				$htmlTagCreationOptions['xOffset'],
+				$htmlTagCreationOptions['yOffset']
 			);
+			foreach ($connectionParts as $part) {
+				array_push(
+					$htmlTagCreationOptions['tagArray'],
+					$part
+				);
+			}
 		}
 	}
 
@@ -306,7 +310,7 @@ class SVGPkmn {
 	}
 
 	private function addSuccessorTagsToHTMLTagArray (array &$htmlTagCreationOptions, SVGPkmn $successor) {
-		$successorHTMLTags = $successor->toHTML(
+		$successorHTMLTags = $successor->toHTMLElements(
 			$htmlTagCreationOptions['xOffset'],
 			$htmlTagCreationOptions['yOffset']
 		);
