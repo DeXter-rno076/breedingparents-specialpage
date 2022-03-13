@@ -27,7 +27,7 @@ $markerExamplesTable = new HTMLElement('table', [
 				'height' => 50
 			], [
 				new HTMLElement('a',[
-					'href' => 'Mewtu/Attacken#8. Generation'
+					'href' => 'Mewtu/Attacken#8._Generation'
 				], [
 					new HTMLElement('circle', [
 						'cx' => 25,
@@ -58,7 +58,7 @@ $markerExamplesTable = new HTMLElement('table', [
 				'height' => 56
 			], [
 				new HTMLElement('a', [
-					'href' => 'Mewtu/Attacken#8. Generation'
+					'href' => 'Mewtu/Attacken#8._Generation'
 				], [
 					new HTMLElement('rect', [
 						'x' => 2,
