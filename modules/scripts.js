@@ -37,22 +37,8 @@ const map = L.map('breedingChainsSVGMap', {
 main();
 
 function main () {
-	initLeafletMap();
 	addSVGElements(svgChildren);
 	svgTag.style.display = 'none';
-}
-
-function initLeafletMap () {
-	map.setMaxBounds(new L.LatLngBounds(
-		map.unproject([
-			-SVG_CONTAINER_WIDTH + MAX_BOUNDS_X_PADDING,
-			SVG_CONTAINER_HEIGHT - MAX_BOUNDS_Y_PADDING
-		], 0),
-		map.unproject([
-			SVG_WIDTH + SVG_CONTAINER_WIDTH - MAX_BOUNDS_X_PADDING,
-			-SVG_HEIGHT - SVG_CONTAINER_HEIGHT + MAX_BOUNDS_Y_PADDING
-		], 0)
-	));
 }
 
 function calcCenterOffsets () {
