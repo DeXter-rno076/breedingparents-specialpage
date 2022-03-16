@@ -8,21 +8,28 @@ class SVGCircle extends SVGElement {
 	private $centerX;
 	private $centerY;
 	private $radius;
+	private $color;
 
-	public function __construct (int $centerX, int $centerY, int $radius) {
+	public function __construct (int $centerX, int $centerY, int $radius, string $color, int $groupId) {
+		parent::__construct('circle', $groupId);
 		$this->centerX = $centerX;
 		$this->centerY = $centerY;
 		$this->radius = $radius;
+		$this->color = $color;
 
 		Logger::statusLog('created '.$this);
 	}
 
 	public function toHTML (int $xOffset, int $yOffset): HTMLElement {
-		return new HTMLElement('circle', [
+		$circle = new HTMLElement('circle', [
 			'cx' => $this->centerX + $xOffset,
 			'cy' => $this->centerY + $yOffset,
-			'r' => $this->radius
+			'r' => $this->radius,
+			'color' => $this->color,
+			'groupid' => $this->groupId
 		]);
+
+		return $circle;
 	}
 
 	/**

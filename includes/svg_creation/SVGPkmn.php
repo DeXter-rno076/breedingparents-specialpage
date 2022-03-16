@@ -44,8 +44,12 @@ class SVGPkmn {
 
 	private function setPkmnIcon () {
 		Logger::statusLog($this->nodeFrontendPkmn.' has no file error set => can add icon');
-		$pkmnIconSVG = new SVGImg($this->nodeFrontendPkmn);
-		$linkSVG = new SVGLink($this->nodeFrontendPkmn->getName(), $pkmnIconSVG);
+		$pkmnIconSVG = new SVGImg($this->nodeFrontendPkmn, $this->nodeFrontendPkmn->getGroupId());
+		$linkSVG = new SVGLink(
+			$this->nodeFrontendPkmn->getName(),
+			$pkmnIconSVG,
+			$this->nodeFrontendPkmn->getGroupId()
+		);
 		$this->pkmnLink = $linkSVG;
 	}
 
@@ -72,7 +76,8 @@ class SVGPkmn {
 		$firstSuccessorIsLowestEvoOfThis = $firstSuccessorJSONData->isLowestEvolution() 
 			&& $firstSuccessorJSONData->hasAsEvolution($this->nodeFrontendPkmn->getName());
 		
-		return $this->nodeFrontendPkmn->isRoot() && $firstSuccessor->isRoot() && $firstSuccessorIsLowestEvoOfThis;
+		return $this->nodeFrontendPkmn->isRoot() 
+			&& $firstSuccessor->isRoot() && $firstSuccessorIsLowestEvoOfThis;
 	}
 
 	/**
@@ -93,11 +98,14 @@ class SVGPkmn {
 		$endX = $this->calculateNodeConnectionMarginLeft($evoFrontendPkmnInstance);
 		$y = $this->nodeFrontendPkmn->getMiddleY();
 
-		$horizontalLine = new SVGLine($startX, $y, $endX, $y);
-		$upperArrowPart = SVGPkmnConnection::constructWithoutText($startX, $y, $startX + 10, $y - 10);
-		$lowerArrowPart = SVGPkmnConnection::constructWithoutText($startX, $y, $startX + 10, $y + 10);
+		$horizontalLine = new SVGLine($startX, $y, $endX, $y, $this->nodeFrontendPkmn->getGroupId());
+		$upperArrowPart = SVGPkmnConnection::constructWithoutText(
+			$startX, $y, $startX + 10, $y - 10, $this->nodeFrontendPkmn->getGroupId());
+		$lowerArrowPart = SVGPkmnConnection::constructWithoutText(
+			$startX, $y, $startX + 10, $y + 10, $this->nodeFrontendPkmn->getGroupId());
 
-		$horizontalConnection = new SVGPkmnConnection($horizontalLine, Constants::i18nMsg('breedingchains-evo'));
+		$horizontalConnection = new SVGPkmnConnection(
+			$horizontalLine, $this->nodeFrontendPkmn->getGroupId(), Constants::i18nMsg('breedingchains-evo'));
 
 		return [
 			$horizontalConnection, $upperArrowPart, $lowerArrowPart
@@ -106,7 +114,7 @@ class SVGPkmn {
 
 	private function calculateNodeConnectionMarginLeft (FrontendPkmn $successor): int {
 		return $successor->getMiddleX() - $successor->calculateDiagonal()/2 
-			- Constants::SVG_CIRCLE_MARGIN + Constants::SVG_LINE_WIDTH/2;
+			- Constants::SVG_CIRCLE_MARGIN;// + Constants::SVG_LINE_WIDTH/2;
 	}
 
 	private function addConnections (array $connections) {
@@ -135,7 +143,7 @@ class SVGPkmn {
 		$startY = $this->nodeFrontendPkmn->getMiddleY();
 		$horizontalLine = SVGPkmnConnection::constructWithoutText(
 			$startX, $startY,
-			$this->middleColumnX, $startY);
+			$this->middleColumnX, $startY, $this->nodeFrontendPkmn->getGroupId());
 		
 		return $horizontalLine;
 	}
@@ -161,7 +169,7 @@ class SVGPkmn {
 
 		$verticalLine = SVGPkmnConnection::constructWithoutText(
 			$this->middleColumnX, $lowestY,
-			$this->middleColumnX, $highestY);
+			$this->middleColumnX, $highestY, Constants::UNUSED_GROUP_ID);
 		
 		return $verticalLine;
 	}
@@ -202,11 +210,11 @@ class SVGPkmn {
 	}
 
 	private function createMiddleToSuccessorConnection (FrontendPkmn $successor): SVGPkmnConnection {
-		$startX = $this->middleColumnX - Constants::SVG_LINE_WIDTH/2;
+		$startX = $this->middleColumnX;// - Constants::SVG_LINE_WIDTH/2;
 		$endX = $this->calculateNodeConnectionMarginLeft($successor);
 		$y = $successor->getMiddleY();
 
-		$line = SVGPkmnConnection::constructWithoutText($startX, $y, $endX, $y);
+		$line = SVGPkmnConnection::constructWithoutText($startX, $y, $endX, $y, $successor->getGroupId());
 		return $line;
 	}
 
@@ -219,8 +227,8 @@ class SVGPkmn {
 			'yOffset' => $yOffset
 		];
 
+		$this->addCircle($htmlTagCreationOptions);
 		$this->addIconOrFileErrorToHTMLTagArray($htmlTagCreationOptions);
-		$this->addSpecialLearnsetMarkerToHTMLTagArray($htmlTagCreationOptions);
 		$this->addPkmnConnectionsToHTMLTagArray($htmlTagCreationOptions);
 		$this->addSuccessorsToHTMLTagArray($htmlTagCreationOptions);
 
@@ -239,28 +247,34 @@ class SVGPkmn {
 		}
 	}
 
-	private function addSpecialLearnsetMarkerToHTMLTagArray (array &$htmlTagCreationOptions) {
+	private function addCircle (array &$htmlTagCreationOptions) {
+		$circleColor = '#3388ff';
+
 		if ($this->nodeFrontendPkmn->getLearnsByOldGen()) {
-			Logger::statusLog('adding old gen marker to '.$this);
-			array_push(
-				$htmlTagCreationOptions['tagArray'],
-				$this->createOldGenMarker($htmlTagCreationOptions['xOffset'], $htmlTagCreationOptions['yOffset'])
-			);
+			$circleColor = 'yellow';
 		} else if ($this->nodeFrontendPkmn->getLearnsByEvent()) {
-			Logger::statusLog('adding event marker to '.$this);
-			array_push(
-				$htmlTagCreationOptions['tagArray'],
-				$this->createEventMarker($htmlTagCreationOptions['xOffset'], $htmlTagCreationOptions['yOffset'])
-			);
+			$circleColor = 'green';
 		}
+
+		$circle = $this->createCircle(
+			$htmlTagCreationOptions['xOffset'],
+			$htmlTagCreationOptions['yOffset'],
+			$circleColor
+		);
+
+		array_push(
+			$htmlTagCreationOptions['tagArray'],
+			$circle
+		);
 	}
 
-	private function createOldGenMarker (int $xOffset, int $yOffset): HTMLElement {
+	private function createCircle (int $xOffset, int $yOffset, string $color): HTMLElement {
 		$middleX = $this->nodeFrontendPkmn->getMiddleX();
 		$middleY = $this->nodeFrontendPkmn->getMiddleY();
 		$radius = $this->calculateOldGenMarkerRadius();
 
-		$oldGenMarker = new SVGCircle($middleX, $middleY, $radius);
+		$oldGenMarker = new SVGCircle(
+			$middleX, $middleY, $radius, $color, $this->nodeFrontendPkmn->getGroupId());
 
 		return $oldGenMarker->toHTML($xOffset, $yOffset);
 	}
@@ -270,22 +284,6 @@ class SVGPkmn {
 		$distanceFromMiddleToCorners = $diagonal / 2;
 
 		return $distanceFromMiddleToCorners + Constants::SVG_CIRCLE_MARGIN;
-	}
-
-	private function createEventMarker (int $xOffset, int $yOffset): HTMLElement {
-		$x = $this->nodeFrontendPkmn->getX();
-		$y = $this->nodeFrontendPkmn->getY();
-		$width = $this->nodeFrontendPkmn->getWidth();
-		$height = $this->nodeFrontendPkmn->getHeight();
-
-		$eventMarker = new SVGRectangle(
-			$x - Constants::SVG_RECTANGLE_PADDING,
-			$y - Constants::SVG_RECTANGLE_PADDING,
-			$width + 2 * Constants::SVG_RECTANGLE_PADDING,
-			$height + 2 * Constants::SVG_RECTANGLE_PADDING
-		);
-
-		return $eventMarker->toHTML($xOffset, $yOffset);
 	}
 
 	private function addPkmnConnectionsToHTMLTagArray (array &$htmlTagCreationOptions) {

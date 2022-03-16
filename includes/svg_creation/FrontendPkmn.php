@@ -25,6 +25,8 @@ class FrontendPkmn extends Pkmn {
 	private $iconHeight;
 	private $fileError = null;
 
+	private $groupId;
+
 	public function __construct (BreedingTreeNode $breedingTreeNode) {
 		parent::__construct($breedingTreeNode->getName(), $breedingTreeNode->getID());
 
@@ -32,6 +34,7 @@ class FrontendPkmn extends Pkmn {
 		$this->learnsByOldGen = $breedingTreeNode->getLearnsByOldGen();
 		$this->isRoot = $breedingTreeNode->isRoot();
 		$this->pkmnData = $breedingTreeNode->getJSONPkmnData();
+		$this->groupId = Constants::generateGroupId();
 
 		foreach ($breedingTreeNode->getSuccessors() as $successorTreeNode) {
 			$successorFrontendObj = new FrontendPkmn($successorTreeNode);
@@ -128,18 +131,13 @@ class FrontendPkmn extends Pkmn {
 	}
 
 	private function calculateEndNodeHeight (): int {
-		$pureHeight = -1;
-		if ($this->learnsByEvent || $this->learnsByOldGen) {
-			$pureHeight = $this->calculateDiagonal();
-		} else {
-			$pureHeight = $this->getHeight();
-		}
+		$pureHeight = $this->calculateDiagonal() + 10;
 
 		return $pureHeight + 2*Constants::SVG_CIRCLE_MARGIN;
 	}
 
 	public function calculateDiagonal (): int {
-		return sqrt(pow($this->getHeight(), 2) +  pow($this->getWidth(), 2));
+		return Constants::SVG_CIRCLE_DIAMETER;
 	}
 
 	private function calculateTreeSectionHeightForMiddleNode (FrontendPkmn $successor): int {
@@ -270,6 +268,10 @@ class FrontendPkmn extends Pkmn {
 
 	public function getJSONPkmnData (): PkmnData {
 		return $this->pkmnData;
+	}
+
+	public function getGroupId (): int {
+		return $this->groupId;
 	}
 
 	/**

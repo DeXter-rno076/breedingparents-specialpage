@@ -5,17 +5,19 @@ require_once 'SVGLine.php';
 class SVGPkmnConnection {
 	private $line;
 	private $text = null;
+	private $groupId;
 
-	public function __construct (SVGLine $line, string $text = null) {
+	public function __construct (SVGLine $line, int $groupId, string $text = null) {
 		$this->line = $line;
+		$this->groupId = $groupId;
 		if (!is_null($text)) {
 			$this->text = $this->createSVGTextOverLine($text);
 		}
 	}
 
-	public static function constructWithoutText (int $x1, int $y1, int $x2, int $y2): SVGPkmnConnection {
-		$line = new SVGLine($x1, $y1, $x2, $y2);
-		return new SVGPkmnConnection($line);
+	public static function constructWithoutText (int $x1, int $y1, int $x2, int $y2, int $groupId): SVGPkmnConnection {
+		$line = new SVGLine($x1, $y1, $x2, $y2, $groupId);
+		return new SVGPkmnConnection($line, $groupId);
 	}
 
 	public function createSVGTextOverLine (string $text): SVGText {
@@ -29,7 +31,7 @@ class SVGPkmnConnection {
 			//use substr_replace($text, '\n' | '<br />', length/2, 0) to insert line breaks
 		}
 
-		return new SVGText($textX, $textY, $text);
+		return new SVGText($textX, $textY, $text, $this->groupId);
 	}
 
 	private function calculateTextX (string $text): int {

@@ -26,6 +26,14 @@ class Constants {
 	public const SVG_OFFSET = 50;
 	public const APPROXIMATE_STRING_HEIGHT = 16;
 	public const SVG_TEXT_LINE_MARGIN = 4;
+	public const SVG_CIRCLE_DIAMETER = 60;
+
+	private static $groupIdCounter = 0;
+	public const UNUSED_GROUP_ID = -1;
+
+	public static function generateGroupId (): int {
+		return Constants::$groupIdCounter++;
+	}
 
 	public static function i18nMsg (string $msgIdentifier, ...$params): string {
 		return Constants::$centralSpecialPageInstance->msg($msgIdentifier, ...$params);

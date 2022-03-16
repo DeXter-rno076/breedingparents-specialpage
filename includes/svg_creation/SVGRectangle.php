@@ -14,7 +14,9 @@ class SVGRectangle extends SVGElement {
 	private $rx;
 	private $ry;
 
-	public function __construct (int $x, int $y, int $width, int $height) {
+	public function __construct (int $x, int $y, int $width, int $height, int $groupId) {
+		parent::__construct('rect', $groupId);
+
 		$this->x = $x;
 		$this->y = $y;
 		$this->width = $width;
@@ -34,7 +36,8 @@ class SVGRectangle extends SVGElement {
 			'height' => $this->height,
 			'width' => $this->width,
 			'rx' => $this->rx,
-			'ry' => $this->ry
+			'ry' => $this->ry,
+			'groupid' => $this->groupId
 		]);
 	}
 

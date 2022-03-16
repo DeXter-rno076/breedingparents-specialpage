@@ -10,8 +10,8 @@ class SVGLink extends SVGElement {
 	private $href;
 	private $innerEl;
 
-	public function __construct(string $pkmnName, SVGImg $innerEl) {
-		parent::__construct('a');
+	public function __construct(string $pkmnName, SVGImg $innerEl, int $groupId) {
+		parent::__construct('a', $groupId);
 		$this->href = Constants::i18nMsg('breedingchains-learnsetpage-link', $pkmnName, Constants::$targetGenNumber);
 		$this->innerEl = $innerEl;
 
@@ -20,7 +20,8 @@ class SVGLink extends SVGElement {
 
 	public function toHTML (int $xOffset, int $yOffset): HTMLElement {
 		return new HTMLElement('a', [
-			'href' => $this->href
+			'href' => $this->href,
+			'groupid' => $this->groupId
 		], [
 			$this->innerEl->toHTML($xOffset, $yOffset)
 		]);

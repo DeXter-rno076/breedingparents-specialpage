@@ -9,7 +9,9 @@ class SVGText extends SVGElement {
 	private $y;
 	private $text;
 
-	public function __construct (int $x, int $y, string $text) {
+	public function __construct (int $x, int $y, string $text, int $groupId) {
+		parent::__construct('text', $groupId);
+
 		$this->x = $x;
 		$this->y = $y;
 		$this->text = $text;
@@ -17,18 +19,19 @@ class SVGText extends SVGElement {
 		Logger::statusLog('created '.$this);
 	}
 
-	public function getLogInfo (): string {
-		return 'SVGText:('.$this->x.';'.$this->y.');'.$this->text.';;';
-	}
-
 	public function toHTML (int $xOffset, int $yOffset): HTMLElement {
 		$svgText = new HTMLElement('text',[
 			'x' => $this->x + $xOffset,
-			'y' => $this->y + $yOffset
+			'y' => $this->y + $yOffset,
+			'groupid' => $this->groupId
 		]);
 
 		$svgText->addInnerString($this->text);
 
 		return $svgText;
+	}
+
+	public function getLogInfo (): string {
+		return 'SVGText:('.$this->x.';'.$this->y.');'.$this->text.';;';
 	}
 }

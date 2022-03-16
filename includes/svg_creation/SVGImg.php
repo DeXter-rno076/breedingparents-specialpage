@@ -12,8 +12,8 @@ class SVGImg extends SVGElement {
 	private $height;
 	private $href;
 
-	public function __construct (FrontendPkmn $frontendPkmn) {
-		parent::__construct('image');
+	public function __construct (FrontendPkmn $frontendPkmn, int $groupId) {
+		parent::__construct('image', $groupId);
 
 		$this->x = $frontendPkmn->getX();
 		$this->y = $frontendPkmn->getY();
@@ -31,7 +31,8 @@ class SVGImg extends SVGElement {
 			'y' => $this->y + $yOffset,
 			'width' => $this->width,
 			'height' => $this->height,
-			'xlink:href' => $this->href
+			'xlink:href' => $this->href,
+			'groupid' => $this->groupId
 		]);
 	}
 

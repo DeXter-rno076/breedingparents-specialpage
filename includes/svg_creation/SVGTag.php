@@ -13,8 +13,8 @@ class SVGTag extends SVGElement {
 	private $height;
 	private $svgRoot;
 
-	public function __construct (FrontendPkmn $pkmnRoot) {
-		parent::__construct('svg');
+	public function __construct (FrontendPkmn $pkmnRoot, int $groupId) {
+		parent::__construct('svg', $groupId);
 		Logger::statusLog('creating SVGRoot instance');
 
 		$this->width = $this->calculateWidth($pkmnRoot->getDepth());
@@ -40,6 +40,7 @@ class SVGTag extends SVGElement {
 			'id' => $this->id,
 			'xmlns' => 'http://www.w3.org/2000/svg',
 			'viewbox' => '0 0 '.$this->width.' '.$this->height,
+			'groupid' => $this->groupId
 		]);
 		
 		$topLevelSVGTags = $this->svgRoot->toHTMLElements($xOffset, $yOffset);

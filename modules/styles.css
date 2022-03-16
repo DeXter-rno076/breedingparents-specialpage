@@ -15,11 +15,20 @@
 	fill: none;
 }
 
+#breedingChainsSVG circle[color=green] {
+	stroke: green;
+}
+
+#breedingChainsSVG circle[color=yellow] {
+	stroke: yellow;
+}
+
 #breedingChainsExplanationTable {
 	border: 3px solid black;
 	border-radius: 0.5em;
 	/* background-color: black; */
 	margin: 2% auto;
+	background-color: #ddd;
 }
 
 #breedingChainsExplanationTable tr {
@@ -32,6 +41,21 @@
 
 #breedingChainsMarkerExplanationsBottomNote {
 	text-align: center;
+}
+
+#breedingChainsOldGenMarkerExample circle, #breedingChainsEventMarkerExample circle {
+	stroke-width: 3;
+	fill-opacity: 0.2;
+}
+
+#breedingChainsOldGenMarkerExample circle {
+	stroke: yellow;
+	fill: yellow;
+}
+
+#breedingChainsEventMarkerExample circle {
+	stroke: green;
+	fill: green;
 }
 
 .breedingChainsMessageBox {
@@ -56,4 +80,8 @@
 	.breedingChainsMessageBox {
 		width: 90%;
 	}
+}
+
+.breedingChainsLeafletText {
+	text-align: center;
 }

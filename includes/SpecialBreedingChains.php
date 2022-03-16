@@ -186,7 +186,7 @@ class SpecialBreedingChains extends SpecialPage {
 		Logger::statusLog('CREATING SVG STRUCTURE');
 		$timeStart = hrtime(true);
 
-		$svgRoot = new SVGTag($frontendRoot);
+		$svgRoot = new SVGTag($frontendRoot, Constants::UNUSED_GROUP_ID);
 		$svgStructureInHTML = $svgRoot->toHTML();
 
 		$timeEnd = hrtime(true);
