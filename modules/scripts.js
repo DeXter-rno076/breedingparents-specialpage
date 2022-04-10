@@ -4,8 +4,10 @@ const svgMap = document.getElementById('breedingChainsSVGMap');
 
 const SVG_CONTAINER_WIDTH = svgMap.clientWidth;
 const SVG_CONTAINER_HEIGHT = svgMap.clientHeight;
-const SVG_WIDTH = svgTag.width.baseVal.value;
-const SVG_HEIGHT = svgTag.height.baseVal.value;
+const SVG_TAG_VIEWBOX = svgTag.attributes.viewBox.value;
+const SVG_TAG_VIEWBOX_VALUES = SVG_TAG_VIEWBOX.split(' ');
+const SVG_WIDTH = SVG_TAG_VIEWBOX_VALUES[2];
+const SVG_HEIGHT = SVG_TAG_VIEWBOX_VALUES[3];
 
 /*mouse wheel events are handled strangely across browsers.
 Some work as intended via the zoomDelta option, some not and for those
@@ -39,6 +41,7 @@ main();
 function main () {
 	addSVGElements(svgChildren);
 	svgTag.style.display = 'none';
+	//addHelpingLines();
 }
 
 function calcCenterOffsets () {
@@ -239,4 +242,28 @@ function addImage (svgImage) {
 	addPkmnPopup(svgImage.attributes.groupid.value, marker);
 
 	marker.addTo(map);
+}
+
+function addHelpingLines () {
+	const RADIUS = 5;
+	const COLOR = 'black;'
+	L.circle([0, 0], {
+		radius: RADIUS,
+		color: COLOR,
+		className: 'breedingChainsLeafletCircle'
+	}).addTo(map);
+
+	L.polyline([
+		[0, 0],
+		[100, 0]
+	], {
+		className: 'breedingChainsLeafletLine'
+	}).addTo(map);
+
+	L.polyline([
+		[0, 0],
+		[0, 100]
+	], {
+		className: 'breedingChainsLeafletLine'
+	}).addTo(map);
 }
