@@ -74,8 +74,8 @@ class SpecialBreedingChains extends SpecialPage {
 
 	private function initConstants ($formData) {
 		Constants::$targetGenNumber = $formData['genInput'];
-		Constants::$targetMoveName = $formData['moveInput'];
-		Constants::$targetPkmnName = $formData['pkmnInput'];
+		Constants::$targetMoveName = trim($formData['moveInput']);
+		Constants::$targetPkmnName = trim($formData['pkmnInput']);
 		if (isset($formData['displayDebuglogs'])) {
 			Constants::$displayDebuglogs = $formData['displayDebuglogs'];
 		}
@@ -259,7 +259,7 @@ class SpecialBreedingChains extends SpecialPage {
 		}
 
 		//these are all characters that are used in pkmn names
-		$regex = '/[^a-zA-Zßäéü\-♂♀2:]/';
+		$regex = '/[^a-zA-Zßäéü\-♂♀2:\s]/';
 		if (preg_match($regex, $value)) {
 			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-pkmn'));
 			$alertMessage->outputOnce();
@@ -276,7 +276,7 @@ class SpecialBreedingChains extends SpecialPage {
 		}
 
 		//these are all characters that are used in move names
-		$regex = '/[^a-zA-ZÜßäöü\- 2]/';
+		$regex = '/[^a-zA-ZÜßäöü\- 2\s]/';
 		if (preg_match($regex, $value)) {
 			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-move'));
 			$alertMessage->outputOnce();
