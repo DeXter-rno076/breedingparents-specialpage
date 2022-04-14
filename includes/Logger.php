@@ -1,12 +1,10 @@
 <?php
 require_once 'Constants.php';
 
-class Logger {
+abstract class Logger {
 	private static $elogCache = [];
 	private static $wlogCache = [];
 	private static $statusLogCache = [];
-
-	private function __construct () {}
 
 	public static function outputDebugMessage (string $msg) {
 		if (Constants::$displayDebuglogs) {

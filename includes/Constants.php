@@ -1,5 +1,5 @@
 <?php
-class Constants {
+abstract class Constants {
 	public static $externalPkmnJSON;
 	public static $externalEggGroupsJSON;
 
