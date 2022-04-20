@@ -67,6 +67,7 @@ class SuccessorFilter {
 
 	public function filter (): array {
 		Logger::statusLog('filtering successor list');
+		$this->removeNonExistants();
 		$this->removeUnpairables();
 		$this->checkGenderSpecificRequirements();
 		$this->removeBlacklistedPkmn();
@@ -74,6 +75,21 @@ class SuccessorFilter {
 		Logger::statusLog('successor list after: '.json_encode($this->successorList));
 
 		return $this->successorList;
+	}
+
+	private function removeNonExistants () {
+		$doesNotExist = function (string $pkmnName): bool {
+			try {
+				$pkmnData = new PkmnData($pkmnName);
+				return !$pkmnData->existsInThisGame();
+			} catch (AttributeNotFoundException $e) {
+				$errorMessage = new ErrorMessage($e);
+				$errorMessage->output();
+				return true;
+			}
+		};
+
+		$this->remove($doesNotExist);
 	}
 
 	/**
@@ -100,7 +116,7 @@ class SuccessorFilter {
 		$this->remove($isUnpairable);
 	}
 
-		/**
+	/**
 	 * Removes all successors for which $condition returns true.
 	 * @param mixed $condition - function that returns a boolean and determines whether the given pkmn shall be removed
 	 * 

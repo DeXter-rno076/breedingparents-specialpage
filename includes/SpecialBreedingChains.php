@@ -22,6 +22,7 @@ class SpecialBreedingChains extends SpecialPage {
 		Constants::$centralOutputPageInstance = $this->getOutput();
 
 		Constants::$centralOutputPageInstance->setPageTitle(Constants::i18nMsg('breedingchains-title'));
+
 		$this->setHeaders();//seems like a must have
 		$this->addCSSandJS();
 		$this->addForms();
@@ -73,15 +74,22 @@ class SpecialBreedingChains extends SpecialPage {
 	}
 
 	private function initConstants ($formData) {
-		Constants::$targetGenNumber = $formData['genInput'];
-		Constants::$targetMoveName = trim($formData['moveInput']);
-		Constants::$targetPkmnName = trim($formData['pkmnInput']);
+		Constants::$targetGameString = Constants::GAME_LIST[$formData['gameInput']];
+		Constants::$targetGenNumber = Constants::GAMES_TO_GEN[Constants::$targetGameString];
+
+		Constants::$targetMoveNameNormalCasing = trim($formData['moveInput']); 
+		Constants::$targetMoveName = strtolower(Constants::$targetMoveNameNormalCasing);
+		Constants::$targetPkmnNameNormalCasing = trim($formData['pkmnInput']);
+		Constants::$targetPkmnName = strtolower(Constants::$targetPkmnNameNormalCasing);
+		
 		if (isset($formData['displayDebuglogs'])) {
 			Constants::$displayDebuglogs = $formData['displayDebuglogs'];
 		}
 		if (isset($formData['displayStatuslogs'])) {
 			Constants::$displayStatuslogs = $formData['displayStatuslogs'];
 		}
+
+		Constants::logUserinputConstants();
 	}
 
 	private function specialPageProcessIsFinished (string $code): bool {
@@ -92,14 +100,16 @@ class SpecialBreedingChains extends SpecialPage {
 		$programTerminationCode = 'easter egg';
 
 		if (Constants::$targetPkmnName === 'Greenchu') {
-			$messageText = Constants::i18nMsg('breedingchains-easteregg-greenchu', Constants::$targetMoveName);
+			$messageText = Constants::i18nMsg('breedingchains-easteregg-greenchu',
+				Constants::$targetMoveNameNormalCasing);
 			$infoMessage = new InfoMessage($messageText);
 			$infoMessage->output();
 			return $programTerminationCode;
 		}
 
 		if (Constants::$targetPkmnName === 'DeXter') {
-			$messageText = Constants::i18nMsg('breedingchains-easteregg-dexter', Constants::$targetMoveName);
+			$messageText = Constants::i18nMsg('breedingchains-easteregg-dexter',
+				Constants::$targetMoveNameNormalCasing);
 			$infoMessage = new InfoMessage($messageText);
 			$infoMessage->output();
 			return $programTerminationCode;
@@ -111,8 +121,8 @@ class SpecialBreedingChains extends SpecialPage {
 	private function catchUnknownPkmnName (): string {
 		$programTerminationCode = 'unknown pkmn name';
 		$targetPkmn = Constants::$targetPkmnName;
-		if (!isset(Constants::$externalPkmnJSON->$targetPkmn)) {
-			$messageText = Constants::i18nMsg('breedingchains-unknown-pkmn', Constants::$targetPkmnName);
+		if (!isset(Constants::$externalPkmnGenCommons->$targetPkmn)) {
+			$messageText = Constants::i18nMsg('breedingchains-unknown-pkmn', Constants::$targetPkmnNameNormalCasing);
 			$alertMessage = new AlertMessage($messageText);
 			$alertMessage->output();
 			return $programTerminationCode;
@@ -131,7 +141,10 @@ class SpecialBreedingChains extends SpecialPage {
 
 	private function catchEmptyBreedingTree (): string {
 		//todo check whether move has a typo or generally if it's a move
-		$infoMessage = new InfoMessage(Constants::i18nMsg('breedingchains-cant-learn', Constants::$targetPkmnName, Constants::$targetMoveName));
+		$infoMessage = new InfoMessage(
+			Constants::i18nMsg('breedingchains-cant-learn',
+				Constants::$targetPkmnNameNormalCasing, Constants::$targetMoveNameNormalCasing)
+		);
 		$infoMessage->output();
 		return 'cant learn';
 	}
@@ -141,14 +154,16 @@ class SpecialBreedingChains extends SpecialPage {
 		$infoMessage = null;
 		if ($breedingTreeRoot->getLearnsByEvent()) {
 			$infoMessage = new InfoMessage(Constants::i18nMsg(
-				'breedingchains-can-learn-event', Constants::$targetPkmnName, Constants::$targetMoveName));
+				'breedingchains-can-learn-event', Constants::$targetPkmnNameNormalCasing,
+				Constants::$targetMoveNameNormalCasing));
 		} else if ($breedingTreeRoot->getLearnsByOldGen()) {
 			$infoMessage = new InfoMessage(Constants::i18nMsg(
-				'breedingchains-can-learn-oldgen', Constants::$targetPkmnName, Constants::$targetMoveName));
+				'breedingchains-can-learn-oldgen', Constants::$targetPkmnNameNormalCasing,
+				Constants::$targetMoveNameNormalCasing));
 		} else {
 			$infoMessage = new InfoMessage(Constants::i18nMsg(
-				'breedingchains-can-learn-directly', Constants::$targetPkmnName,
-				Constants::$targetMoveName));
+				'breedingchains-can-learn-directly', Constants::$targetPkmnNameNormalCasing,
+				Constants::$targetMoveNameNormalCasing));
 		}
 		$infoMessage->output();
 		return 'can learn directly';
@@ -301,22 +316,31 @@ class SpecialBreedingChains extends SpecialPage {
 		return true;
 	}
 
+	public function validateGameInput ($value, $allData) {
+		//todo
+		return true;
+	}
+
 	private function getDataFromExternalWikipages () {
-		Constants::$externalPkmnJSON = $this->getExternalJSONPkmnData();
+		$this->loadExternalJSONPkmnData();
 
 		$eggGroupPageName = 'MediaWiki:BreedingChains/Gen'
-			.Constants::$targetGenNumber.'/egg-groups.json';
+			.Constants::$targetGenNumber.'/egg groups '.Constants::$targetGameString.'.json';
 		Constants::$externalEggGroupsJSON = $this->getWikiPageContent($eggGroupPageName);
 	}
 
-	private function getExternalJSONPkmnData () : StdClass {
+	private function loadExternalJSONPkmnData () {
+		Constants::$externalPkmnGenCommons = $this->loadSplitExternalJSON('MediaWiki:BreedingChains/Gen'.Constants::$targetGenNumber.'/commons ##INDEX##.json');
+		Constants::$externalPkmnGameDiffs = $this->loadSplitExternalJSON('MediaWiki:BreedingChains/Gen'.Constants::$targetGenNumber.'/diffs '.Constants::$targetGameString.' ##INDEX##.json');
+	}
+
+	private function loadSplitExternalJSON (string $pageNameScheme): StdClass {
 		$pkmnDataArr = [];
 		$pageData = null;
 		$pageIndex = 1;
 
 		do {
-			$pkmnDataPageName = 'MediaWiki:BreedingChains/Gen'
-				.Constants::$targetGenNumber.'/pkmn-data'.$pageIndex.'.json';
+			$pkmnDataPageName = str_replace('##INDEX##', $pageIndex, $pageNameScheme);
 			$pageData = $this->getWikiPageContent($pkmnDataPageName);
 
 			$pageDataArray = (array) $pageData;

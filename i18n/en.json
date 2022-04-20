@@ -10,7 +10,8 @@
 
 	"breedingchains-pkmn": "Pokémon (for now german translation)",
 	"breedingchains-move": "Move (for now german translation)",
-	"breedingchains-gen": "Generation: ",
+	"breedingchains-gen": "Generation:",
+	"breedingchains-game": "Game:",
 	"breedingchains-evo": "evolution",
 	"breedingchains-error": "Oh no :O, this should not have happened. Please report this on our Discord server or [[PokéWiki:Auskunft|here]]. Error: $1",
 	"breedingchains-unknown-pkmn": "Unknown Pokémon $1.",

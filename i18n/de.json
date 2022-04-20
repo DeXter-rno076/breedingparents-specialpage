@@ -10,7 +10,8 @@
 
 	"breedingchains-pkmn": "Pokémon",
 	"breedingchains-move": "Attacke",
-	"breedingchains-gen": "Generation: ",
+	"breedingchains-gen": "Generation:",
+	"breedingchains-game": "Spiel:",
 	"breedingchains-evo": "Entwicklung",
 	"breedingchains-error": "Oh nein, das hätte nicht passieren sollen :( Bitte melde das auf unserem Discordserver oder in der [[PokéWiki:Auskunft|Auskunft]].<br /> Fehler: $1",
 	"breedingchains-unknown-pkmn": "Das Pokémon $1 ist mir unbekannt. Hast du dich eventuell vertippt?",

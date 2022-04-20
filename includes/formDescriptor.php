@@ -6,7 +6,7 @@ $formDescriptor = [
 		'placeholder' => $this->msg('breedingchains-pkmn'),
 		'size' => 20,
 		'validation-callback' => [ $this, 'validatePkmnInput' ],
-		'required' => true
+		'required' => true,
 	],
 	'moveInput' => [
 		'name' => 'targetMove',
@@ -16,20 +16,13 @@ $formDescriptor = [
 		'validation-callback' => [ $this, 'validateMoveInput' ],
 		'required' => true
 	],
-	'genInput' => [
-		'name' => 'targetGen',
-		'label' => $this->msg('breedingchains-gen'),
-		'class' => 'HTMLSelectField',
-		'options' => [//breeding was implented in gen 2
-			'8' => 8,
-			'7' => 7,
-			'6' => 6,
-			'5' => 5,
-			'4' => 4,
-			'3' => 3,
-			'2' => 2,
-		],
-		'validation-callback' => [ $this, 'validateGenInput' ]
+	'gameInput' => [
+		'name' => 'targetGame',
+		'class' => 'HTMLTextField',
+		'placeholder' => $this->msg('breedingchains-game'),
+		'size' => 40,
+		'validation-callback' => [ $this, 'validateGameInput' ],
+		'required' => true
 	]
 ];
 

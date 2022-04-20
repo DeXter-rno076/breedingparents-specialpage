@@ -7,6 +7,9 @@ require_once __DIR__.'/../Logger.php';
 require_once 'BreedingTreeNode.php';
 
 class PkmnData extends Pkmn {
+	private $game;
+	private $exists;
+
 	private $eggGroup1;
 	private $eggGroup2;
 
@@ -17,7 +20,7 @@ class PkmnData extends Pkmn {
 	 * @var String lowest evolution of this pkmn (e. g. Charmander for Charizard); 
 	 * if this pkmn is the lowest evo in its evo line this is set to the name of this pkmn (e. g. Abra for Abra) 
 	 */
-	private $lowestEvolution;
+	private $lowestEvo;
 	private $evolutions;
 
 	private $unpairable;
@@ -34,11 +37,13 @@ class PkmnData extends Pkmn {
 	private $oldGenLearnsets;
 
 	public function __construct (string $name) {
-		$pkmnDataObj = Constants::$externalPkmnJSON->$name;
+		$pkmnCommons = Constants::$externalPkmnGenCommons->$name;
+		$pkmnDiffs = Constants::$externalPkmnGameDiffs->$name;
 
-		parent::__construct($name, $pkmnDataObj->id);
+		parent::__construct($name, $pkmnCommons->id);
 
-		$this->copyPropertys($pkmnDataObj);
+		$this->addCommons($pkmnCommons);
+		$this->addDiffs($pkmnDiffs);
 	}
 
 	/**
@@ -48,36 +53,60 @@ class PkmnData extends Pkmn {
 	 * 
 	 * @throws AttributeNotFoundException
 	 */
-	private function copyPropertys (StdClass $pkmnDataObj) {
-		$mustHavePropertysList = [
-			'eggGroup1', 'eggGroup2', 'gender', 'lowestEvolution',
-			'unpairable', 'unbreedable', 'directLearnsets', 'breedingLearnsets',
-			'eventLearnsets', 'oldGenLearnsets', 'evolutions'
+	private function addCommons (StdClass $pkmnCommons) {
+		$mustHaveCommonsProperties = [
+			'directLearnsets', 'breedingLearnsets', 'eventLearnsets', 'oldGenLearnsets'
 		];
+		$this->copyProperties($pkmnCommons, $mustHaveCommonsProperties);
+	}
 
-		foreach ($mustHavePropertysList as $property) {
-			if (!isset($pkmnDataObj->$property)) {
+	private function copyProperties (StdClass $dataObj, array $propertieNames) {
+		foreach ($propertieNames as $property) {
+			if (!isset($dataObj->$property)) {
 				throw new AttributeNotFoundException($this, $property);
 			}
-			$this->$property = $pkmnDataObj->$property;
+			$this->$property = $dataObj->$property;
 		}
+	}
 
-		$optionalPropertys = [];
+	private function addDiffs (StdClass $pkmnDiff) {
+		$mustHaveDiffPropertiesToCopy = [
+			'unbreedable', 'unpairable', 'lowestEvo', 'evolutions', 'exists',
+			'game', 'gender', 'eggGroup1', 'eggGroup2'
+		];
+		$this->copyProperties($pkmnDiff, $mustHaveDiffPropertiesToCopy);
+		$this->addGameExclusiveLearnsets($pkmnDiff);
+	}
 
-		foreach ($optionalPropertys as $property) {
-			if (isset($pkmnDataObj->$property)) {
-				$this->$property = $pkmnDataObj->$property;
-			} else {
-				$this->$property = null;
+	private function addGameExclusiveLearnsets (StdClass $pkmnDiff) {
+		$learnsetListNames = [
+			'directLearnsets', 'breedingLearnsets', 'eventLearnsets', 'oldGenLearnsets'
+		];
+		foreach ($learnsetListNames as $learnsetListName) {
+			if (!isset($pkmnDiff->$learnsetListName)) {
+				throw new AttributeNotFoundException($this, $learnsetListName);
 			}
+			$this->$learnsetListName = array_merge($this->$learnsetListName, $pkmnDiff->$learnsetListName);
 		}
+	}
+
+	private function logLearnsets () {
+		Logger::statusLog($this->name.' has learnsets: ');
+		Logger::statusLog('direct: '.json_encode($this->directLearnsets));
+		Logger::statusLog('breeding: '.json_encode($this->breedingLearnsets));
+		Logger::statusLog('event: '.json_encode($this->eventLearnsets));
+		Logger::statusLog('old: '.json_encode($this->oldGenLearnsets));
 	}
 
 	/**
 	 * checks Level, TMTR and Tutor learnsets
 	 */
 	public function canLearnDirectly (): bool {
-		return $this->checkLearnsetType($this->directLearnsets, 'directly');
+		$directlyLearnability = $this->checkLearnsetType($this->directLearnsets, 'directly');
+		if ($directlyLearnability) {
+			Logger::statusLog($this->name.' can learn the move directly');
+		}
+		return $directlyLearnability;
 	}
 
 	private function checkLearnsetType (Array $learnsetList, string $learnsetType): bool {
@@ -95,15 +124,27 @@ class PkmnData extends Pkmn {
 			return false;
 		}
 
-		return $this->checkLearnsetType($this->breedingLearnsets, 'breeding');
+		$breedingLearnability = $this->checkLearnsetType($this->breedingLearnsets, 'breeding');
+		if ($breedingLearnability) {
+			Logger::statusLog($this->name.' can inherit the move');
+		}
+		return $breedingLearnability;
 	}
 
 	public function canLearnByEvent (): bool {
-		return $this->checkLearnsetType($this->eventLearnsets, 'event');
+		$eventLearnability = $this->checkLearnsetType($this->eventLearnsets, 'event');
+		if ($eventLearnability) {
+			Logger::statusLog($this->name.' can learn the move via event');
+		}
+		return $eventLearnability;
 	}
 
 	public function canLearnByOldGen (): bool {
-		return $this->checkLearnsetType($this->oldGenLearnsets, 'old gen');
+		$oldGenLearnability = $this->checkLearnsetType($this->oldGenLearnsets, 'old gen');
+		if ($oldGenLearnability) {
+			Logger::statusLog($this->name.' can learn the move via old gen');
+		}
+		return $oldGenLearnability;
 	}
 
 	public function getEggGroup1 (): string {
@@ -127,11 +168,11 @@ class PkmnData extends Pkmn {
 	}
 
 	public function isLowestEvolution (): bool {
-		return $this->lowestEvolution === $this->name;
+		return $this->lowestEvo === $this->name;
 	}
 
 	public function getLowestEvolutionBreedingTreeInstance (bool $isRoot = false): BreedingTreeNode {
-		return new BreedingTreeNode($this->lowestEvolution, $isRoot);
+		return new BreedingTreeNode($this->lowestEvo, $isRoot);
 	}
 
 	public function isUnpairable (): bool {
@@ -144,6 +185,10 @@ class PkmnData extends Pkmn {
 
 	public function hasAsEvolution (string $pkmnName): bool {
 		return in_array($pkmnName, $this->evolutions);
+	}
+
+	public function existsInThisGame (): bool {
+		return $this->exists;
 	}
 
 	/**
