@@ -30,16 +30,24 @@ class SpecialBreedingChains extends SpecialPage {
 
 	public function submitCallback ($data, $form) {
 		$successCode = '';
-		try {
-			$successCode = $this->reactToInput($data, $form);
-		} catch (Exception $e) {
-			$eMsg = new ErrorMessage($e);
-			$eMsg->output();
-			Logger::flush();
-			return Status::newFatal((string) $e);
+		if ($this->formIsEmpty($data)) {
+			$successCode = 'empty form';
+		} else {
+			try {
+				$successCode = $this->reactToInput($data, $form);
+			} catch (Exception $e) {
+				$eMsg = new ErrorMessage($e);
+				$eMsg->output();
+				Logger::flush();
+				return Status::newFatal((string) $e);
+			}
 		}
 		Logger::flush();
 		return Status::newGood($successCode);
+	}
+
+	private function formIsEmpty ($data) {
+		return is_null($data['pkmnInput']) || is_null($data['moveInput']) || is_null($data['gameInput']);
 	}
 
 	public function reactToInput ($data, $form): string {
