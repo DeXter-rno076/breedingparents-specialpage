@@ -1,4 +1,7 @@
 const svgTag = document.getElementById('breedingChainsSVG');
+if (svgTag !== null) {
+	
+
 const svgChildren = svgTag.children;
 const svgMap = document.getElementById('breedingChainsSVGMap');
 
@@ -266,4 +269,5 @@ function addHelpingLines () {
 	], {
 		className: 'breedingChainsLeafletLine'
 	}).addTo(map);
+}
 }

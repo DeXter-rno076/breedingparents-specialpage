@@ -253,6 +253,8 @@ class SpecialBreedingChains extends SpecialPage {
 
 		$form->displayForm('');
 		$form->trySubmit();
+
+		$this->addSuggestions();
 	}
 
 	private function getUserGroupSpecificFormDescription () {
@@ -273,6 +275,22 @@ class SpecialBreedingChains extends SpecialPage {
 		}
 
 		return $formDescriptor;
+	}
+
+	//TODO THIS IS UNCLEAN AF
+	private function addSuggestions () {
+		$moveSuggestions = $this->loadSplitExternalJSON('MediaWiki:BreedingChains/move suggestions ##INDEX##.json');
+		$moveSuggestionsAsText = json_encode($moveSuggestions);
+		$moveSuggestionsAsTextWithoutWhiteSpace = str_replace([' ', '\n'], '', $moveSuggestionsAsText);
+
+		$gen2Commons = $this->loadSplitExternalJSON('MediaWiki:BreedingChains/Gen2/commons ##INDEX##.json');
+		$pkmnSuggestions = array_keys((array) $gen2Commons);
+		$pkmnSuggestionsAsText = json_encode($pkmnSuggestions);
+		$suggestionsScriptTag = new HTMLElement('script', [], [
+			'const MOVE_SUGGESTIONS = '.$moveSuggestionsAsTextWithoutWhiteSpace.';'
+			.'const PKMN_SUGGESTIONS = '.$pkmnSuggestionsAsText.';'
+		]);
+		$suggestionsScriptTag->addToOutput();
 	}
 
 	//has to be public

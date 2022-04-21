@@ -30,7 +30,8 @@
 			],
 			"scripts": [
 				"leaflet.js",
-				"scripts.js"
+				"moving.js",
+				"suggestions.js"
 			]
 		}
 	},
