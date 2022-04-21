@@ -363,7 +363,7 @@ class SpecialBreedingChains extends SpecialPage {
 	private function loadSplitExternalJSON (string $pageNameScheme): StdClass {
 		$pkmnDataArr = [];
 		$pageData = null;
-		$pageIndex = 1;
+		$pageIndex = 0;
 
 		do {
 			$pkmnDataPageName = str_replace('##INDEX##', $pageIndex, $pageNameScheme);
