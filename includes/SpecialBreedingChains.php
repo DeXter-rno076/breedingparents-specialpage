@@ -107,7 +107,7 @@ class SpecialBreedingChains extends SpecialPage {
 	private function catchEasterEggs (): string {
 		$programTerminationCode = 'easter egg';
 
-		if (Constants::$targetPkmnName === 'Greenchu') {
+		if (Constants::$targetPkmnNameNormalCasing === 'Greenchu') {
 			$messageText = Constants::i18nMsg('breedingchains-easteregg-greenchu',
 				Constants::$targetMoveNameNormalCasing);
 			$infoMessage = new InfoMessage($messageText);
@@ -115,7 +115,7 @@ class SpecialBreedingChains extends SpecialPage {
 			return $programTerminationCode;
 		}
 
-		if (Constants::$targetPkmnName === 'DeXter') {
+		if (Constants::$targetPkmnNameNormalCasing === 'DeXter') {
 			$messageText = Constants::i18nMsg('breedingchains-easteregg-dexter',
 				Constants::$targetMoveNameNormalCasing);
 			$infoMessage = new InfoMessage($messageText);
