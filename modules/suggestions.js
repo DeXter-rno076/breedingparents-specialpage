@@ -143,6 +143,7 @@ const GAME_SUGGESTIONS_LIST = [
 ];
 
 pkmnTextInputBox.addEventListener('change', switchMoveSuggestions);
+gameTextInputBox.addEventListener('change', switchMoveSuggestions);
 
 initDatalists();
 initSuggestions();
@@ -157,7 +158,7 @@ function initDatalists () {
 }
 
 function initSuggestions () {
-	switchMoveSuggestions({target: pkmnTextInputBox});
+	switchMoveSuggestions();
 }
 
 function buildSuggestions (id, valueList) {
@@ -195,7 +196,7 @@ function clearDatalist (datalist) {
 
 function switchMoveSuggestions (event) {
 	console.log('switching moves');
-	const pkmnName = event.target.value;
+	const pkmnName = pkmnTextInputBox.value;
 	const learnsetData = MOVE_SUGGESTIONS[pkmnName.toLowerCase()];
 	const currentGame = getCurrentGame();
 	if (learnsetData === undefined) {
