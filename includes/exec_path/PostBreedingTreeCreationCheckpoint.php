@@ -16,15 +16,16 @@ class PostBreedingTreeCreationCheckpoint extends Checkpoint {
 		if ($this->breedingTreeIsEmpty()) {
 			$this->reactToEmptyBreedingTree();
 			return $this->terminationCode;
-		} else if ($this->breedingTreeRootHasNoSuccessors()) {
-			$this->reactToBreedingTreeRootHasNoSuccessors();
-			return $this->terminationCode;
-		} else {
-			$this->reactToNormalBreedingTree();
 		}
 
-		$frontendTreeCreationTrack = new FrontendTreeCreationTrack($this->breedingTreeRoot);
-		return $frontendTreeCreationTrack->passOn();
+		$this->reactToBreedingTreeState();
+
+		if ($this->breedingTreeRoot->hasSuccessors()) {
+			$frontendTreeCreationTrack = new FrontendTreeCreationTrack($this->breedingTreeRoot);
+			return $frontendTreeCreationTrack->passOn();
+		} else {
+			return $this->terminationCode;
+		}
 	}
 
 	private function breedingTreeIsEmpty (): bool {
@@ -34,30 +35,34 @@ class PostBreedingTreeCreationCheckpoint extends Checkpoint {
 	private function reactToEmptyBreedingTree () {
 		$this->outputInfoMessage('breedingchains-cant-learn', Constants::$targetPkmnNameNormalCasing,
 			Constants::$targetMoveNameNormalCasing);
+		Logger::elog('empty breeding tree, the tree must at least contain the root');
 	}
 
-	private function breedingTreeRootHasNoSuccessors (): bool {
-		return !$this->breedingTreeRoot->hasSuccessors();
-	}
+	private function reactToBreedingTreeState () {
+		$msgIdentifiers = [];
+		if ($this->breedingTreeRoot->learnsDirectly()) {
+			$msgIdentifiers[] = $this->getLearnsDirectlyMsgIdentifier();
+		}
+		if (!$this->breedingTreeRoot->hasSuccessors() && $this->breedingTreeRoot->canInherit()) {
+			$msgIdentifiers[] = 'breedingchains-can-inherit-but-no-successors';
+		}
+		if ($this->breedingTreeRoot->learnsByEvent()) {
+			$msgIdentifiers[] = 'breedingchains-can-learn-event';
+		}
+		if ($this->breedingTreeRoot->learnsByOldGen()) {
+			$msgIdentifiers[] = 'breedingchains-can-learn-oldgen';
+		}
 
-	private function reactToBreedingTreeRootHasNoSuccessors () {
-		//todo if a lowest evo can inherit the move but no suiting parents are found, this wouldnt be handled
-		$msgIdentifier = $this->getTreeHasNoSuccessorsMsgIdentifier();
-		$this->outputInfoMessage($msgIdentifier, Constants::$targetPkmnNameNormalCasing,
-			Constants::$targetMoveNameNormalCasing);
-	}
-
-	private function getTreeHasNoSuccessorsMsgIdentifier (): string {
-		if ($this->breedingTreeRoot->getLearnsByEvent()) {
-			return 'breedingchains-can-learn-event';
-		} else if ($this->breedingTreeRoot->getLearnsByOldGen()) {
-			return 'breedingchains-can-learn-oldgen';
-		} else {
-			return 'breedingchains-can-learn-directly';
+		foreach ($msgIdentifiers as $msgIdentifier) {
+			$this->outputInfoMessage($msgIdentifier, Constants::$targetPkmnNameNormalCasing,
+				Constants::$targetMoveNameNormalCasing);
 		}
 	}
-
-	private function reactToNormalBreedingTree () {
-		//todo check for direct learnability
+	private function getLearnsDirectlyMsgIdentifier (): string {
+		if (Constants::$targetGenNumber < 8) {
+			return 'breedingchains-can-learn-directly-old-gen';
+		} else {
+			return 'breedingchains-can-learn-directly-new-gen';
+		}
 	}
 }

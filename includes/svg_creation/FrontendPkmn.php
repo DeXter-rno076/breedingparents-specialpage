@@ -30,8 +30,8 @@ class FrontendPkmn extends Pkmn {
 	public function __construct (BreedingTreeNode $breedingTreeNode) {
 		parent::__construct($breedingTreeNode->getName(), $breedingTreeNode->getID());
 
-		$this->learnsByEvent = $breedingTreeNode->getLearnsByEvent();
-		$this->learnsByOldGen = $breedingTreeNode->getLearnsByOldGen();
+		$this->learnsByEvent = $breedingTreeNode->learnsByEvent();
+		$this->learnsByOldGen = $breedingTreeNode->learnsByOldGen();
 		$this->isRoot = $breedingTreeNode->isRoot();
 		$this->pkmnData = $breedingTreeNode->getJSONPkmnData();
 		$this->groupId = Constants::generateGroupId();
