@@ -7,6 +7,7 @@ require_once 'output_messages/OutputMessage.php';
 require_once 'tree_creation/BreedingTreeNode.php';
 require_once 'svg_creation/FrontendPkmn.php';
 require_once 'svg_creation/SVGTag.php';
+require_once 'exec_path/PreDataLoadingCheckpoint.php';
 
 require_once 'Constants.php';
 require_once 'Logger.php';
@@ -53,32 +54,8 @@ class SpecialBreedingChains extends SpecialPage {
 	public function reactToInput ($data, $form): string {
 		$this->initConstants($data);
 
-		$findBetterName = $this->catchEasterEggs();
-		if ($this->specialPageProcessIsFinished($findBetterName)) {
-			return $findBetterName;
-		}
-
-		$this->getDataFromExternalWikipages();
-
-		$findBetterName = $this->catchUnknownPkmnName();
-		if ($this->specialPageProcessIsFinished($findBetterName)) {
-			return $findBetterName;
-		}
-
-		$breedingTreeRoot = $this->createBreedingTree();
-
-		$findBetterName = $this->catchNonStandardBreedingTreeStates($breedingTreeRoot);
-		if ($this->specialPageProcessIsFinished($findBetterName)) {
-			return $findBetterName;
-		}
-
-		$frontendRoot = $this->createFrontendRoot($breedingTreeRoot);
-
-		$svgMapDiv = $this->createSVGMapDiv();
-		$svgStructure = $this->createSVGStructure($frontendRoot);
-		$this->addVisualStructuresToOutput($svgMapDiv, $svgStructure);
-
-		return 'all ok';
+		$preDataloadingCheckpoint = new PreDataLoadingCheckPoint();
+		return $preDataloadingCheckpoint->passOn();
 	}
 
 	private function initConstants ($formData) {
@@ -98,143 +75,6 @@ class SpecialBreedingChains extends SpecialPage {
 		}
 
 		Constants::logUserinputConstants();
-	}
-
-	private function specialPageProcessIsFinished (string $code): bool {
-		return $code !== '';
-	}
-
-	private function catchEasterEggs (): string {
-		$programTerminationCode = 'easter egg';
-
-		if (Constants::$targetPkmnNameNormalCasing === 'Greenchu') {
-			$messageText = Constants::i18nMsg('breedingchains-easteregg-greenchu',
-				Constants::$targetMoveNameNormalCasing);
-			$infoMessage = new InfoMessage($messageText);
-			$infoMessage->output();
-			return $programTerminationCode;
-		}
-
-		if (Constants::$targetPkmnNameNormalCasing === 'DeXter') {
-			$messageText = Constants::i18nMsg('breedingchains-easteregg-dexter',
-				Constants::$targetMoveNameNormalCasing);
-			$infoMessage = new InfoMessage($messageText);
-			$infoMessage->output();
-			return $programTerminationCode;
-		}
-
-		return '';
-	}
-
-	private function catchUnknownPkmnName (): string {
-		$programTerminationCode = 'unknown pkmn name';
-		$targetPkmn = Constants::$targetPkmnName;
-		if (!isset(Constants::$externalPkmnGenCommons->$targetPkmn)) {
-			$messageText = Constants::i18nMsg('breedingchains-unknown-pkmn', Constants::$targetPkmnNameNormalCasing);
-			$alertMessage = new AlertMessage($messageText);
-			$alertMessage->output();
-			return $programTerminationCode;
-		}
-		return '';
-	}
-
-	private function catchNonStandardBreedingTreeStates (?BreedingTreeNode $breedingTreeRoot): string {
-		if (is_null($breedingTreeRoot)) {
-			return $this->catchEmptyBreedingTree();
-		} else if (!$breedingTreeRoot->hasSuccessors()) {
-			return $this->catchBreedingTreeRootLearnsDirectly($breedingTreeRoot);
-		}
-		return '';
-	}
-
-	private function catchEmptyBreedingTree (): string {
-		//todo check whether move has a typo or generally if it's a move
-		$infoMessage = new InfoMessage(
-			Constants::i18nMsg('breedingchains-cant-learn',
-				Constants::$targetPkmnNameNormalCasing, Constants::$targetMoveNameNormalCasing)
-		);
-		$infoMessage->output();
-		return 'cant learn';
-	}
-
-	private function catchBreedingTreeRootLearnsDirectly (BreedingTreeNode $breedingTreeRoot): string {
-		//todo if a lowest evo can inherit the move but no suiting parents are found, this wouldnt be handled
-		$infoMessage = null;
-		if ($breedingTreeRoot->getLearnsByEvent()) {
-			$infoMessage = new InfoMessage(Constants::i18nMsg(
-				'breedingchains-can-learn-event', Constants::$targetPkmnNameNormalCasing,
-				Constants::$targetMoveNameNormalCasing));
-		} else if ($breedingTreeRoot->getLearnsByOldGen()) {
-			$infoMessage = new InfoMessage(Constants::i18nMsg(
-				'breedingchains-can-learn-oldgen', Constants::$targetPkmnNameNormalCasing,
-				Constants::$targetMoveNameNormalCasing));
-		} else {
-			$infoMessage = new InfoMessage(Constants::i18nMsg(
-				'breedingchains-can-learn-directly', Constants::$targetPkmnNameNormalCasing,
-				Constants::$targetMoveNameNormalCasing));
-		}
-		$infoMessage->output();
-		return 'can learn directly';
-	}
-
-	private function createBreedingTree (): ?BreedingTreeNode {
-		Logger::statusLog('CREATING BREEDING TREE NODES');
-		$timeStart = hrtime(true);
-
-		$breedingTreeRoot = new BreedingTreeNode(Constants::$targetPkmnName, true);
-		$breedingTreeRoot = $breedingTreeRoot->createBreedingTreeNode([]);
-
-		$timeEnd = hrtime(true);
-		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
-		Logger::outputDebugMessage('breeding tree creation needed: '.$timeDiff.'s');
-
-		return $breedingTreeRoot;
-	}
-
-	private function createFrontendRoot (BreedingTreeNode $breedingTreeRoot): FrontendPkmn {
-		Logger::statusLog('CREATING FRONTENDPKMN INSTANCES');
-		$timeStart = hrtime(true);
-
-		$frontendRoot = new FrontendPkmn($breedingTreeRoot);
-		$frontendRoot->setTreeIconsAndCoordinates();
-	
-		$timeEnd = hrtime(true);
-		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
-		Logger::outputDebugMessage('creating frontend pkmn tree needed: '.$timeDiff.'s');
-
-		return $frontendRoot;
-	}
-
-	private function createSVGStructure (FrontendPkmn $frontendRoot): HTMLElement {
-		Logger::statusLog('CREATING SVG STRUCTURE');
-		$timeStart = hrtime(true);
-
-		$svgRoot = new SVGTag($frontendRoot, Constants::UNUSED_GROUP_ID);
-		$svgStructureInHTML = $svgRoot->toHTML();
-
-		$timeEnd = hrtime(true);
-		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
-		Logger::outputDebugMessage('svg creation needed: '.$timeDiff.'s');
-
-		return $svgStructureInHTML;
-	}
-
-	private function createSVGMapDiv (): HTMLElement {
-		$mapDiv = new HTMLElement('div', [
-			'id' => 'breedingChainsSVGMap',
-		]);
-		return $mapDiv;
-	}
-
-	private function addVisualStructuresToOutput (HTMLElement $svgMapDiv, HTMLElement $svgStructure) {
-		$this->addMarkerExplanations();
-		$svgMapDiv->addToOutput();
-		$svgStructure->addToOutput();
-	}
-
-	private function addMarkerExplanations () {
-		require_once 'markerExamples.php';
-		$markerExamplesTable->addToOutput();
 	}
 
 	private function addCSSandJS () {
@@ -347,20 +187,7 @@ class SpecialBreedingChains extends SpecialPage {
 		return true;
 	}
 
-	private function getDataFromExternalWikipages () {
-		$this->loadExternalJSONPkmnData();
-
-		$eggGroupPageName = 'MediaWiki:BreedingChains/Gen'
-			.Constants::$targetGenNumber.'/egg groups '.Constants::$targetGameString.'.json';
-		Constants::$externalEggGroupsJSON = $this->getWikiPageContent($eggGroupPageName);
-	}
-
-	private function loadExternalJSONPkmnData () {
-		Constants::$externalPkmnGenCommons = $this->loadSplitExternalJSON('MediaWiki:BreedingChains/Gen'.Constants::$targetGenNumber.'/commons ##INDEX##.json');
-		Constants::$externalPkmnGameDiffs = $this->loadSplitExternalJSON('MediaWiki:BreedingChains/Gen'.Constants::$targetGenNumber.'/diffs '.Constants::$targetGameString.' ##INDEX##.json');
-	}
-
-	private function loadSplitExternalJSON (string $pageNameScheme): StdClass {
+	public function loadSplitExternalJSON (string $pageNameScheme): StdClass {
 		$pkmnDataArr = [];
 		$pageData = null;
 		$pageIndex = 0;
