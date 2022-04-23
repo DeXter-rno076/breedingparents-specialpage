@@ -22,7 +22,7 @@ class FrontendTreeCreationTrack extends Track {
 		$timeStart = hrtime(true);
 
 		$frontendRoot = new FrontendPkmn($this->breedingTreeRoot);
-		$frontendRoot->setTreeIconsAndCoordinates();
+		$frontendRoot->prep();
 	
 		$timeEnd = hrtime(true);
 		$timeDiff = ($timeEnd - $timeStart) / 1000000000;

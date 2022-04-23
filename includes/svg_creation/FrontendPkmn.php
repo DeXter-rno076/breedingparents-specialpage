@@ -56,10 +56,12 @@ class FrontendPkmn extends Pkmn {
 		return $highestDepth + 1;
 	}
 
-	public function setTreeIconsAndCoordinates () {
+	public function prep () {
 		$this->setIconData();
 
 		$this->calcTreeSectionHeights();
+		$this->orderSuccessors();
+
 		$this->calcYCoords(0);
 
 		$this->calcXCoords();
@@ -143,6 +145,64 @@ class FrontendPkmn extends Pkmn {
 	private function calculateTreeSectionHeightForMiddleNode (FrontendPkmn $successor): int {
 		$successorTreeSectionHeight = $successor->calcTreeSectionHeights();
 		return $successorTreeSectionHeight;
+	}
+
+	private function orderSuccessors () {
+		if (count($this->successors) > 1) {
+			Logger::statusLog('ordering succesors of '.$this);
+			$this->sortSuccessors();
+			$this->changeOrderToFromMiddleToOuterLayers();
+		} else {
+			Logger::statusLog('not ordering succesors of '.$this.', less then 2 successors -> unnecessary');
+		}
+
+		foreach ($this->successors as $successor) {
+			$successor->orderSuccessors();
+		}
+	}
+
+	private function sortSuccessors () {
+		usort($this->successors, function ($first, $second) {
+			return $first->treeSectionHeight <=> $second->treeSectionHeight;
+		});
+		Logger::statusLog('successor array of '.$this.' with treeSectionHeightKeys after pure sorting: '
+			.json_encode($this->successors));
+	}
+
+	/**
+	 * todo explain this
+	 */
+	private function changeOrderToFromMiddleToOuterLayers () {
+		Logger::statusLog('changing sorting order for '.$this.', '.count($this->successors).' successors');
+		$middleToOuterOrdering = [];
+		$pointer = $this->getSuccessorOrderingBackPointer();
+		Logger::statusLog('starting pointer from back: '.$pointer);
+
+		for (; $pointer >= 0; $pointer -= 2) {
+			Logger::statusLog('new pointer: '.$pointer);
+			$middleToOuterOrdering[] = $this->successors[$pointer];
+		}
+		$pointer += 2;
+		Logger::statusLog('corrected pointer to '.$pointer.' after first run');
+
+		for ($pointer++ ; $pointer < count($this->successors); $pointer += 2) {
+			Logger::statusLog('new pointer: '.$pointer);
+			$middleToOuterOrdering[] = $this->successors[$pointer];
+		}
+
+		$this->successors = $middleToOuterOrdering;
+	}
+
+	private function getSuccessorOrderingBackPointer (): int {
+		$successorsAmount = count($this->successors);
+		$secondLastSuccessorIndex = $successorsAmount - 2;
+		$lastSuccessorIndex = $successorsAmount - 1;
+
+		if ($successorsAmount % 2 === 0) {
+			return $secondLastSuccessorIndex;
+		} else {
+			return $lastSuccessorIndex;
+		}
 	}
 
 	/**
