@@ -1,12 +1,6 @@
 <?php
-require_once 'exceptions/AttributeNotFoundException.php';
-require_once 'output_messages/InfoMessage.php';
 require_once 'output_messages/AlertMessage.php';
 require_once 'output_messages/ErrorMessage.php';
-require_once 'output_messages/OutputMessage.php';
-require_once 'tree_creation/BreedingTreeNode.php';
-require_once 'svg_creation/FrontendPkmn.php';
-require_once 'svg_creation/SVGTag.php';
 require_once 'exec_path/PreDataLoadingCheckpoint.php';
 
 require_once 'Constants.php';
@@ -52,21 +46,38 @@ class SpecialBreedingChains extends SpecialPage {
 	}
 
 	public function reactToInput ($data, $form): string {
-		$this->initConstants($data);
+		$success = $this->initConstants($data);
+		if (!$success) {
+			return 'invalid input';
+		}
 
 		$preDataloadingCheckpoint = new PreDataLoadingCheckPoint();
 		return $preDataloadingCheckpoint->passOn();
 	}
 
-	private function initConstants ($formData) {
-		Constants::$targetGameString = Constants::GAME_LIST[$formData['gameInput']];
-		Constants::$targetGenNumber = Constants::GAMES_TO_GEN[Constants::$targetGameString];
+	//todo split up / outsource
+	private function initConstants ($formData): bool {
+		//todo i dont like these magic strings
+		Constants::$GAME_LIST = json_decode(file_get_contents(__DIR__.'/../manual_data/gamesToSk.json'));
+		Constants::$GAMES_TO_GEN = json_decode(file_get_contents(__DIR__.'/../manual_data/gamesToGen.json'));
+		Constants::$MOVE_NAMES = json_decode(file_get_contents(__DIR__.'/../manual_data/moveNames.json'));
+		Constants::$MOVE_NAME_TO_NEW_MOVE_NAME = json_decode(file_get_contents(__DIR__.'/../manual_data/renamedMoves.json'));
 
-		Constants::$targetMoveNameNormalCasing = trim($formData['moveInput']); 
-		Constants::$targetMoveName = strtolower(Constants::$targetMoveNameNormalCasing);
-		Constants::$targetPkmnNameNormalCasing = trim($formData['pkmnInput']);
-		Constants::$targetPkmnName = strtolower(Constants::$targetPkmnNameNormalCasing);
-		
+		$gameInput = $formData['gameInput'];
+		if (!isset(Constants::$GAME_LIST->$gameInput)) {
+			$infoMsg = new InfoMessage(Constants::i18nMsg('breedingchains-unknown-game', $gameInput));
+			$infoMsg->output();
+			return false;
+		}
+		$targetGameString = Constants::$GAME_LIST->$gameInput;
+		Constants::$targetGameString = $targetGameString;
+		Constants::$targetGenNumber = Constants::$GAMES_TO_GEN->$targetGameString;
+
+		Constants::$targetMoveNameOriginalInput = $formData['moveInput'];
+		Constants::$targetMoveName = $this->buildInternalMoveName($formData['moveInput']);
+		Constants::$targetPkmnNameOriginalInput = trim($formData['pkmnInput']);
+		Constants::$targetPkmnName = strtolower(Constants::$targetPkmnNameOriginalInput);
+
 		if (isset($formData['displayDebuglogs'])) {
 			Constants::$displayDebuglogs = $formData['displayDebuglogs'];
 		}
@@ -75,6 +86,16 @@ class SpecialBreedingChains extends SpecialPage {
 		}
 
 		Constants::logUserinputConstants();
+
+		return true;
+	}
+
+	private function buildInternalMoveName (string $moveInput): string {
+		$internalMoveName = trim($moveInput);
+		if (isset(Constants::$MOVE_NAME_TO_NEW_MOVE_NAME->$internalMoveName)) {
+			$internalMoveName = Constants::$MOVE_NAME_TO_NEW_MOVE_NAME->$internalMoveName;
+		}
+		return strtolower($internalMoveName);
 	}
 
 	private function addCSSandJS () {
@@ -123,8 +144,7 @@ class SpecialBreedingChains extends SpecialPage {
 		$moveSuggestionsAsText = json_encode($moveSuggestions);
 		$moveSuggestionsAsTextWithoutWhiteSpace = str_replace([' ', '\n'], '', $moveSuggestionsAsText);
 
-		$gen2Commons = $this->loadSplitExternalJSON('MediaWiki:BreedingChains/Gen2/commons ##INDEX##.json');
-		$pkmnSuggestions = array_keys((array) $gen2Commons);
+		$pkmnSuggestions = array_keys((array) $moveSuggestions);
 		$pkmnSuggestionsAsText = json_encode($pkmnSuggestions);
 		$suggestionsScriptTag = new HTMLElement('script', [], [
 			'const MOVE_SUGGESTIONS = '.$moveSuggestionsAsTextWithoutWhiteSpace.';'
@@ -162,21 +182,6 @@ class SpecialBreedingChains extends SpecialPage {
 			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-move'));
 			$alertMessage->outputOnce();
 			return 'invalid move';
-		}
-
-		return true;
-	}
-
-	//has to be public
-	public function validateGenInput ($value, $allData) {
-		if ($value === '' || $value === null) {
-			return true;
-		}
-
-		if (!is_numeric($value)) {
-			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-gen'));
-			$alertMessage->outputOnce();
-			return 'invalid gen';
 		}
 
 		return true;

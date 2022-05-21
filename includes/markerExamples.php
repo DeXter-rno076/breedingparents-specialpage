@@ -3,7 +3,7 @@
 $iconFile = null;
 $iconFileLink = '';
 try {
-	$iconFile = FrontendPkmn::getPkmnIcon('150');
+	$iconFile = VisualNode::getIcon('Pokémon-Icon 150.png');
 } catch (FileNotFoundException $e) {
 	$errorMsg = new ErrorMessage($e);
 	$errorMsg->output();

@@ -48,7 +48,7 @@ const GAME_SUGGESTIONS_LIST = [
 	['PLA', 'Pokémon: Legenden Arceus'],
 	['Legenden Arceus', 'Pokémon: Legenden Arceus'],
 	'Pokémon Leuchtende Perle',
-	['Leuchtende Perle', 'Pokémon Leuchtende Perle']
+	['Leuchtende Perle', 'Pokémon Leuchtende Perle'],
 	['LP', 'Pokémon Leuchtende Perle'],
 	'Pokémon Strahlender Diamant',
 	['Strahlender Diamant', 'Pokémon Strahlender Diamant'],
@@ -197,7 +197,7 @@ function clearDatalist (datalist) {
 function switchMoveSuggestions (event) {
 	console.log('switching moves');
 	const pkmnName = pkmnTextInputBox.value;
-	const learnsetData = MOVE_SUGGESTIONS[pkmnName.toLowerCase()];
+	const learnsetData = MOVE_SUGGESTIONS[pkmnName];
 	const currentGame = getCurrentGame();
 	if (learnsetData === undefined) {
 		//no pkmn name entered

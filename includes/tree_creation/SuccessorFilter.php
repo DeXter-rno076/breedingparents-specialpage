@@ -5,79 +5,87 @@ require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../Constants.php';
 
 require_once 'PkmnData.php';
+require_once 'PkmnTreeNode.php';
 require_once 'BreedingTreeNode.php';
 
 /**
+ * explanation prefix: This is a **Successor**filter. This removes every Pokemon that is not intended as
+ * a **parent** of the currently handled tree node.
+ * 
  * list of relevant special cases:
  * 		gender unknown + male only
- *			all pkmn outside of the evo line are blacklisted
+ * 			only with ditto they can have children of their species -> cant be influenced by other species
+ * 			-> if all parents of the current node are male/unknown onle -> only parents of its evo line are allowed
  *
  * 		female only
- * 			get blacklisted in gens 2-5
+ * 			can only have their own species as children -> cant influence other species
+ * 			-> are only allowed if current node is the lowest evo of them (reminder: middle nodes are always lowest evos)
+ * 			females can't pass on any moves up until gen 5 -> get blacklisted in gens 2-5
+ * 
+ * To make the differnce of the first two cases clearer: In male/unknown potentially all others are removed
+ * 			in female potentially the female only parent is removed
  * 
  * 		egg groupn unknown
- * 			have unpairable and unbreedable set to true
- * 			have all learnsets removed
+ * 			don't take part in any relevant breeding situation (special case Phione doesn't inherit any moves) 
+ * 			-> always removed
  * 
  * 		babys
- * 			have unpairable set to true
- * 			have all learnsets except of breedingLearnsets removed
+ * 			can't take part in making kids -> not allowed as a parent -> get removed
  * 
  * 		individual Pokemon:
  * 			Farbeagle
  * 				has all moves of the corresponding gen set in its directLearnsets
  *
- * 			Manaphy
+ * 			Phione
  * 				manaphy has no breeding learnsets -> irrelevant
+ */
+/**
+ * todo this class not only filters but also creates the successor list -> separate tasks and create super class for filter and mixer
  */
 class SuccessorFilter {
 	private $eggGroupBlacklist;
+	private $currentPkmnTreeNodeData;
 
 	/**
-	 * @var String egg group whose pkmn are checked and added after this filter did its job
-	 * using a whitelist variable seems unnecessarily complex
-	 * but is necessary (at least i haven't found a better solution).
-	 * Just adding the egg group after filtering the successors would work
-	 * for almost all nodes, BUT not for the root. There the first handled
-	 * egg group could include the second egg group which would result in
-	 * redundancies or a wrong tree section.
+	 * @throws AttributeNotFoundException
 	 */
-	private $whitelistedEggGroup;
-
-	private $successorList;
-
-	private $currentTreeNode;
-
-	public function __construct (array $eggGroupBlacklist, string $whitelistedEggGroup,
-									BreedingTreeNode $currentTreeNode) {
+	public function __construct (array $eggGroupBlacklist, PkmnTreeNode $currentPkmnTreeNode) {
 		Logger::statusLog('creating SuccessorFilter instance with: '
-			.'eggGroupBlacklist: '.json_encode($eggGroupBlacklist)
-			.'whiteListedEggGroup: '.json_encode($whitelistedEggGroup));
+			.'eggGroupBlacklist: '.json_encode($eggGroupBlacklist));
 		$this->eggGroupBlacklist = $eggGroupBlacklist;
-		$this->whitelistedEggGroup = $whitelistedEggGroup;
-		$this->currentTreeNode = $currentTreeNode;
+		$this->currentPkmnTreeNodeData = new PkmnData($currentPkmnTreeNode->getName());
+	}
 
-		if (isset(Constants::$externalEggGroupsJSON->$whitelistedEggGroup)) {
-			$this->successorList = Constants::$externalEggGroupsJSON->$whitelistedEggGroup;
-		} else {
-			$this->successorList = [];
-			Logger::elog('egg group '.$whitelistedEggGroup.' is not set');
+	public function filter (array $successorList): array {
+		Logger::statusLog('filtering successor list; successor list before: '.json_encode($successorList));
+		$successorList = $this->removeNonExistants($successorList);
+		$successorList = $this->removeUnpairables($successorList);
+		$successorList = $this->checkGenderSpecificRequirements($successorList);
+		$successorList = $this->removeBlacklistedPkmn($successorList);
+		$successorList = $this->checkGenerationSpecificRequirements($successorList);
+		Logger::statusLog('successor list after: '.json_encode($successorList));
+
+		return $successorList;
+	}
+
+	/**
+	 * Removes all successors for which $condition returns true.
+	 * @param mixed $condition - function that returns a boolean and determines whether the given pkmn shall be removed
+	 * 
+	 */
+	private function remove (array $list, $condition): array {
+		for ($i = 0; $i < count($list); $i++) {
+			$item = $list[$i];
+			if ($condition($item)) {
+				array_splice($list, $i, 1);
+				$i--;
+			}
 		}
+
+		return $list;
 	}
 
-	public function filter (): array {
-		Logger::statusLog('filtering successor list');
-		$this->removeNonExistants();
-		$this->removeUnpairables();
-		$this->checkGenderSpecificRequirements();
-		$this->removeBlacklistedPkmn();
-		$this->checkGenerationSpecificRequirements();
-		Logger::statusLog('successor list after: '.json_encode($this->successorList));
-
-		return $this->successorList;
-	}
-
-	private function removeNonExistants () {
+	private function removeNonExistants (array $successorList): array {
 		$doesNotExist = function (string $pkmnName): bool {
 			try {
 				$pkmnData = new PkmnData($pkmnName);
@@ -89,7 +97,7 @@ class SuccessorFilter {
 			}
 		};
 
-		$this->remove($doesNotExist);
+		return $this->remove($successorList, $doesNotExist);
 	}
 
 	/**
@@ -97,7 +105,7 @@ class SuccessorFilter {
 	 * This filter is supposed to only let those pkmn through that could be a suiting breeding parent.
 	 * Pkmn that can't be paired can't possible be a parent.
 	 */
-	private function removeUnpairables () {
+	private function removeUnpairables (array $successorList): array {
 		/*unpairable pkmn cant get children
 		=> may only appear at the end of a chain*/
 		$isUnpairable = function (string $pkmnName): bool {
@@ -113,38 +121,70 @@ class SuccessorFilter {
 			return $unpairableStatus;
 		};
 
-		$this->remove($isUnpairable);
+		return $this->remove($successorList, $isUnpairable);
 	}
 
-	/**
-	 * Removes all successors for which $condition returns true.
-	 * @param mixed $condition - function that returns a boolean and determines whether the given pkmn shall be removed
-	 * 
-	 */
-	private function remove ($condition) {
-		for ($i = 0; $i < count($this->successorList); $i++) {
-
-			$pkmn = $this->successorList[$i];
-			if ($condition($pkmn)) {
-				array_splice($this->successorList, $i, 1);
-				$i--;
-			}
-
-		}
+	private function checkGenderSpecificRequirements (array $successorList): array {
+		$successorList = $this->checkMaleAndUnknownOnlyRequirements($successorList);
+		$successorList = $this->checkFemaleOnlyRequirements($successorList);
+		return $successorList;
 	}
 
-	private function checkGenderSpecificRequirements () {
-		$currentTreeNodeData = $this->currentTreeNode->getJSONPkmnData();
-
-		if ($currentTreeNodeData->isMaleOnly() || $currentTreeNodeData->hasNoGender()) {
-			$this->remove(function (string $pkmnName): bool {
-				$currentTreeNodeData = $this->currentTreeNode->getJSONPkmnData();
-				return !$currentTreeNodeData->hasAsEvolution($pkmnName);
+	private function checkMaleAndUnknownOnlyRequirements (array $successorList): array {
+		if ($this->nodeHasOnlyMaleEvolutions() || $this->nodeHasOnlyGenderUnknownEvolutions()) {
+			return $this->remove($successorList, function (string $pkmnName): bool {
+				return !$this->currentPkmnTreeNodeData->hasAsEvolution($pkmnName);
 			});
 		}
+		return $successorList;
 	}
 
-	private function removeBlacklistedPkmn () {
+	//basically duplicate of $this->nodeHasOnlyGenderUnknownEvolutions
+	private function nodeHasOnlyMaleEvolutions (): bool {
+		foreach ($this->currentPkmnTreeNodeData->getEvolutions() as $evoName) {
+			try {
+				$evoData = new PkmnData($evoName);
+				if (!$evoData->isMaleOnly()) {
+					return false;
+				}
+			} catch (AttributeNotFoundException $e) {
+				$eMsg = new ErrorMessage($e);
+				$eMsg->output();
+			}
+		}
+		return true;
+	}
+
+	//basically duplicate of $this->nodeHasOnlyMaleEvolutions
+	private function nodeHasOnlyGenderUnknownEvolutions (): bool {
+		foreach ($this->currentPkmnTreeNodeData->getEvolutions() as $evoName) {
+			try {
+				$evoData = new PkmnData($evoName);
+				if (!$evoData->hasNoGender()) {
+					return false;
+				}
+			} catch (AttributeNotFoundException $e) {
+				$eMsg = new ErrorMessage($e);
+				$eMsg->output();
+			}
+		}
+		return true; 
+	}
+
+	private function checkFemaleOnlyRequirements (array $successorList): array {
+		return $this->remove($successorList, function (string $pkmnName) {
+			try {
+				$pkmnData = new PkmnData($pkmnName);
+				return $pkmnData->isFemaleOnly() && !$this->currentPkmnTreeNodeData->hasAsEvolution($pkmnName);
+			} catch (AttributeNotFoundException $e) {
+				$eMsg = new ErrorMessage($e);
+				$eMsg->output();
+				return false;
+			}
+		});
+	}
+
+	private function removeBlacklistedPkmn (array $successorList): array {
 		$pkmnIsBlacklisted = function (string $pkmn): bool {
 			$pkmnData = null;
 			try {
@@ -155,29 +195,16 @@ class SuccessorFilter {
 				return true;
 			}
 
-			if ($this->eggGroupIsWhiteListed($pkmnData->getEggGroup1())) {
-				return false;
-			}
 			if ($this->eggGroupIsBlacklisted($pkmnData->getEggGroup1(), $pkmn)) {
 				return true;
 			}
 			if ($pkmnData->hasSecondEggGroup()) {
-				if ($this->eggGroupIsWhiteListed($pkmnData->getEggGroup2(), $pkmn)) {
-					return false;
-				}
 				return $this->eggGroupIsBlacklisted($pkmnData->getEggGroup2(), $pkmn);
 			}
 			return false;
 		};
 
-		$this->remove($pkmnIsBlacklisted);
-	}
-
-	private function eggGroupIsWhiteListed (string $eggGroup): bool {
-		if ($eggGroup === '') {
-			return false;
-		}
-		return $this->whitelistedEggGroup === $eggGroup;
+		return $this->remove($successorList, $pkmnIsBlacklisted);
 	}
 
 	private function eggGroupIsBlacklisted (string $eggGroup): bool {
@@ -190,14 +217,15 @@ class SuccessorFilter {
 	/**
 	 * Checks filters that only apply in some gens, like only male pkmn can pass on moves up to gen 5.
 	 */
-	private function checkGenerationSpecificRequirements () {
+	private function checkGenerationSpecificRequirements (array $successorList): array {
 		if (Constants::$targetGenNumber < 6) {
 			//in gens 2-5 only fathers can give moves to their kids
-			$this->removeFemaleOnlys();
+			$successorList = $this->removeFemaleOnlys($successorList);
 		}
+		return $successorList;
 	}
 
-	private function removeFemaleOnlys () {
+	private function removeFemaleOnlys (array $successorList): array {
 		$isFemale = function (string $pkmn): bool {
 			$pkmnData = null;
 			try {
@@ -211,6 +239,6 @@ class SuccessorFilter {
 			return $pkmnData->isFemaleOnly();
 		};
 
-		$this->remove($isFemale);
+		return $this->remove($successorList, $isFemale);
 	}
 }

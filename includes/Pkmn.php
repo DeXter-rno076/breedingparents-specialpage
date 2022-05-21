@@ -1,19 +1,20 @@
 <?php
+/**
+ * todo rename -> there are non pkmn entities in the trees
+ */
 abstract class Pkmn {
 	protected $name;
-	protected $id;
 
-	protected function __construct (string $name, string $id) {
+	protected function __construct (string $name) {
 		$this->name = $name;
-		$this->id = $id;
 	}
 
 	public function getName (): string {
 		return $this->name;
 	}
 
-	public function getID (): string {
-		return $this->id;
+	public function is (string $name): bool {
+		return strtolower($this->name) === strtolower($name);
 	}
 
 	public abstract function getLogInfo (): string;

@@ -2,42 +2,42 @@
 require_once __DIR__.'/../exceptions/FileNotFoundException.php';
 require_once __DIR__.'/../tree_creation/BreedingTreeNode.php';
 require_once __DIR__.'/../tree_creation/PkmnData.php';
+require_once __DIR__.'/../tree_creation/PkmnTreeRoot.php';
 require_once __DIR__.'/../Pkmn.php';
 require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../Constants.php';
 
 use MediaWiki\MediaWikiServices;
 
-class FrontendPkmn extends Pkmn {
-	private $learnsByEvent;
-	private $learnsByOldGen;
+class VisualNode extends Pkmn {
+	private $displayEventMarker;
+	private $displayOldGenMarker;
 	private $successors = [];
 	private $isRoot;
-
-	private $pkmnData;
 
 	private $x;
 	private $y;
 	private $treeSectionHeight;
 
-	private $iconUrl;
-	private $iconWidth;
-	private $iconHeight;
+	private $iconName;
+	private $iconUrl = '';
+	private $iconWidth = 0;
+	private $iconHeight = 0;
 	private $fileError = null;
 
 	private $groupId;
 
 	public function __construct (BreedingTreeNode $breedingTreeNode) {
-		parent::__construct($breedingTreeNode->getName(), $breedingTreeNode->getID());
+		parent::__construct($breedingTreeNode->getName());
 
-		$this->learnsByEvent = $breedingTreeNode->learnsByEvent();
-		$this->learnsByOldGen = $breedingTreeNode->learnsByOldGen();
-		$this->isRoot = $breedingTreeNode->isRoot();
-		$this->pkmnData = $breedingTreeNode->getJSONPkmnData();
+		$this->displayEventMarker = $breedingTreeNode->getLearnabilityStatus()->getLearnsByEvent();
+		$this->displayOldGenMarker = $breedingTreeNode->getLearnabilityStatus()->getLearnsByOldGen();
+		$this->isRoot = $breedingTreeNode instanceof PkmnTreeRoot;
 		$this->groupId = Constants::generateGroupId();
+		$this->iconName = $breedingTreeNode->buildIconName();
 
 		foreach ($breedingTreeNode->getSuccessors() as $successorTreeNode) {
-			$successorFrontendObj = new FrontendPkmn($successorTreeNode);
+			$successorFrontendObj = new VisualNode($successorTreeNode);
 			$this->addSuccessor($successorFrontendObj);
 		}
 	}
@@ -80,7 +80,7 @@ class FrontendPkmn extends Pkmn {
 	}
 
 	private function tryLoadAndSetIconData () {
-		$iconFileObj = FrontendPkmn::getPkmnIcon($this->id);
+		$iconFileObj = VisualNode::getIcon($this->iconName);
 		Logger::statusLog('icon file for '.$this.' successfully loaded');
 
 		$this->iconUrl = $iconFileObj->getUrl();
@@ -88,12 +88,11 @@ class FrontendPkmn extends Pkmn {
 		$this->iconHeight = $iconFileObj->getHeight();
 	}
 
-	public static function getPkmnIcon (string $pkmnId): File {
-		$fileName = 'Pokémon-Icon '.$pkmnId.'.png';
-		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileName);
+	public static function getIcon (string $fileURL): File {
+		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileURL);
 
 		if ($fileObj === false) {
-			throw new FileNotFoundException($pkmnId);
+			throw new FileNotFoundException($fileURL);
 		}
 
 		return $fileObj;
@@ -142,7 +141,7 @@ class FrontendPkmn extends Pkmn {
 		return Constants::SVG_CIRCLE_DIAMETER;
 	}
 
-	private function calculateTreeSectionHeightForMiddleNode (FrontendPkmn $successor): int {
+	private function calculateTreeSectionHeightForMiddleNode (VisualNode $successor): int {
 		$successorTreeSectionHeight = $successor->calcTreeSectionHeights();
 		return $successorTreeSectionHeight;
 	}
@@ -171,6 +170,11 @@ class FrontendPkmn extends Pkmn {
 
 	/**
 	 * todo explain this
+	 * short draft: the smaller the sub tree, the closer to the middle
+	 * sortSuccessors sorts all successors descending
+	 * changeOrderToFromMiddleToOuterLayern starts from the end and jumps 2 indices at a time to the start
+	 * makes a u turn, steps one index further and hops 2 indices at a time to the end
+	 * by pushing a successor at every jump to a list, the successors are reodered as wanted
 	 */
 	private function changeOrderToFromMiddleToOuterLayers () {
 		Logger::statusLog('changing sorting order for '.$this.', '.count($this->successors).' successors');
@@ -252,7 +256,7 @@ class FrontendPkmn extends Pkmn {
 		return $x - $this->getIconWidth() / 2; 
 	}
 
-	public function addSuccessor (FrontendPkmn $successor) {
+	public function addSuccessor (VisualNode $successor) {
 		array_push($this->successors, $successor);
 	}
 
@@ -264,12 +268,12 @@ class FrontendPkmn extends Pkmn {
 		return $this->successors;
 	}
 
-	public function getLearnsByEvent (): bool {
-		return $this->learnsByEvent;
+	public function getDisplayEventMarker (): bool {
+		return $this->displayEventMarker;
 	}
 
-	public function getLearnsByOldGen (): bool {
-		return $this->learnsByOldGen;
+	public function getDisplayOldGenMarker (): bool {
+		return $this->displayOldGenMarker;
 	}
 
 	public function getIconUrl (): string {
@@ -326,19 +330,41 @@ class FrontendPkmn extends Pkmn {
 		return $this->isRoot;
 	}
 
-	public function getJSONPkmnData (): PkmnData {
-		return $this->pkmnData;
-	}
-
 	public function getGroupId (): int {
 		return $this->groupId;
 	}
 
+	public function getFirstPkmnSuccessor (): ?VisualNode {
+		foreach ($this->successors as $successor) {
+			if (Constants::isPkmn($successor->getName())) {
+				return $successor;
+			}
+		}
+		return null;
+	}
+
+	public function getArticleLink (): string {
+		if (Constants::isPkmn($this->getName())) {
+			try {
+				$pkmnData = new PkmnData($this->getName());
+				$linkSuperPage = $pkmnData->getArticleLinkSuperPageName();
+				$linkName = Constants::i18nMsg('breedingchains-learnsetpage-link',
+					$linkSuperPage, Constants::$targetGenNumber);
+				return $linkName;
+			} catch (Exception $e) {
+				$eMessage = new ErrorMessage($e);
+				$eMessage->output();
+			}
+		} else {
+			return $this->getName();
+		}
+	}
+
 	/**
-	 * @return string - FrontendPkmn:<pkmn name>;(<x>;<y>);<branch position>;;
+	 * @return string - VisualNode:<pkmn name>;(<x>;<y>);<branch position>;;
 	 */
 	public function getLogInfo (): string {
-		$msg = 'FrontendPkmn:\'\'\''.$this->name.'\'\'\';('
+		$msg = 'VisualNode:\'\'\''.$this->name.'\'\'\';('
 			.(isset($this->x) ? $this->x : '-').';'
 			.(isset($this->y) ? $this->y : '-').')';
 		if (count($this->successors) > 0) {

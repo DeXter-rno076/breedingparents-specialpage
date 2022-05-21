@@ -2,7 +2,7 @@
 require_once 'Track.php';
 require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../Constants.php';
-require_once __DIR__.'/../tree_creation/BreedingTreeNode.php';
+require_once __DIR__.'/../tree_creation/PkmnTreeRoot.php';
 require_once 'PostBreedingTreeCreationCheckpoint.php';
 
 class BreedingTreeCreationTrack extends Track {
@@ -12,11 +12,11 @@ class BreedingTreeCreationTrack extends Track {
 		return $postBreedingTreeCreationCheckpoint->passOn();
 	}
 
-	private function createBreedingTree (): ?BreedingTreeNode {
+	private function createBreedingTree (): PkmnTreeRoot {
 		Logger::statusLog('CREATING BREEDING TREE NODES');
 		$timeStart = hrtime(true);
 
-		$breedingTreeRoot = new BreedingTreeNode(Constants::$targetPkmnName, true);
+		$breedingTreeRoot = new PkmnTreeRoot(Constants::$targetPkmnName);
 		$breedingTreeRoot = $breedingTreeRoot->createBreedingTreeNode([]);
 
 		$timeEnd = hrtime(true);

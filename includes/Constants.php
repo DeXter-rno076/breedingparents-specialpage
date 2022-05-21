@@ -9,12 +9,12 @@ abstract class Constants {
 	public static $targetGenNumber;
 	public static $targetGameString;
 
-	public static $targetPkmnNameNormalCasing;
-	public static $targetMoveNameNormalCasing;
+	public static $targetPkmnNameOriginalInput;
+	public static $targetMoveNameOriginalInput;
 
 	public static $centralOutputPageInstance;
 	public static $centralSpecialPageInstance;
-	
+
 	/**
 	 * @var bool whether to display custom error and warning logs and performance measurements
 	 */
@@ -33,75 +33,10 @@ abstract class Constants {
 	public const SVG_TEXT_LINE_MARGIN = 4;
 	public const SVG_CIRCLE_DIAMETER = 60;
 
-	public const GAME_LIST = [
-		'Pokémon: Legenden Arceus' => 'PLA',
-		'Pokémon Leuchtende Perle' => 'LP',
-		'Pokémon Strahlender Diamant' => 'SD',
-		'Pokémon Schild' => 'SH',
-		'Pokémon Schwert' => 'SW',
-		'Pokémon Let\'s Go Evoli' => 'LGE',
-		'Pokémon Let\'s Go Pikachu' => 'LGP',
-		'Pokémon Ultramond' => 'UM',
-		'Pokémon Ultrasonne' => 'US',
-		'Pokémon Mond' => 'M',
-		'Pokémon Sonne' => 'So',
-		'Pokémon Alpha Saphir' => 'AS',
-		'Pokémon Omega Rubin' => 'OR',
-		'Pokémon Y' => 'Y',
-		'Pokémon X' => 'X',
-		'Pokémon Weiß 2' => 'W2',
-		'Pokémon Schwarz 2' => 'S2',
-		'Pokémon Weiß' => 'W',
-		'Pokémon Schwarz' => 'Sc',
-		'Pokémon Silberne Edition SoulSilver' => 'SS',
-		'Pokémon Goldende Edition HeartGold' => 'HG',
-		'Pokémon Platin' => 'PT',
-		'Pokémon Perl' => 'P',
-		'Pokémon Diamant' => 'D',
-		'Pokémon Blattgrün' => 'BG',
-		'Pokémon Feuerrot' => 'FR',
-		'Pokémon Smaragd' => 'SM',
-		'Pokémon Saphir' => 'SA',
-		'Pokémon Rubin' => 'RU',
-		'Pokémon Kristall' => 'K',
-		'Pokémon Silber' => 'Si',
-		'Pokémon Gold' => 'Go',
-	];
-
-	public const GAMES_TO_GEN = [
-		'Go' => 2,
-		'Si' => 2,
-		'K' => 2,
-		'RU' => 3,
-		'SA' => 3,
-		'SM' => 3,
-		'FR' => 3,
-		'BG' => 3,
-		'D' => 4,
-		'P' => 4,
-		'PT' => 4,
-		'HG' => 4,
-		'SS' => 4,
-		'Sc' => 5,
-		'W' => 5,
-		'S2' => 5,
-		'W2' => 5,
-		'X' => 6,
-		'Y' => 6,
-		'OR' => 6,
-		'AS' => 6,
-		'So' => 7,
-		'M' => 7,
-		'US' => 7,
-		'UM' => 7,
-		'LPG' => 7,
-		'LGE' => 7,
-		'SW' => 8,
-		'SH' => 8,
-		'SD' => 8,
-		'LP' => 8,
-		'PLA' => 8,
-	];
+	public static $GAME_LIST;
+	public static $GAMES_TO_GEN;
+	public static $MOVE_NAMES;
+	public static $MOVE_NAME_TO_NEW_MOVE_NAME;
 
 	private static $groupIdCounter = 0;
 	public const UNUSED_GROUP_ID = -1;
@@ -128,9 +63,16 @@ abstract class Constants {
 	public static function logUserinputConstants () {
 		Logger::statusLog('target game: '.Constants::$targetGameString);
 		Logger::statusLog('target gen: '.Constants::$targetGenNumber);
-		Logger::statusLog('target move input: '.Constants::$targetMoveNameNormalCasing);
+		Logger::statusLog('target move input: '.Constants::$targetMoveNameOriginalInput);
 		Logger::statusLog('target move lower case: '.Constants::$targetMoveName);
-		Logger::statusLog('target pkmn input: '.Constants::$targetPkmnNameNormalCasing);
+		Logger::statusLog('target pkmn input: '.Constants::$targetPkmnNameOriginalInput);
 		Logger::statusLog('target pkmn lower case: '.Constants::$targetPkmnName);
+	}
+
+	/**
+	 * todo remove this after making core classes fully independent of the concrete pkmn context
+	 */
+	public static function isPkmn (string $name): bool {
+		return isset(Constants::$externalPkmnGenCommons->$name);
 	}
 }

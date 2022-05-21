@@ -26,6 +26,6 @@ class PreBreedingTreeCreationCheckpoint extends Checkpoint {
 
 	private function outputTargetPkmnNameIsUnknownMsg () {
 		$this->outputInfoMessage('breedingchains-unknown-pkmn',
-			Constants::$targetPkmnNameNormalCasing);
+			Constants::$targetPkmnNameOriginalInput);
 	}
 }

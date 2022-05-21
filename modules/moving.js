@@ -37,6 +37,7 @@ const map = L.map('breedingChainsSVGMap', {
 	zoomSnap: 0,
 	zoomDelta: WANTED_ZOOM_DELTA,
 	wheelPxPerZoomLevel: ZOOM_DELTA_IN_PX_PERCENTAGE,
+	attributionControl: false
 });
 
 main();
@@ -143,7 +144,12 @@ function createPkmnLinkTag (pkmnLinks) {
 	const linkTag = document.createElement('a');
 	linkTag.href = pkmnLink;
 
-	const linkText = pkmnLink.substring(0, pkmnLink.indexOf('/Attacken'));
+	let linkText = '';
+	if (pkmnLink.includes('/Attacken')) {
+		linkText = pkmnLink.substring(0, pkmnLink.indexOf('/Attacken'));
+	} else {
+		linkText = pkmnLink;
+	}
 	const linkTextNode = document.createTextNode(linkText);
 
 	linkTag.appendChild(linkTextNode);

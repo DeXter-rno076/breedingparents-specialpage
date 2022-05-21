@@ -4,11 +4,15 @@ require_once __DIR__.'/../Pkmn.php';
 require_once __DIR__.'/../Constants.php';
 require_once __DIR__.'/../Logger.php';
 
-require_once 'BreedingTreeNode.php';
+require_once 'PkmnTreeNode.php';
 
 class PkmnData extends Pkmn {
+	private $id;
 	private $game;
 	private $exists;
+
+	private $correctlyWrittenName;
+	private $subpageLinkName;
 
 	private $eggGroup1;
 	private $eggGroup2;
@@ -40,7 +44,7 @@ class PkmnData extends Pkmn {
 		$pkmnCommons = Constants::$externalPkmnGenCommons->$name;
 		$pkmnDiffs = Constants::$externalPkmnGameDiffs->$name;
 
-		parent::__construct($name, $pkmnCommons->id);
+		parent::__construct($name);
 
 		$this->addCommons($pkmnCommons);
 		$this->addDiffs($pkmnDiffs);
@@ -55,7 +59,8 @@ class PkmnData extends Pkmn {
 	 */
 	private function addCommons (StdClass $pkmnCommons) {
 		$mustHaveCommonsProperties = [
-			'directLearnsets', 'breedingLearnsets', 'eventLearnsets', 'oldGenLearnsets'
+			'id', 'directLearnsets', 'breedingLearnsets', 'eventLearnsets', 'oldGenLearnsets',
+			'correctlyWrittenName', 'subpageLinkName'
 		];
 		$this->copyProperties($pkmnCommons, $mustHaveCommonsProperties);
 	}
@@ -119,7 +124,11 @@ class PkmnData extends Pkmn {
 		return false;
 	}
 
-	public function canInherit (): bool {
+	public function getId (): string {
+		return $this->id;
+	}
+
+	public function canLearnByBreeding (): bool {
 		if ($this->unbreedable) {
 			return false;
 		}
@@ -171,8 +180,8 @@ class PkmnData extends Pkmn {
 		return $this->lowestEvo === $this->name;
 	}
 
-	public function getLowestEvolutionBreedingTreeInstance (bool $isRoot = false): BreedingTreeNode {
-		return new BreedingTreeNode($this->lowestEvo, $isRoot);
+	public function getLowestEvo (): string {
+		return $this->lowestEvo;
 	}
 
 	public function isUnpairable (): bool {
@@ -187,8 +196,16 @@ class PkmnData extends Pkmn {
 		return in_array($pkmnName, $this->evolutions);
 	}
 
+	public function getEvolutions (): array {
+		return $this->evolutions;
+	}
+
 	public function existsInThisGame (): bool {
 		return $this->exists;
+	}
+
+	public function getArticleLinkSuperPageName (): string {
+		return $this->subpageLinkName;
 	}
 
 	/**

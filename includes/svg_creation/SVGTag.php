@@ -4,8 +4,8 @@ require_once __DIR__.'/../HTMLElement.php';
 require_once __DIR__.'/../Constants.php';
 
 require_once 'SVGElement.php';
-require_once 'SVGPkmn.php';
-require_once 'FrontendPkmn.php';
+require_once 'SVGNode.php';
+require_once 'VisualNode.php';
 
 class SVGTag extends SVGElement {
 	private $id = 'breedingChainsSVG';
@@ -13,14 +13,14 @@ class SVGTag extends SVGElement {
 	private $height;
 	private $svgRoot;
 
-	public function __construct (FrontendPkmn $pkmnRoot, int $groupId) {
+	public function __construct (VisualNode $pkmnRoot, int $groupId) {
 		parent::__construct('svg', $groupId);
 		Logger::statusLog('creating SVGRoot instance');
 
 		$this->width = $this->calculateWidth($pkmnRoot->getDepth());
 		$this->height = $this->calculateHeight($pkmnRoot->getTreeSectionHeight());
 
-		$this->svgRoot = new SVGPkmn($pkmnRoot);
+		$this->svgRoot = new SVGNode($pkmnRoot);
 	}
 
 	private function calculateWidth (int $treeDepth): int {

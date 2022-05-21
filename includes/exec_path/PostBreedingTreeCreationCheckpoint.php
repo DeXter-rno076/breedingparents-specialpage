@@ -1,63 +1,58 @@
 <?php
 require_once 'Checkpoint.php';
-require_once __DIR__.'/../tree_creation/BreedingTreeNode.php';
+require_once __DIR__.'/../tree_creation/PkmnTreeRoot.php';
 require_once __DIR__.'/../Constants.php';
 require_once 'FrontendTreeCreationTrack.php';
 
 class PostBreedingTreeCreationCheckpoint extends Checkpoint {
 	private $breedingTreeRoot;
+	private $breedingTreeRootLearnabilityStatus;
 	
-	public function __construct (?BreedingTreeNode $breedingTreeRoot) {
+	public function __construct (PkmnTreeRoot $breedingTreeRoot) {
 		parent::__construct('non standard breeding tree');
 		$this->breedingTreeRoot = $breedingTreeRoot;
+		$this->breedingTreeRootLearnabilityStatus = $breedingTreeRoot->getLearnabilityStatus();
 	}
 
 	public function passOn (): string {
-		if ($this->breedingTreeIsEmpty()) {
-			$this->reactToEmptyBreedingTree();
+		if (!$this->breedingTreeRootLearnabilityStatus->canLearn()) {
+			$this->outputInfoMessage('breedingchains-cant-learn',
+				Constants::$targetPkmnNameOriginalInput, Constants::$targetMoveNameOriginalInput);
 			return $this->terminationCode;
 		}
-
-		$this->reactToBreedingTreeState();
+		$this->reactToNonTerminatingBreedingTreeState();
 
 		if ($this->breedingTreeRoot->hasSuccessors()) {
 			$frontendTreeCreationTrack = new FrontendTreeCreationTrack($this->breedingTreeRoot);
 			return $frontendTreeCreationTrack->passOn();
 		} else {
+			
 			return $this->terminationCode;
 		}
 	}
 
-	private function breedingTreeIsEmpty (): bool {
-		return is_null($this->breedingTreeRoot);
-	}
-
-	private function reactToEmptyBreedingTree () {
-		$this->outputInfoMessage('breedingchains-cant-learn', Constants::$targetPkmnNameNormalCasing,
-			Constants::$targetMoveNameNormalCasing);
-		Logger::elog('empty breeding tree, the tree must at least contain the root');
-	}
-
-	private function reactToBreedingTreeState () {
+	private function reactToNonTerminatingBreedingTreeState () {
 		$msgIdentifiers = [];
-		if ($this->breedingTreeRoot->learnsDirectly()) {
+		if ($this->breedingTreeRootLearnabilityStatus->getLearnsDirectly()) {
 			$msgIdentifiers[] = $this->getLearnsDirectlyMsgIdentifier();
 		}
-		if (!$this->breedingTreeRoot->hasSuccessors() && $this->breedingTreeRoot->canInherit()) {
+		if (!$this->breedingTreeRoot->hasSuccessors() 
+				&& $this->breedingTreeRootLearnabilityStatus->getLearnsByBreeding()) {
 			$msgIdentifiers[] = 'breedingchains-can-inherit-but-no-successors';
 		}
-		if ($this->breedingTreeRoot->learnsByEvent()) {
+		if ($this->breedingTreeRootLearnabilityStatus->getLearnsByEvent()) {
 			$msgIdentifiers[] = 'breedingchains-can-learn-event';
 		}
-		if ($this->breedingTreeRoot->learnsByOldGen()) {
+		if ($this->breedingTreeRootLearnabilityStatus->getLearnsByOldGen()) {
 			$msgIdentifiers[] = 'breedingchains-can-learn-oldgen';
 		}
 
 		foreach ($msgIdentifiers as $msgIdentifier) {
-			$this->outputInfoMessage($msgIdentifier, Constants::$targetPkmnNameNormalCasing,
-				Constants::$targetMoveNameNormalCasing);
+			$this->outputInfoMessage($msgIdentifier, Constants::$targetPkmnNameOriginalInput,
+				Constants::$targetMoveNameOriginalInput);
 		}
 	}
+
 	private function getLearnsDirectlyMsgIdentifier (): string {
 		if (Constants::$targetGenNumber < 8) {
 			return 'breedingchains-can-learn-directly-old-gen';

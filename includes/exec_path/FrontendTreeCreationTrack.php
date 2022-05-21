@@ -1,13 +1,13 @@
 <?php
 require_once 'Track.php';
-require_once __DIR__.'/../tree_creation/BreedingTreeNode.php';
-require_once __DIR__.'/../svg_creation/FrontendPkmn.php';
+require_once __DIR__.'/../tree_creation/PkmnTreeRoot.php';
+require_once __DIR__.'/../svg_creation/VisualNode.php';
 require_once 'SVGCreationTrack.php';
 
 class FrontendTreeCreationTrack extends Track {
 	private $breedingTreeRoot;
 
-	public function __construct (BreedingTreeNode $breedingTreeRoot) {
+	public function __construct (PkmnTreeRoot $breedingTreeRoot) {
 		$this->breedingTreeRoot = $breedingTreeRoot;		
 	}
 
@@ -17,11 +17,11 @@ class FrontendTreeCreationTrack extends Track {
 		return $svgCreationTrack->passOn(); 
 	}
 
-	private function createFrontendRoot (): FrontendPkmn {
-		Logger::statusLog('CREATING FRONTENDPKMN INSTANCES');
+	private function createFrontendRoot (): VisualNode {
+		Logger::statusLog('CREATING VISUALNODE INSTANCES');
 		$timeStart = hrtime(true);
 
-		$frontendRoot = new FrontendPkmn($this->breedingTreeRoot);
+		$frontendRoot = new VisualNode($this->breedingTreeRoot);
 		$frontendRoot->prep();
 	
 		$timeEnd = hrtime(true);

@@ -3,7 +3,7 @@ require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../HTMLElement.php';
 
 require_once 'SVGElement.php';
-require_once 'FrontendPkmn.php';
+require_once 'VisualNode.php';
 
 class SVGImg extends SVGElement {
 	private $x;
@@ -12,7 +12,7 @@ class SVGImg extends SVGElement {
 	private $height;
 	private $href;
 
-	public function __construct (FrontendPkmn $frontendPkmn, int $groupId) {
+	public function __construct (VisualNode $frontendPkmn, int $groupId) {
 		parent::__construct('image', $groupId);
 
 		$this->x = $frontendPkmn->getX();

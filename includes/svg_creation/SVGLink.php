@@ -10,9 +10,9 @@ class SVGLink extends SVGElement {
 	private $href;
 	private $innerEl;
 
-	public function __construct(string $pkmnName, SVGImg $innerEl, int $groupId) {
+	public function __construct(VisualNode $visualNode, SVGImg $innerEl, int $groupId) {
 		parent::__construct('a', $groupId);
-		$this->href = Constants::i18nMsg('breedingchains-learnsetpage-link', $pkmnName, Constants::$targetGenNumber);
+		$this->href = $visualNode->getArticleLink();
 		$this->innerEl = $innerEl;
 
 		Logger::statusLog('created '.$this);
