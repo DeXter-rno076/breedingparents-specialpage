@@ -1,26 +1,31 @@
 <?php
 require_once 'BreedingTreeNode.php';
+require_once 'BreedingSubtree.php';
 require_once 'PkmnData.php';
 require_once 'SuccessorFilter.php';
 require_once 'SuccessorMixer.php';
 require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
+require_once __DIR__.'/../Constants.php';
 
 class PkmnTreeNode extends BreedingTreeNode {
+	private static $subtrees = [];
+
 	public function __construct (string $pkmnName) {
 		$this->data = new PkmnData($pkmnName);
 
 		parent::__construct($this->data->getName());
 	}
 
-	public function createBreedingTreeNode (array $eggGroupBlacklist): ?BreedingTreeNode {
+	public function createBreedingSubtree (array $eggGroupBlacklist): ?BreedingSubtree {
 		Logger::statusLog('creating tree node of '.$this.' with eggGroupBlacklist: '.json_encode($eggGroupBlacklist));
 		/*in this single spot parameter $eggGroupBlacklist MUST NOT be
 		pass by reference (this would create wrong breeding trees, more information in the documentation)*/
+		$subtree = new BreedingSubtree($this, [], $this->getTargetEggGroup($eggGroupBlacklist), $eggGroupBlacklist);
 		if ($this->data->canLearnDirectly()) {
 			Logger::statusLog($this.' can learn the move directly');
 			$this->learnabilityStatus->setLearnsDirectly();
-			return $this;
+			return $subtree;
 		}
 
 		if ($this->data->canLearnByOldGen()) {
@@ -35,40 +40,65 @@ class PkmnTreeNode extends BreedingTreeNode {
 		if ($this->data->canLearnByBreeding()) {
 			Logger::statusLog($this.' could inherit the move');
 			$this->learnabilityStatus->setLearnsByBreeding();
-			$this->selectSuccessors($eggGroupBlacklist);
 
-			if ($this->hasSuccessors()) {
+            //todo special cases should not be included to the hashing algorithm
+
+			$hash = BreedingSubtree::buildHash($this->getTargetEggGroup($eggGroupBlacklist), $eggGroupBlacklist);
+			if (isset(PkmnTreeNode::$subtrees[$hash])) {
+                Logger::statusLog($this.' is compatible with existing subtree, adding to hash '.$hash);
+				$cachedSubtree = PkmnTreeNode::$subtrees[$hash];
+				$cachedSubtree->addRoot($this);
+				return null;//return $cachedSubtree;
+			}
+			$successors = $this->selectSuccessors($eggGroupBlacklist);
+            $subtree->addSuccessors($successors);
+
+			if ($subtree->hasSuccessors()) {
 				Logger::statusLog($this.' can inherit the move, successors found');
-				return $this;
+				PkmnTreeNode::$subtrees[$hash] = $subtree;
+                return $subtree;
 			}
 		}
 
 		if ($this->learnabilityStatus->getLearnsByOldGen()) {
-			return $this;
+			return $subtree;
 		}
 
 		if ($this->data->canLearnByEvent()) {
 			Logger::statusLog($this.' can learn the move by event');
 			$this->learnabilityStatus->setLearnsByEvent();
-			return $this;
+			return $subtree;
 		}
 
 		Logger::statusLog($this.' can\'t learn the move');
 		return null;
 	}
 
+	protected function getTargetEggGroup (array $eggGroupBlacklist): string {
+		if (!$this->data->hasSecondEggGroup()) {
+			return $this->data->getEggGroup1();
+		}
+		if ($this->eggGroupIsBlacklisted($this->data->getEggGroup1(), $eggGroupBlacklist)) {
+			return $this->data->getEggGroup2();
+		} else {
+			return $this->data->getEggGroup1();
+		}
+	}
+
 	/**
+     * todo remove this comment by choosing better method name
 	 * Looks which egg group(s) could 'deliver' possible breeding parents
 	 * and calls the methods to check and add those pkmn.
 	 */
-	protected function selectSuccessors (array &$eggGroupBlacklist) {
-		$this->selectSuccessorsOfMiddleOrEndNode($eggGroupBlacklist);
+	protected function selectSuccessors (array &$eggGroupBlacklist): array {
+		$successors = $this->selectSuccessorsOfMiddleOrEndNode($eggGroupBlacklist);
 
 		$mixer = new SuccessorMixer($this);
-		$this->successors = $mixer->mix($this->successors);
-	}
+		$successors = $mixer->mix($successors);
+        return $successors;
+    }
 
-	private function selectSuccessorsOfMiddleOrEndNode (array &$eggGroupBlacklist) {
+	private function selectSuccessorsOfMiddleOrEndNode (array &$eggGroupBlacklist): array {
 		if (!$this->data->hasSecondEggGroup()) {
 			/*One egg group is ALWAYS in the blacklist (except for
 			root node pkmn).
@@ -78,15 +108,15 @@ class PkmnTreeNode extends BreedingTreeNode {
 			needs two egg groups (one for successor(s), one for predecessor).
 			A pkmn with one egg group can ONLY be the end of a chain
 			(=> must learn the move directly).*/
-			return;
+			return [];
 		}
 
 		$otherEggGroup = $this->getOtherEggGroup($eggGroupBlacklist);
-		if ($otherEggGroup === '') {
-			return;
+		if (is_null($otherEggGroup)) {
+			return [];
 		}
 
-		$this->createSuccessorsTreeSection($eggGroupBlacklist, $otherEggGroup);
+		return $this->createSuccessorsTreeSection($eggGroupBlacklist, $otherEggGroup);
 	}
 
 	/**
@@ -97,7 +127,7 @@ class PkmnTreeNode extends BreedingTreeNode {
 	 * @param Array &$eggGroupBlacklist
 	 * @param string $whitelisted currently handled egg group
 	 */
-	protected function createSuccessorsTreeSection (array &$eggGroupBlacklist, string $targetEggGroup) {
+	protected function createSuccessorsTreeSection (array &$eggGroupBlacklist, string $targetEggGroup): array {
 		Logger::statusLog('calling '.__FUNCTION__.' on '.$this.' eggGroupBlacklist: '
 							.json_encode($eggGroupBlacklist));
 
@@ -107,6 +137,7 @@ class PkmnTreeNode extends BreedingTreeNode {
 
 		$eggGroupBlacklist[] = $targetEggGroup;
 
+        $successors = [];
 		foreach ($listOfPotentialSuccessors as $potSuccessorName) {
 			$potSuccessorInstance = null;
 			try {
@@ -115,15 +146,16 @@ class PkmnTreeNode extends BreedingTreeNode {
 				Logger::elog('couldn\'t create breeding tree node, error: '.$e);
 				continue;
 			}
-			$potSuccessorNode = $potSuccessorInstance->createBreedingTreeNode($eggGroupBlacklist);
+			$potSuccessorNode = $potSuccessorInstance->createBreedingSubTree($eggGroupBlacklist);
 
 			if ($this->breedingTreeNodeCanLearnTargetMove($potSuccessorNode)) {
-				$this->addSuccessor($potSuccessorNode);
+                $successors[] = $potSuccessorNode;
 			}
 		}
+        return $successors;
 	}
 
-	protected function breedingTreeNodeCanLearnTargetMove (?BreedingTreeNode $node): bool {
+	protected function breedingTreeNodeCanLearnTargetMove (?BreedingSubtree $node): bool {
 		return !is_null($node);
 	}
 
@@ -134,7 +166,7 @@ class PkmnTreeNode extends BreedingTreeNode {
 	 * 
 	 * @return string egg group that is not blacklisted or '' if none is found
 	 */
-	protected function getOtherEggGroup (array &$eggGroupBlacklist): string {
+	protected function getOtherEggGroup (array &$eggGroupBlacklist): ?string {
 		Logger::statusLog('calling '.__FUNCTION__.' on '.$this.' eggGroupBlacklist: '
 							.json_encode($eggGroupBlacklist));
 		/*One egg group is always in the blacklist because of
@@ -142,7 +174,7 @@ class PkmnTreeNode extends BreedingTreeNode {
 		Possible successors can only come from the other one.*/
 		$eggGroup1 = $this->data->getEggGroup1();
 		$eggGroup2 = $this->data->getEggGroup2();
-		$otherEggGroup = '';
+		$otherEggGroup = null;
 
 		if (!$this->eggGroupIsBlacklisted($eggGroup1, $eggGroupBlacklist)) {
 			Logger::statusLog('egg group 1 '.$eggGroup1.' found for '.$this);
@@ -156,7 +188,7 @@ class PkmnTreeNode extends BreedingTreeNode {
 		} else {
 			//all egg groups blocked
 			Logger::statusLog('all egg groups of '.$this. ' are blocked');
-			return '';
+			return null;
 		}
 
 		Logger::statusLog('returning '.$otherEggGroup);
@@ -178,13 +210,7 @@ class PkmnTreeNode extends BreedingTreeNode {
 	 * @return string BreedingTreeNode:<pkmn name>;<successor count>;<learns by event>;<learns by old gen>;<is root>;;
 	 */
 	public function getLogInfo (): string {
-		$msg = 'BreedingTreeNode:\'\'\''.$this->data->getName().'\'\'\';'.count($this->successors);
-		if (isset($this->learnsByEvent) && $this->learnsByEvent) {
-			$msg .= ';learnsByEvent';
-		}
-		if (isset($this->learnsByOldGen) && $this->learnsByOldGen) {
-			$msg .= ';learnsByOldGen';
-		}
+		$msg = 'BreedingTreeNode:\'\'\''.$this->data->getName().'\'\'\'';	
 		$msg .= ';;';
 
 		return $msg;

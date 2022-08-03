@@ -4,23 +4,23 @@ require_once __DIR__.'/../HTMLElement.php';
 require_once __DIR__.'/../Constants.php';
 
 require_once 'SVGElement.php';
-require_once 'SVGNode.php';
-require_once 'VisualNode.php';
+require_once 'SVGSubtree.php';
+require_once 'VisualSubtree.php';
 
 class SVGTag extends SVGElement {
 	private $id = 'breedingChainsSVG';
 	private $width;
 	private $height;
-	private $svgRoot;
+	private $svgTree;
 
-	public function __construct (VisualNode $pkmnRoot, int $groupId) {
+	public function __construct (VisualSubtree $pkmnRoot, int $groupId) {
 		parent::__construct('svg', $groupId);
 		Logger::statusLog('creating SVGRoot instance');
 
 		$this->width = $this->calculateWidth($pkmnRoot->getDepth());
-		$this->height = $this->calculateHeight($pkmnRoot->getTreeSectionHeight());
+		$this->height = $this->calculateHeight($pkmnRoot->getSubtreeHeight());
 
-		$this->svgRoot = new SVGNode($pkmnRoot);
+		$this->svgTree = new SVGSubtree($pkmnRoot);
 	}
 
 	private function calculateWidth (int $treeDepth): int {
@@ -43,7 +43,7 @@ class SVGTag extends SVGElement {
 			'groupid' => $this->groupId
 		]);
 		
-		$topLevelSVGTags = $this->svgRoot->toHTMLElements($xOffset, $yOffset);
+		$topLevelSVGTags = $this->svgTree->toHTMLElements($xOffset, $yOffset);
 
 		foreach ($topLevelSVGTags as $tag) {
 			$svgTag->addInnerElement($tag);

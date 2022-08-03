@@ -1,6 +1,7 @@
 <?php
 require_once 'Track.php';
 require_once __DIR__.'/../svg_creation/VisualNode.php';
+require_once __DIR__.'/../svg_creation/VisualSubtree.php';
 require_once __DIR__.'/../HTMLElement.php';
 require_once __DIR__.'/../Constants.php';
 require_once __DIR__.'/../svg_creation/SVGTag.php';
@@ -9,7 +10,7 @@ require_once __DIR__.'/../Logger.php';
 class SVGCreationTrack extends Track {
 	private $frontendRoot;
 
-	public function __construct (VisualNode $frontendRoot) {
+	public function __construct (VisualSubtree $frontendRoot) {
 		$this->frontendRoot = $frontendRoot;
 	}
 

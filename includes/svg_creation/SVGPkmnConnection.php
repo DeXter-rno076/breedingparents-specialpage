@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__.'/../HTMLElement.php';
 require_once 'SVGLine.php';
+require_once 'SVGText.php';
+require_once __DIR__.'/../Constants.php';
 
 class SVGPkmnConnection {
 	private $line;

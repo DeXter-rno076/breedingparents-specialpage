@@ -1,5 +1,6 @@
 <?php
 require_once 'BreedingTreeNode.php';
+require_once 'BreedingSubtree.php';
 
 class MiscTreeNode extends BreedingTreeNode {
 	private $iconName;
@@ -9,8 +10,8 @@ class MiscTreeNode extends BreedingTreeNode {
 		$this->iconName = $iconName;
 	}
 	
-	public function createBreedingTreeNode (array $eggGroupBlacklist): ?BreedingTreeNode {
-		return $this;
+	public function createBreedingSubTree (array $eggGroupBlacklist): ?BreedingSubtree {
+		return new BreedingSubtree($this, [], '', []);
 	}
 
 	public function buildIconName (): string {
