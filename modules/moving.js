@@ -46,6 +46,7 @@ function main () {
 	addSVGElements(svgChildren);
 	svgTag.style.display = 'none';
 	//addHelpingLines();
+    addResetButton();
 }
 
 function calcCenterOffsets () {
@@ -120,6 +121,7 @@ function addCircle (svgCircle) {
 	const circle = L.circle([y, x], {
 		radius: r,
 		color,
+        weight: 4,
 		className: 'breedingChainsLeafletCircle'
 	});
 	
@@ -276,4 +278,20 @@ function addHelpingLines () {
 		className: 'breedingChainsLeafletLine'
 	}).addTo(map);
 }
+
+function addResetButton () {
+    const button = document.createElement('img');
+    button.id = 'breedingChainsMapResetButton';
+    button.src = '../extensions/BreedingChains/img/Clockwise_Arrow.svg';
+
+    button.addEventListener('click', resetMap);
+
+    svgMap.appendChild(button);
+    console.log('added reset button');
+}
+
+function resetMap () {
+    map.setView(calcCenterOffsets(), 0);
+}
+
 }
