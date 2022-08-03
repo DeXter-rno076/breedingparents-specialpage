@@ -3,6 +3,7 @@ require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../HTMLElement.php';
 require_once __DIR__.'/../Constants.php';
 
+require_once 'VisualNode.php';
 require_once 'SVGElement.php';
 require_once 'SVGImg.php';
 

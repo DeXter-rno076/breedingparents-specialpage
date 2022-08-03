@@ -1,6 +1,7 @@
 <?php
 require_once 'output_messages/AlertMessage.php';
 require_once 'output_messages/ErrorMessage.php';
+require_once 'output_messages/InfoMessage.php';
 require_once 'exec_path/PreDataLoadingCheckpoint.php';
 
 require_once 'Constants.php';

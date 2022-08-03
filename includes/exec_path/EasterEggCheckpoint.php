@@ -1,6 +1,6 @@
 <?php
+require_once 'Checkpoint.php';
 require_once __DIR__.'/../Constants.php';
-require_once __DIR__.'/../output_messages/InfoMessage.php';
 require_once 'ExternalDataLoadingTrack.php';
 
 class EasterEggCheckPoint extends Checkpoint {

@@ -1,4 +1,6 @@
 <?php
+require_once 'Logger.php';
+
 abstract class Constants {
 	public static $externalPkmnGenCommons;
 	public static $externalPkmnGameDiffs;

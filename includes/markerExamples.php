@@ -1,4 +1,9 @@
 <?php
+require_once __DIR__.'/svg_creation/VisualNode.php';
+require_once __DIR__.'/exceptions/FileNotFoundException.php';
+require_once __DIR__.'/output_messages/ErrorMessage.php';
+require_once 'HTMLElement.php';
+require_once 'Constants.php';
 
 $iconFile = null;
 $iconFileLink = '';

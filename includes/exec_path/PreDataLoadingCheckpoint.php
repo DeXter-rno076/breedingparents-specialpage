@@ -1,4 +1,5 @@
 <?php
+require_once 'Checkpoint.php';
 require_once __DIR__.'/../Constants.php';
 require_once 'EasterEggCheckpoint.php';
 
