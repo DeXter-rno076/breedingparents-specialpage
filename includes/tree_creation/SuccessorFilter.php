@@ -75,6 +75,9 @@ class SuccessorFilter {
 		for ($i = 0; $i < count($list); $i++) {
 			$item = $list[$i];
 			if ($condition($item)) {
+                if (Constants::$createDetailedSuccessorFilterLogs) {
+                    Logger::statusLog('removing '.$item);
+                }
 				array_splice($list, $i, 1);
 				$i--;
 			}
@@ -84,6 +87,9 @@ class SuccessorFilter {
 	}
 
 	private function removeNonExistants (array $successorList): array {
+        if (Constants::$createDetailedSuccessorFilterLogs) {
+            Logger::statusLog('removing pkmn that dont exist in this game');
+        }
 		$doesNotExist = function (string $pkmnName): bool {
 			try {
 				$pkmnData = new PkmnData($pkmnName);
@@ -104,6 +110,9 @@ class SuccessorFilter {
 	 * Pkmn that can't be paired can't possible be a parent.
 	 */
 	private function removeUnpairables (array $successorList): array {
+        if (Constants::$createDetailedSuccessorFilterLogs) {
+            Logger::statusLog('removing unpairable pkmn (i. e. that cant get children)');
+        }
 		/*unpairable pkmn cant get children
 		=> may only appear at the end of a chain*/
 		$isUnpairable = function (string $pkmnName): bool {
@@ -128,12 +137,21 @@ class SuccessorFilter {
 		return $successorList;
 	}
 
+    //todo split
 	private function checkMaleAndUnknownOnlyRequirements (array $successorList): array {
 		if ($this->nodeHasOnlyMaleEvolutions() || $this->nodeHasOnlyGenderUnknownEvolutions()) {
+            if (Constants::$createDetailedSuccessorFilterLogs) {
+                Logger::statusLog('removing all non-evo-line successors because target node has'
+                                .' only male-only or gender-unknown evos');
+            }
 			return $this->remove($successorList, function (string $pkmnName): bool {
 				return !$this->currentPkmnTreeNodeData->hasAsEvolution($pkmnName);
 			});
 		} else {
+            if (Constants::$createDetailedSuccessorFilterLogs) {
+                Logger::statusLog('removing all male-only or gender-unknown successors'
+                                    .' that are no evos of the target node');
+            }
             return $this->remove($successorList, function (string $potSuccessorName): bool {
                 try {
                     $potSuccessorData = new PkmnData($potSuccessorName);
@@ -153,7 +171,11 @@ class SuccessorFilter {
 
 	//basically duplicate of $this->nodeHasOnlyGenderUnknownEvolutions
 	private function nodeHasOnlyMaleEvolutions (): bool {
-		foreach ($this->currentPkmnTreeNodeData->getEvolutions() as $evoName) {
+        $evos = $this->currentPkmnTreeNodeData->getEvolutions();
+        if (count($evos) === 0) {
+            return false;
+        }
+		foreach ($evos as $evoName) {
 			try {
 				$evoData = new PkmnData($evoName);
 				if (!$evoData->isMaleOnly()) {
@@ -169,7 +191,11 @@ class SuccessorFilter {
 
 	//basically duplicate of $this->nodeHasOnlyMaleEvolutions
 	private function nodeHasOnlyGenderUnknownEvolutions (): bool {
-		foreach ($this->currentPkmnTreeNodeData->getEvolutions() as $evoName) {
+        $evos = $this->currentPkmnTreeNodeData->getEvolutions();
+        if (count($evos) === 0) {
+            return false;
+        }
+		foreach ($evos as $evoName) {
 			try {
 				$evoData = new PkmnData($evoName);
 				if (!$evoData->hasNoGender()) {
@@ -183,7 +209,11 @@ class SuccessorFilter {
 		return true; 
 	}
 
+    //todo more precise method name
 	private function checkFemaleOnlyRequirements (array $successorList): array {
+        if (Constants::$createDetailedSuccessorFilterLogs) {
+            Logger::statusLog('removing female-only successors that are no evos of the target node');
+        }
 		return $this->remove($successorList, function (string $pkmnName) {
 			try {
 				$pkmnData = new PkmnData($pkmnName);
@@ -197,6 +227,9 @@ class SuccessorFilter {
 	}
 
 	private function removeBlacklistedPkmn (array $successorList): array {
+        if (Constants::$createDetailedSuccessorFilterLogs) {
+            Logger::statusLog('removing successors that have a blacklisted egg group');
+        }
 		$pkmnIsBlacklisted = function (string $pkmn): bool {
 			$pkmnData = null;
 			try {
@@ -231,6 +264,9 @@ class SuccessorFilter {
 	 */
 	private function checkGenerationSpecificRequirements (array $successorList): array {
 		if (Constants::$targetGenNumber < 6) {
+            if (Constants::$createDetailedSuccessorFilterLogs) {
+                Logger::statusLog('removing female-only successors because they cant pass on moves in gens 2-5');
+            }
 			//in gens 2-5 only fathers can give moves to their kids
 			$successorList = $this->removeFemaleOnlys($successorList);
 		}

@@ -22,6 +22,7 @@ abstract class Constants {
 	 */
 	public static $displayDebuglogs = false;
 	public static $displayStatuslogs = false;
+    public static $createDetailedSuccessorFilterLogs = false;
 
 	public const PKMN_MARGIN_HORIZONTAL = 200;
 	public const PKMN_ICON_LINE_MARGIN = 10;

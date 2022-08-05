@@ -34,10 +34,16 @@ $debuglogsCheckBox = [
 	]
 ];
 
-//vb level
 $statuslogsCheckBox = [
 	'displayStatuslogs' => [
 		'type' => 'check',
 		'label' => 'display status logs',
 	]
+];
+
+$detailedSuccessorFilterLogsCheckBox = [
+    'createDetailedSuccessorFilterLogs' => [
+        'type' => 'check',
+        'label' => 'create detailed successor filter logs'
+    ]
 ];

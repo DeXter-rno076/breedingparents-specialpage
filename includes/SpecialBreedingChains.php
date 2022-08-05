@@ -86,6 +86,10 @@ class SpecialBreedingChains extends SpecialPage {
 			Constants::$displayStatuslogs = $formData['displayStatuslogs'];
 		}
 
+        if (isset($formData['createDetailedSuccessorFilterLogs'])) {
+            Constants::$createDetailedSuccessorFilterLogs = $formData['createDetailedSuccessorFilterLogs'];
+        }
+
 		Constants::logUserinputConstants();
 
 		return true;
@@ -125,15 +129,16 @@ class SpecialBreedingChains extends SpecialPage {
 		$user = $this->getUser();
 		$userGroups = $user->getGroupMemberships();
 
-		//todo put the group names in some kind of config file
+		//todo put the group name in some kind of config file
 		if (isset($userGroups['voting'])) {
 			$formDescriptor = array_merge($formDescriptor,
 				$debuglogsCheckBox);
-		}
 
-		if (isset($userGroups['leader'])) {
-			$formDescriptor = array_merge($formDescriptor,
+            $formDescriptor = array_merge($formDescriptor,
 				$statuslogsCheckBox);
+
+            $formDescriptor = array_merge($formDescriptor,
+                $detailedSuccessorFilterLogsCheckBox);
 		}
 
 		return $formDescriptor;
