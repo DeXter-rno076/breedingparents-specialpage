@@ -133,20 +133,33 @@ class VisualSubtree {
 	}
 
     private function setYCoords (int $offset): int {
-        $rootsAmount = count($this->visualRoots);
-        $rootMargin = $this->subtreeHeight / $rootsAmount;
-        $this->visualRoots[0]->setY($offset + $rootMargin/2);
-        for ($i = 1; $i < $rootsAmount; $i++) {
-            $this->visualRoots[$i]->setY($this->visualRoots[$i - 1]->getY() + $rootMargin);
-        }
-
-        foreach ($this->visualRoots as $root) {
-            $root->setY($root->getY() - $root->getIconHeight()/2);
+        if (count($this->visualRoots) === 1) {
+            $root = $this->visualRoots[0];
+            $nodeHeight = $root->calcSingleNodeHeight();
+            $root->setY($offset + ($this->subtreeHeight - $root->getIconHeight())/2);
         }
 
         $currentSuccessorOffset = $this->calcInitialSuccessorOffset($offset);
         foreach ($this->successors as $subtreeSuccessor) {
             $currentSuccessorOffset += $subtreeSuccessor->setYCoords($currentSuccessorOffset);
+        }
+
+        if (count($this->visualRoots) > 1) {
+            //todo successors may be empty
+            $top = $this->successors[0]->getRoots()[0]->getY();
+            $lastSuccessorsRoots = $this->successors[count($this->successors) - 1]->getRoots();
+            $bottom = $lastSuccessorsRoots[count($lastSuccessorsRoots) - 1]->getY();
+            $nodeHeight = $this->visualRoots[0]->calcSingleNodeHeight();
+            $height = $bottom - $top + $nodeHeight;
+            $rootsOffset = $offset + ($height - count($this->visualRoots)*$nodeHeight)/2;
+
+            for ($i = 0; $i < count($this->visualRoots); $i++) {
+                $this->visualRoots[$i]->setY($rootsOffset + $i*$nodeHeight);
+            }
+
+            for ($i = 0; $i < count($this->visualRoots); $i++) {
+                $this->visualRoots[$i]->setY($this->visualRoots[$i]->getY() - $this->visualRoots[$i]->getIconHeight());
+            }
         }
 
         return $this->subtreeHeight;
