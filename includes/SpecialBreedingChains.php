@@ -115,6 +115,7 @@ class SpecialBreedingChains extends SpecialPage {
 		$form->setMethod('get');
 		$form->setSubmitCallback([$this, 'submitCallback']);
 		$form->setSubmitText(Constants::i18nMsg('breedingchains-submit-text'));
+
 		$form->prepareForm();
 
 		$form->displayForm('');
@@ -144,7 +145,6 @@ class SpecialBreedingChains extends SpecialPage {
 		return $formDescriptor;
 	}
 
-	//TODO THIS IS UNCLEAN AF
 	private function addSuggestions () {
 		$moveSuggestions = $this->loadSplitExternalJSON('MediaWiki:BreedingChains/move suggestions ##INDEX##.json');
 		$moveSuggestionsAsText = json_encode($moveSuggestions);
@@ -152,11 +152,13 @@ class SpecialBreedingChains extends SpecialPage {
 
 		$pkmnSuggestions = array_keys((array) $moveSuggestions);
 		$pkmnSuggestionsAsText = json_encode($pkmnSuggestions);
-		$suggestionsScriptTag = new HTMLElement('script', [], [
-			'const MOVE_SUGGESTIONS = '.$moveSuggestionsAsTextWithoutWhiteSpace.';'
-			.'const PKMN_SUGGESTIONS = '.$pkmnSuggestionsAsText.';'
-		]);
-		$suggestionsScriptTag->addToOutput();
+
+        $gameToSk = json_decode(file_get_contents(__DIR__.'/../manual_data/gamesToSk.json'));
+        Constants::$centralOutputPageInstance->addJsConfigVars([
+            'breedingchains-moveSuggestions' => $moveSuggestions,
+            'breedingchains-pkmnSuggestions' => $pkmnSuggestions,
+            'breedingchains-gameToSk' => $gameToSk
+        ]);
 	}
 
 	//has to be public

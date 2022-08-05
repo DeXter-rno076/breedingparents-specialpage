@@ -1,7 +1,6 @@
 <?php
 $formDescriptor = [
 	'gameInput' => [
-		'name' => 'targetGame',
 		'class' => 'HTMLTextField',
 		'placeholder' => $this->msg('breedingchains-game'),
 		'size' => 40,
@@ -9,7 +8,6 @@ $formDescriptor = [
 		'required' => true
 	],
 	'pkmnInput' => [
-		'name' => 'targetPkmn',
 		'class' => 'HTMLTextField',
 		'placeholder' => $this->msg('breedingchains-pkmn'),
 		'size' => 20,
@@ -17,7 +15,6 @@ $formDescriptor = [
 		'required' => true,
 	],
 	'moveInput' => [
-		'name' => 'targetMove',
 		'class' => 'HTMLTextField',
 		'placeholder' => $this->msg('breedingchains-move'),
 		'size' => 20,
