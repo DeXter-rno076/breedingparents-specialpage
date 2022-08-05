@@ -16,14 +16,12 @@ require_once 'BreedingTreeNode.php';
  * 		gender unknown + male only
  * 			only with ditto they can have children of their species -> cant be influenced by other species
  * 			-> if all parents of the current node are male/unknown onle -> only parents of its evo line are allowed
+ * todo     -> gender unknown or male only successors are only allowed if node is in the same evo line 
  *
  * 		female only
  * 			can only have their own species as children -> cant influence other species
  * 			-> are only allowed if current node is the lowest evo of them (reminder: middle nodes are always lowest evos)
  * 			females can't pass on any moves up until gen 5 -> get blacklisted in gens 2-5
- * 
- * To make the differnce of the first two cases clearer: In male/unknown potentially all others are removed
- * 			in female potentially the female only parent is removed
  * 
  * 		egg groupn unknown
  * 			don't take part in any relevant breeding situation (special case Phione doesn't inherit any moves) 
@@ -135,8 +133,22 @@ class SuccessorFilter {
 			return $this->remove($successorList, function (string $pkmnName): bool {
 				return !$this->currentPkmnTreeNodeData->hasAsEvolution($pkmnName);
 			});
-		}
-		return $successorList;
+		} else {
+            return $this->remove($successorList, function (string $potSuccessorName): bool {
+                try {
+                    $potSuccessorData = new PkmnData($potSuccessorName);
+                    if ($potSuccessorData->isMaleOnly() || $potSuccessorData->hasNoGender()) {
+                        return !$this->currentPkmnTreeNodeData->hasAsEvolution($potSuccessorName);
+                    } else {
+                        return false;
+                    }
+                } catch (Exception $e) {
+                    $eMsg = new ErrorMessage($e);
+                    $eMsg->output();
+                    return false;
+                }
+            });
+        }
 	}
 
 	//basically duplicate of $this->nodeHasOnlyGenderUnknownEvolutions
