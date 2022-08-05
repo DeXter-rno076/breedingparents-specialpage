@@ -77,7 +77,7 @@ class SpecialBreedingChains extends SpecialPage {
 		Constants::$targetMoveNameOriginalInput = $formData['moveInput'];
 		Constants::$targetMoveName = $this->buildInternalMoveName($formData['moveInput']);
 		Constants::$targetPkmnNameOriginalInput = trim($formData['pkmnInput']);
-		Constants::$targetPkmnName = strtolower(Constants::$targetPkmnNameOriginalInput);
+		Constants::$targetPkmnName = mb_strtolower(Constants::$targetPkmnNameOriginalInput);
 
 		if (isset($formData['displayDebuglogs'])) {
 			Constants::$displayDebuglogs = $formData['displayDebuglogs'];
@@ -100,7 +100,7 @@ class SpecialBreedingChains extends SpecialPage {
 		if (isset(Constants::$MOVE_NAME_TO_NEW_MOVE_NAME->$internalMoveName)) {
 			$internalMoveName = Constants::$MOVE_NAME_TO_NEW_MOVE_NAME->$internalMoveName;
 		}
-		return strtolower($internalMoveName);
+		return mb_strtolower($internalMoveName);
 	}
 
 	private function addCSSandJS () {
