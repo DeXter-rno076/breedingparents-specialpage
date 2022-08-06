@@ -31,7 +31,7 @@
 			"scripts": [
 				"leaflet.js",
 				"moving.js",
-				"suggestions.js"
+                "form.js"
 			]
 		}
 	},

@@ -33,5 +33,8 @@
 	"breedingchains-easteregg-dexter": "... Ob ich $1 erlernen kann? Ich bin vielleicht angehender professioneller Druckerreparierer, Teilzeit-Mod und Discord-Hobbypsychologe, aber ich bin (leider oder zum Glück) kein Pokémon!",
 	"breedingchains-learnsetpage-link": "$1/Attacken#$2._Generation",
 	"breedingchains-unknown-move": "The move $1 is unknown to me. You probably made a typo somewhere.",
-	"breedingchains-unknown-game": "The game $1 is unknown to me or I don't support it. Please use the dropdown of the text input box (in some browsers you need to double click on the text box). Keep in mind that only those suggestions that suit the currently written text are shown."
+	"breedingchains-unknown-game": "The game $1 is unknown to me or I don't support it. Please use the dropdown of the text input box (in some browsers you need to double click on the text box). Keep in mind that only those suggestions that suit the currently written text are shown.",
+    "breedingchains-game-required": "Please set a game.",
+    "breedingchains-pkmn-required": "Please set a Pokémon.",
+    "breedingchains-move-required": "Please set a move."
 }
