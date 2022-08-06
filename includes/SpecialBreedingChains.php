@@ -107,10 +107,9 @@ class SpecialBreedingChains extends SpecialPage {
 
             return Status::newFatal((string) $e);
         } finally {
+            Logger::statusLog('success code: '.$successCode);
             Logger::flush();
         }
-
-        echo $successCode;
 
 		return Status::newGood($successCode);
 	}
