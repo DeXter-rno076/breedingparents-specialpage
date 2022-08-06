@@ -83,6 +83,8 @@ $( function () {
         //todo set warning if move not in suggestions
     });
 
+    $('#specialBreedingChainsLoadingBar').remove();
+
     function clearErrorsAndWarningsIfNonEmpty (input, field) {
         if (input.getValue() !== '') {
             field.setErrors([]).setWarnings([]);

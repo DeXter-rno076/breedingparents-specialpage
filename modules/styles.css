@@ -2,6 +2,10 @@
     clear: both;/*field layout messages are a bit broken when combined with floating inputs*/
 }
 
+#specialBreedingChainsLoadingBar {
+    margin: 2% auto;
+}
+
 #breedingChainsSVGMap {
 	width: 100%;
 	height: 80vh;

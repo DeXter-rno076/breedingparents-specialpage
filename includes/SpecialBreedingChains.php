@@ -20,15 +20,32 @@ class SpecialBreedingChains extends SpecialPage {
 		Constants::$centralOutputPageInstance->setPageTitle(Constants::i18nMsg('breedingchains-title'));
 
 		$this->setHeaders();//seems like a must have
+        $this->addLoadingBar();
         $this->addFormContainer();
 		$this->addCSSandJS();
 		$this->startExecPath();
 	}
 
+    private function addLoadingBar () {
+        Constants::$centralOutputPageInstance->enableOOUI();
+
+        $loadingBar = new OOUI\ProgressBarWidget([
+            'id' => 'specialBreedingChainsLoadingBar',
+            'progress' => false,
+        ]);
+
+        Constants::$centralOutputPageInstance->addHTML($loadingBar);
+    }
+
     private function addFormContainer () {
         $formContainer = new HTMLElement('div', [
             'id' => 'specialBreedingChainsFormContainer'
+        ], [
+            new HTMLElement('noscript', [], [
+                'Bitte aktiviere JavaScript in deinem Browser, um diese Spezialseite nutzen zu können'
+            ])
         ]);
+
         $formContainer->addToOutput();
     }
 
