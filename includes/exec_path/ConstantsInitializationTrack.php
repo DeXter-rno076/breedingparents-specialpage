@@ -44,16 +44,9 @@ class ConstantsInitializationTrack extends Track {
 		Constants::$targetPkmnNameOriginalInput = trim($this->formData['targetPkmn']);
 		Constants::$targetPkmnName = mb_strtolower(Constants::$targetPkmnNameOriginalInput);
 
-		if (isset($formData['displayDebuglogs'])) {
-			Constants::$displayDebuglogs = isset($this->formData['displayDebuglogs']);
-		}
-		if (isset($formData['displayStatuslogs'])) {
-			Constants::$displayStatuslogs = isset($this->formData['displayStatuslogs']);
-		}
-
-        if (isset($formData['createDetailedSuccessorFilterLogs'])) {
-            Constants::$createDetailedSuccessorFilterLogs = $this->formData['createDetailedSuccessorFilterLogs'];
-        }
+		Constants::$displayDebuglogs = isset($this->formData['displayDebugLogs']);
+		Constants::$displayStatuslogs = isset($this->formData['displayStatusLogs']);
+        Constants::$createDetailedSuccessorFilterLogs = isset($this->formData['createDetailedSuccessorFilterLogs']);
 
 		Constants::logUserinputConstants();
 
