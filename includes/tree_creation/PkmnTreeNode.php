@@ -41,14 +41,12 @@ class PkmnTreeNode extends BreedingTreeNode {
 			Logger::statusLog($this.' could inherit the move');
 			$this->learnabilityStatus->setLearnsByBreeding();
 
-            //todo special cases should not be included to the hashing algorithm
-
 			$hash = BreedingSubtree::buildHash($this->getTargetEggGroup($eggGroupBlacklist), $eggGroupBlacklist);
-			if (isset(PkmnTreeNode::$subtrees[$hash])) {
+			if (!SuccessorFilter::isSpecialCase($this->data) && isset(PkmnTreeNode::$subtrees[$hash])) {
                 Logger::statusLog($this.' is compatible with existing subtree, adding to hash '.$hash);
 				$cachedSubtree = PkmnTreeNode::$subtrees[$hash];
 				$cachedSubtree->addRoot($this);
-				return null;//return $cachedSubtree;
+				return null;
 			}
 			$successors = $this->selectSuccessors($eggGroupBlacklist);
             $subtree->addSuccessors($successors);
@@ -210,8 +208,7 @@ class PkmnTreeNode extends BreedingTreeNode {
 	 * @return string BreedingTreeNode:<pkmn name>;<successor count>;<learns by event>;<learns by old gen>;<is root>;;
 	 */
 	public function getLogInfo (): string {
-		$msg = 'BreedingTreeNode:\'\'\''.$this->data->getName().'\'\'\'';	
-		$msg .= ';;';
+		$msg = 'BreedingTreeNode:\'\'\''.$this->data->getName().'\'\'\';;';	
 
 		return $msg;
 	}

@@ -16,7 +16,7 @@ require_once 'BreedingTreeNode.php';
  * 		gender unknown + male only
  * 			only with ditto they can have children of their species -> cant be influenced by other species
  * 			-> if all parents of the current node are male/unknown onle -> only parents of its evo line are allowed
- * todo     -> gender unknown or male only successors are only allowed if node is in the same evo line 
+ *          -> gender unknown or male only successors are only allowed if node is in the same evo line 
  *
  * 		female only
  * 			can only have their own species as children -> cant influence other species
@@ -53,6 +53,16 @@ class SuccessorFilter {
 		$this->eggGroupBlacklist = $eggGroupBlacklist;
 		$this->currentPkmnTreeNodeData = new PkmnData($currentPkmnTreeNode->getName());
 	}
+
+    public static function isSpecialCase (PkmnData $pkmnData): bool {
+        if (!$pkmnData->existsInThisGame()) return true;
+        if ($pkmnData->isUnpairable()) return true;
+        if ($pkmnData->isFemaleOnly() || $pkmnData->isMaleOnly() || $pkmnData->hasNoGender()) return true;
+        if (SuccessorFilter::nodeHasOnlyMaleEvolutions($pkmnData) 
+            || SuccessorFilter::nodeHasOnlyGenderUnknownEvolutions($pkmnData)) return true;
+
+        return false;
+    }
 
 	public function filter (array $successorList): array {
 		Logger::statusLog('filtering successor list; successor list before: '.json_encode($successorList));
@@ -139,7 +149,8 @@ class SuccessorFilter {
 
     //todo split
 	private function checkMaleAndUnknownOnlyRequirements (array $successorList): array {
-		if ($this->nodeHasOnlyMaleEvolutions() || $this->nodeHasOnlyGenderUnknownEvolutions()) {
+		if (SuccessorFilter::nodeHasOnlyMaleEvolutions($this->currentPkmnTreeNodeData) 
+            || SuccessorFilter::nodeHasOnlyGenderUnknownEvolutions($this->currentPkmnTreeNodeData)) {
             if (Constants::$createDetailedSuccessorFilterLogs) {
                 Logger::statusLog('removing all non-evo-line successors because target node has'
                                 .' only male-only or gender-unknown evos');
@@ -170,8 +181,8 @@ class SuccessorFilter {
 	}
 
 	//basically duplicate of $this->nodeHasOnlyGenderUnknownEvolutions
-	private function nodeHasOnlyMaleEvolutions (): bool {
-        $evos = $this->currentPkmnTreeNodeData->getEvolutions();
+	private static function nodeHasOnlyMaleEvolutions (PkmnData $pkmnData): bool {
+        $evos = $pkmnData->getEvolutions();
         if (count($evos) === 0) {
             return false;
         }
@@ -190,8 +201,8 @@ class SuccessorFilter {
 	}
 
 	//basically duplicate of $this->nodeHasOnlyMaleEvolutions
-	private function nodeHasOnlyGenderUnknownEvolutions (): bool {
-        $evos = $this->currentPkmnTreeNodeData->getEvolutions();
+	private static function nodeHasOnlyGenderUnknownEvolutions (PkmnData $pkmnData): bool {
+        $evos = $pkmnData->getEvolutions();
         if (count($evos) === 0) {
             return false;
         }
