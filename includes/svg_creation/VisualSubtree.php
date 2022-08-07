@@ -46,6 +46,7 @@ class VisualSubtree {
         $rootsTotalHeight = $this->calcRootsHeight();
 
         $this->subtreeHeight = max($successorsTotalHeight, $rootsTotalHeight);
+        Logger::statusLog('calculated subtreeheight '.$this->subtreeHeight.' for '.$this);
         return $this->subtreeHeight;
     }
     
@@ -146,6 +147,8 @@ class VisualSubtree {
             $root = $this->visualRoots[0];
             $nodeHeight = $root->calcSingleNodeHeight();
             $root->setY($offset + ($this->subtreeHeight - $root->getIconHeight())/2);
+            Logger::statusLog('calculated y = '.$root->getY().' for single root of '.$this
+                .', offset='.$offset.', node height='.$nodeHeight);
         }
 
         $currentSuccessorOffset = $this->calcInitialSuccessorOffset($offset);
@@ -154,20 +157,40 @@ class VisualSubtree {
         }
 
         if (count($this->visualRoots) > 1) {
+            Logger::statusLog('calculating y coordinates for roots of '.$this);
             //todo successors may be empty
-            $top = $this->successors[0]->getRoots()[0]->getY();
-            $lastSuccessorsRoots = $this->successors[count($this->successors) - 1]->getRoots();
-            $bottom = $lastSuccessorsRoots[count($lastSuccessorsRoots) - 1]->getY();
+            $rootsHeight = $this->calcRootsHeight();
+            $rootsAreWiderThanSuccessors = $rootsHeight > $this->successors[0]->getSubtreeHeight();
+            $top = 0;
+            if ($rootsAreWiderThanSuccessors) {
+                $top = $offset;
+            } else {
+                $top = $this->successors[0]->getRoots()[0]->getY();
+            }
+
+            $bottom = 0;
+            if ($rootsAreWiderThanSuccessors) {
+                $bottom = $offset + $rootsHeight;
+            } else {
+                $lastSuccessorsRoots = $this->successors[count($this->successors) - 1]->getRoots();
+                $bottom = $lastSuccessorsRoots[count($lastSuccessorsRoots) - 1]->getY();
+            }
+
             $nodeHeight = $this->visualRoots[0]->calcSingleNodeHeight();
             $height = $bottom - $top + $nodeHeight;
             $rootsOffset = $offset + ($height - count($this->visualRoots)*$nodeHeight)/2;
+
+            Logger::statusLog('offset='.$offset.',top y='.$top.', bottom y='.$bottom.', node height='.$nodeHeight
+                .', total height='.$height.' => calculated roots offset='.$rootsOffset);
 
             for ($i = 0; $i < count($this->visualRoots); $i++) {
                 $this->visualRoots[$i]->setY($rootsOffset + $i*$nodeHeight);
             }
 
             for ($i = 0; $i < count($this->visualRoots); $i++) {
-                $this->visualRoots[$i]->setY($this->visualRoots[$i]->getY() - $this->visualRoots[$i]->getIconHeight()/2);
+                $root = $this->visualRoots[$i];
+                $root->setY($root->getY() - $root->getIconHeight()/2);
+                Logger::statusLog('y = '.$root->getY().' for '.$root->getName());
             }
         }
 
@@ -267,7 +290,11 @@ class VisualSubtree {
 	}
 
     public function getLogInfo (): string {
-        return 'VisualSubtree;;';
+        $str = 'VisualSubtree';
+        foreach ($this->visualRoots as $root) {
+            $str .= '-'.$root->getName();
+        }
+        return $str.';;';
     }
 
     public function __toString (): string {
