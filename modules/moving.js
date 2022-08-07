@@ -1,12 +1,11 @@
 const svgTag = document.getElementById('breedingChainsSVG');
 if (svgTag !== null) {
-	
+
 
 const svgChildren = svgTag.children;
 const svgMap = document.getElementById('breedingChainsSVGMap');
 
 const SVG_CONTAINER_WIDTH = svgMap.clientWidth;
-const SVG_CONTAINER_HEIGHT = svgMap.clientHeight;
 const SVG_TAG_VIEWBOX = svgTag.attributes.viewBox.value;
 const SVG_TAG_VIEWBOX_VALUES = SVG_TAG_VIEWBOX.split(' ');
 const SVG_WIDTH = SVG_TAG_VIEWBOX_VALUES[2];
@@ -20,14 +19,6 @@ const SCROLL_IN_PIXELS = 60;
 const WANTED_ZOOM_DELTA = 0.5;
 const ZOOM_DELTA_IN_PX_PERCENTAGE = SCROLL_IN_PIXELS / WANTED_ZOOM_DELTA;
 
-const MAX_BOUNDS_X_PADDING = 100;
-const MAX_BOUNDS_Y_PADDING = 160;
-
-const overlayBounds = [
-	[0, 0],
-	[SVG_HEIGHT, SVG_WIDTH]
-];
-
 const map = L.map('breedingChainsSVGMap', {
 	crs: L.CRS.Simple,
 	center: calcCenterOffsets(),
@@ -37,8 +28,20 @@ const map = L.map('breedingChainsSVGMap', {
 	zoomSnap: 0,
 	zoomDelta: WANTED_ZOOM_DELTA,
 	wheelPxPerZoomLevel: ZOOM_DELTA_IN_PX_PERCENTAGE,
-	attributionControl: false
+    attributionControl: false,
+    zoomControl: false
 });
+
+const zoomControl = L.control.zoom({
+    position: 'bottomleft'
+});
+map.addControl(zoomControl);
+
+const attributionControl = L.control.attribution({
+    position: 'topright',
+    prefix: ''
+}).addAttribution(mw.config.get('breedingchains-whatshappening'));
+map.addControl(attributionControl);
 
 main();
 
@@ -54,10 +57,10 @@ function calcCenterOffsets () {
 	const STANDARD_LAYOUT_CENTERING_OFFSETS = [SVG_HEIGHT / 2, SVG_WIDTH / 2];
 
 	if (svgWidthExceedsContainerWidth()) {
-		console.log('mobile layout');
+		console.debug('mobile layout');
 		return MOBILE_LAYOUT_CENTERING_OFFSETS;
 	} else {
-		console.log('standard layout');
+		console.debug('standard layout');
 		return STANDARD_LAYOUT_CENTERING_OFFSETS;
 	}
 }
@@ -124,7 +127,7 @@ function addCircle (svgCircle) {
         weight: 4,
 		className: 'breedingChainsLeafletCircle'
 	});
-	
+
 	addPkmnPopup(svgCircle.attributes.groupid.value, circle);
 
 	circle.addTo(map);
@@ -198,11 +201,11 @@ function addLine (svgLine) {
 
 function addText (svgText) {
 	const text = svgText.textContent;
-	
+
 	const bbox = svgText.getBBox();
 	const width = bbox.width;
 	const height = bbox.height;
-	
+
 	const x = getLeafletTextXCoordinate(svgText.attributes.groupid.value);
 	const y = Number(svgText.attributes.y.value);
 
