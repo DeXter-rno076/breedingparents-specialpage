@@ -35,7 +35,7 @@ class SuccessorMixer {
 	}
 
 	private function addLightball (array $successorList): array {
-		$successorList[] = new MiscTreeNode('Kugelblitz', 'Itemicon Kugelblitz.png');
+		$successorList[] = new BreedingSubtree(new MiscTreeNode('Kugelblitz', 'Itemicon Kugelblitz.png'), [], '', []);
 		return $successorList;
 	}
 }
