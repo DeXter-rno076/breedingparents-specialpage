@@ -158,7 +158,7 @@ class VisualSubtree {
             }
 
             for ($i = 0; $i < count($this->visualRoots); $i++) {
-                $this->visualRoots[$i]->setY($this->visualRoots[$i]->getY() - $this->visualRoots[$i]->getIconHeight());
+                $this->visualRoots[$i]->setY($this->visualRoots[$i]->getY() - $this->visualRoots[$i]->getIconHeight()/2);
             }
         }
 
