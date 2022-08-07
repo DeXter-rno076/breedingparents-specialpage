@@ -42,7 +42,7 @@ class SpecialBreedingChains extends SpecialPage {
             'id' => 'specialBreedingChainsFormContainer'
         ], [
             new HTMLElement('noscript', [], [
-                'Bitte aktiviere JavaScript in deinem Browser, um diese Spezialseite nutzen zu können'
+                Constants::i18nMsg('breedingchains-noscript')
             ])
         ]);
 
@@ -84,7 +84,7 @@ class SpecialBreedingChains extends SpecialPage {
             'breedingchains-popup-learns-b' => Constants::i18nMsg('breedingchains-popup-learns-b'),
             'breedingchains-popup-learns-o' => ((Constants::$targetGenNumber < 8)
                 ? Constants::i18nMsg('breedingchains-popup-learns-o-old') : Constants::i18nMsg('breedingchains-popup-learns-o-new')),
-            'breedingchains-popup-learns-e' => Constants::i18nMsg('breedingchains-popup-lears-e'),
+            'breedingchains-popup-learns-e' => Constants::i18nMsg('breedingchains-popup-learns-e'),
             'breedingchains-popup-error' => Constants::i18nMsg('breedingchains-popup-error')
         ]);
 	}

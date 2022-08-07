@@ -44,5 +44,6 @@
     "breedingchains-popup-learns-o-old": "In an older generation via level up, TM/HM or a move tutor.",
     "breedingchains-popup-learns-o-new": "In an older generation via level up, TM/TR or a move tutor",
     "breedingchains-popup-learns-e": "Via an event distribution.",
-    "breedingchains-popup-learns-error": "Error: Unexpected learnability character: $1."
+    "breedingchains-popup-learns-error": "Error: Unexpected learnability character: $1.",
+    "breedingchains-noscript": "Please activate JavaScript in your browser to be able to use this special page."
 }

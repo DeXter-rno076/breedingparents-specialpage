@@ -46,5 +46,6 @@
     "breedingchains-popup-learns-o-old": "In einer älteren Generation über Level-Up, TM/VM oder einem Attacken-Lehrer",
     "breedingchains-popup-learns-o-new": "In einer älteren Generation über Level-Up, TM/TP oder einem Attacken-Lehrer.",
     "breedingchains-popup-learns-e": "Durch eine Eventverteilung.",
-    "breedingchains-popup-learns-error": "Fehler: Unerwartetes Erlernbarkeits-Zeichen: $1."
+    "breedingchains-popup-learns-error": "Fehler: Unerwartetes Erlernbarkeits-Zeichen: $1.",
+    "breedingchains-noscript": "Bitte aktiviere JavaScript in deinem Browser, um diese Spezialseite nutzen zu können."
 }
