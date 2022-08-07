@@ -8,132 +8,132 @@ require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
 require_once __DIR__.'/../output_messages/ErrorMessage.php';
 
 class PkmnTreeRoot extends PkmnTreeNode {
-	public function __construct (string $pkmnName) {
-		parent::__construct($pkmnName);
-	}
+    public function __construct (string $pkmnName) {
+        parent::__construct($pkmnName);
+    }
 
-	/**
-	 * @param array $eggGroupBlacklist - is ignored because tree roots always start a new blacklist
-	 */
-	public function createBreedingSubtree (array $eggGroupBlacklist): BreedingRootSubtree {
-		Logger::statusLog('creating tree root node of '.$this);
+    /**
+     * @param array $eggGroupBlacklist - is ignored because tree roots always start a new blacklist
+     */
+    public function createBreedingSubtree (array $eggGroupBlacklist): BreedingRootSubtree {
+        Logger::statusLog('creating tree root node of '.$this);
         $rootSubtree = new BreedingRootSubtree($this, []);
-		if ($this->data->canLearnDirectly()) {
-			Logger::statusLog($this.' can learn the move directly');
-			$this->learnabilityStatus->setLearnsDirectly();
-		}
+        if ($this->data->canLearnDirectly()) {
+            Logger::statusLog($this.' can learn the move directly');
+            $this->learnabilityStatus->setLearnsDirectly();
+        }
 
-		if ($this->data->canLearnByOldGen()) {
-			Logger::statusLog($this.' could learn the move in an old gen');
-			/*learning by old gen might be easier to get than breeding but also maybe not.
-			It depends on the user, therefore learnsByOldGen is checked and marked before
-			inheritence check, but it only exits this method if the pkmn can't inherit the move
-			(learning by old gen is in most cases easier than learning by event)*/
-			$this->learnabilityStatus->setLearnsByOldGen();
-		}
+        if ($this->data->canLearnByOldGen()) {
+            Logger::statusLog($this.' could learn the move in an old gen');
+            /*learning by old gen might be easier to get than breeding but also maybe not.
+            It depends on the user, therefore learnsByOldGen is checked and marked before
+            inheritence check, but it only exits this method if the pkmn can't inherit the move
+            (learning by old gen is in most cases easier than learning by event)*/
+            $this->learnabilityStatus->setLearnsByOldGen();
+        }
 
-		if ($this->data->canLearnByBreeding()) {
-			Logger::statusLog($this.' could inherit the move');
-			$this->learnabilityStatus->setLearnsByBreeding();
-			$emptyEggGroupBlacklist = [];
-			$successors = $this->selectSuccessors($emptyEggGroupBlacklist);
+        if ($this->data->canLearnByBreeding()) {
+            Logger::statusLog($this.' could inherit the move');
+            $this->learnabilityStatus->setLearnsByBreeding();
+            $emptyEggGroupBlacklist = [];
+            $successors = $this->selectSuccessors($emptyEggGroupBlacklist);
             $rootSubtree->addSuccessors($successors);
 
-			if ($rootSubtree->hasSuccessors()) {
-				Logger::statusLog($this.' can inherit the move, successors found');
-			}
-		} else {
-			$evoSuccessor = $this->tryBreedingChainOverLowestEvolution();
+            if ($rootSubtree->hasSuccessors()) {
+                Logger::statusLog($this.' can inherit the move, successors found');
+            }
+        } else {
+            $evoSuccessor = $this->tryBreedingChainOverLowestEvolution();
             if (!is_null($evoSuccessor)) {
                 $rootSubtree->addSuccessor($evoSuccessor);
             }
-		}
+        }
 
-		if ($this->data->canLearnByEvent()) {
-			Logger::statusLog($this.' can learn the move by event');
-			$this->learnabilityStatus->setLearnsByEvent();
-		}
-		
-		return $rootSubtree;
-	}
+        if ($this->data->canLearnByEvent()) {
+            Logger::statusLog($this.' can learn the move by event');
+            $this->learnabilityStatus->setLearnsByEvent();
+        }
 
-	protected function selectSuccessors (array &$eggGroupBlacklist): array {
-		$successors = $this->selectSuccessorsOfRootNode();
+        return $rootSubtree;
+    }
 
-		$mixer = new SuccessorMixer($this);
-		$successors = $mixer->mix($successors);
+    protected function selectSuccessors (array &$eggGroupBlacklist): array {
+        $successors = $this->selectSuccessorsOfRootNode();
+
+        $mixer = new SuccessorMixer($this);
+        $successors = $mixer->mix($successors);
 
         return $successors;
-	}
+    }
 
-	private function selectSuccessorsOfRootNode (): array {
-		$eggGroup1 = $this->data->getEggGroup1();
+    private function selectSuccessorsOfRootNode (): array {
+        $eggGroup1 = $this->data->getEggGroup1();
 
-		$firstSubTreeBlacklist = [];
-		$secondSubTreeBlacklist = [$eggGroup1];
+        $firstSubTreeBlacklist = [];
+        $secondSubTreeBlacklist = [$eggGroup1];
 
-		if ($this->data->hasSecondEggGroup()) {
-			$firstSubTreeBlacklist[] = $this->data->getEggGroup2();
-		}
+        if ($this->data->hasSecondEggGroup()) {
+            $firstSubTreeBlacklist[] = $this->data->getEggGroup2();
+        }
 
-		$successors = $this->createSuccessorsTreeSection($firstSubTreeBlacklist, $eggGroup1);
-		if ($this->data->hasSecondEggGroup()) {
-			$eggGroup2 = $this->data->getEggGroup2();
+        $successors = $this->createSuccessorsTreeSection($firstSubTreeBlacklist, $eggGroup1);
+        if ($this->data->hasSecondEggGroup()) {
+            $eggGroup2 = $this->data->getEggGroup2();
 
-			$successors = array_merge($successors, $this->createSuccessorsTreeSection(
-				$secondSubTreeBlacklist, $eggGroup2));
-		}
+            $successors = array_merge($successors, $this->createSuccessorsTreeSection(
+                $secondSubTreeBlacklist, $eggGroup2));
+        }
         return $successors;
-	}
+    }
 
-	/**
-	 * If the tree root is an evolution it can't inherit any moves (because it can't be breeded directly).
-	 * So inheritance is tried on its lowest evo.
-	 */
-	private function tryBreedingChainOverLowestEvolution (): ?BreedingRootSubtree {
-		if ($this->data->isLowestEvolution()) {
-			return null;
-		}
-		Logger::statusLog($this.' is not the lowest evolution in it\'s line, trying an evo connection');
+    /**
+     * If the tree root is an evolution it can't inherit any moves (because it can't be breeded directly).
+     * So inheritance is tried on its lowest evo.
+     */
+    private function tryBreedingChainOverLowestEvolution (): ?BreedingRootSubtree {
+        if ($this->data->isLowestEvolution()) {
+            return null;
+        }
+        Logger::statusLog($this.' is not the lowest evolution in it\'s line, trying an evo connection');
 
-		$lowestEvoInstance = null;
-		try {
-			$lowestEvoName = $this->data->getLowestEvo();
-			$lowestEvoInstance = new PkmnTreeRoot($lowestEvoName);
-		} catch (AttributeNotFoundException $e) {
-			$errorMessage = new ErrorMessage($e);
-			$errorMessage->output();
-			return null;
-		}
+        $lowestEvoInstance = null;
+        try {
+            $lowestEvoName = $this->data->getLowestEvo();
+            $lowestEvoInstance = new PkmnTreeRoot($lowestEvoName);
+        } catch (AttributeNotFoundException $e) {
+            $errorMessage = new ErrorMessage($e);
+            $errorMessage->output();
+            return null;
+        }
 
-		$lowestEvoNodeSubTree = $lowestEvoInstance->createBreedingSubtree([]);
-		$lowestEvoNode = $lowestEvoNodeSubTree->getRoot();
-    
-		if ($lowestEvoNode->getLearnabilityStatus()->canLearn()) {
-			if ($this->breedingChainOverLowestEvolutionHasAnAdvantage($lowestEvoNodeSubTree)) {
-				//todo learnsByBreeding is unclean here
-				$this->learnabilityStatus->setLearnsByBreeding();
+        $lowestEvoNodeSubTree = $lowestEvoInstance->createBreedingSubtree([]);
+        $lowestEvoNode = $lowestEvoNodeSubTree->getRoot();
+
+        if ($lowestEvoNode->getLearnabilityStatus()->canLearn()) {
+            if ($this->breedingChainOverLowestEvolutionHasAnAdvantage($lowestEvoNodeSubTree)) {
+                //todo learnsByBreeding is unclean here
+                $this->learnabilityStatus->setLearnsByBreeding();
                 return $lowestEvoNodeSubTree;
-			}
-		}
+            }
+        }
         return null;
-	}
+    }
 
-	private function breedingChainOverLowestEvolutionHasAnAdvantage (BreedingRootSubtree $lowestEvoSubTree) {
-		if ($lowestEvoSubTree->hasSuccessors()) {
-			return true;
-		}
+    private function breedingChainOverLowestEvolutionHasAnAdvantage (BreedingRootSubtree $lowestEvoSubTree) {
+        if ($lowestEvoSubTree->hasSuccessors()) {
+            return true;
+        }
         $lowestEvoNode = $lowestEvoSubTree->getRoot();
-		/*NOT ( this learns by old gen AND evo learns by old gen or event)
-		without negation at the beginning:
-		-> this does not learn via old gen or evo learns neither by old gen nor event*/
-		return ! ($this->learnabilityStatus->getLearnsByOldGen() 
-			&& ($lowestEvoNode->learnabilityStatus->getLearnsByOldGen() 
-				|| $lowestEvoNode->learnabilityStatus->getLearnsByEvent()));
-	}
+        /*NOT ( this learns by old gen AND evo learns by old gen or event)
+        without negation at the beginning:
+        -> this does not learn via old gen or evo learns neither by old gen nor event*/
+        return ! ($this->learnabilityStatus->getLearnsByOldGen()
+            && ($lowestEvoNode->learnabilityStatus->getLearnsByOldGen()
+                || $lowestEvoNode->learnabilityStatus->getLearnsByEvent()));
+    }
 
-	public function getLogInfo (): string {
-		$normalPkmnNodeLogInfo = parent::getLogInfo();
-		return str_replace(';;', 'root;;', $normalPkmnNodeLogInfo);
-	}
+    public function getLogInfo (): string {
+        $normalPkmnNodeLogInfo = parent::getLogInfo();
+        return str_replace(';;', 'root;;', $normalPkmnNodeLogInfo);
+    }
 }

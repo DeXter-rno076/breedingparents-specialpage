@@ -8,51 +8,51 @@ require_once 'SVGSubtree.php';
 require_once 'VisualSubtree.php';
 
 class SVGTag extends SVGElement {
-	private $id = 'breedingChainsSVG';
-	private $width;
-	private $height;
-	private $svgTree;
+    private $id = 'breedingChainsSVG';
+    private $width;
+    private $height;
+    private $svgTree;
 
-	public function __construct (VisualSubtree $pkmnRoot, int $groupId) {
-		parent::__construct('svg', $groupId);
-		Logger::statusLog('creating SVGRoot instance');
+    public function __construct (VisualSubtree $pkmnRoot, int $groupId) {
+        parent::__construct('svg', $groupId);
+        Logger::statusLog('creating SVGRoot instance');
 
-		$this->width = $this->calculateWidth($pkmnRoot->getDepth());
-		$this->height = $this->calculateHeight($pkmnRoot->getSubtreeHeight());
+        $this->width = $this->calculateWidth($pkmnRoot->getDepth());
+        $this->height = $this->calculateHeight($pkmnRoot->getSubtreeHeight());
 
-		$this->svgTree = new SVGSubtree($pkmnRoot);
-	}
+        $this->svgTree = new SVGSubtree($pkmnRoot);
+    }
 
-	private function calculateWidth (int $treeDepth): int {
-		return ($treeDepth - 1) * Constants::PKMN_MARGIN_HORIZONTAL + Constants::SVG_OFFSET
-		+ Constants::SVG_SAFETY_MARGIN;
-	}
+    private function calculateWidth (int $treeDepth): int {
+        return ($treeDepth - 1) * Constants::PKMN_MARGIN_HORIZONTAL + Constants::SVG_OFFSET
+        + Constants::SVG_SAFETY_MARGIN;
+    }
 
-	private function calculateHeight (int $treeSectionHeight): int {
-		return $treeSectionHeight + Constants::SVG_OFFSET + Constants::SVG_SAFETY_MARGIN;
-	}
+    private function calculateHeight (int $treeSectionHeight): int {
+        return $treeSectionHeight + Constants::SVG_OFFSET + Constants::SVG_SAFETY_MARGIN;
+    }
 
-	public function toHTML (
-		int $xOffset = Constants::SVG_OFFSET,
-		int $yOffset = Constants::SVG_OFFSET
-	): HTMLElement {
-		$svgTag = new HTMLElement('svg', [
-			'id' => $this->id,
-			'xmlns' => 'http://www.w3.org/2000/svg',
-			'viewbox' => '0 0 '.$this->width.' '.$this->height,
-			'groupid' => $this->groupId
-		]);
-		
-		$topLevelSVGTags = $this->svgTree->toHTMLElements($xOffset, $yOffset);
+    public function toHTML (
+        int $xOffset = Constants::SVG_OFFSET,
+        int $yOffset = Constants::SVG_OFFSET
+    ): HTMLElement {
+        $svgTag = new HTMLElement('svg', [
+            'id' => $this->id,
+            'xmlns' => 'http://www.w3.org/2000/svg',
+            'viewbox' => '0 0 '.$this->width.' '.$this->height,
+            'groupid' => $this->groupId
+        ]);
 
-		foreach ($topLevelSVGTags as $tag) {
-			$svgTag->addInnerElement($tag);
-		}
+        $topLevelSVGTags = $this->svgTree->toHTMLElements($xOffset, $yOffset);
 
-		return $svgTag;
-	}
+        foreach ($topLevelSVGTags as $tag) {
+            $svgTag->addInnerElement($tag);
+        }
 
-	public function getLogInfo (): string {
-		return '\'\'\'SVGTag\'\'\':;;';
-	}
+        return $svgTag;
+    }
+
+    public function getLogInfo (): string {
+        return '\'\'\'SVGTag\'\'\':;;';
+    }
 }

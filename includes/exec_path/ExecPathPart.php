@@ -1,4 +1,4 @@
 <?php
 abstract class ExecPathPart {
-	public abstract function passOn (): string;
+    public abstract function passOn (): string;
 }

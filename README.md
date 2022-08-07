@@ -11,10 +11,10 @@ The name of this specialpage was changed to BreedingChains / Zuchtketten at the 
 # next steps
 * text input
   * better suggestions (really allow shortcuts?)
-* 
+*
 * adjust needed php version
 * create fancy docs of the general algorithms and ideas
-* 
+*
 * performance problems -> Glurak Konter g8 (still relevant for separated games?)
 * somehow remove legend (a bit chaos with infomessages, legend and breeding tree map)
 

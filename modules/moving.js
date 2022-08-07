@@ -20,14 +20,14 @@ const WANTED_ZOOM_DELTA = 0.5;
 const ZOOM_DELTA_IN_PX_PERCENTAGE = SCROLL_IN_PIXELS / WANTED_ZOOM_DELTA;
 
 const map = L.map('breedingChainsSVGMap', {
-	crs: L.CRS.Simple,
-	center: calcCenterOffsets(),
-	zoom: 0,
-	minZoom: -5,
-	maxZoom: 2,
-	zoomSnap: 0,
-	zoomDelta: WANTED_ZOOM_DELTA,
-	wheelPxPerZoomLevel: ZOOM_DELTA_IN_PX_PERCENTAGE,
+    crs: L.CRS.Simple,
+    center: calcCenterOffsets(),
+    zoom: 0,
+    minZoom: -5,
+    maxZoom: 2,
+    zoomSnap: 0,
+    zoomDelta: WANTED_ZOOM_DELTA,
+    wheelPxPerZoomLevel: ZOOM_DELTA_IN_PX_PERCENTAGE,
     attributionControl: false,
     zoomControl: false
 });
@@ -47,92 +47,92 @@ main();
 
 function main () {
     console.time('creating leaflet map');
-	addSVGElements(svgChildren);
-	svgTag.style.display = 'none';
-	//addHelpingLines();
+    addSVGElements(svgChildren);
+    svgTag.style.display = 'none';
+    //addHelpingLines();
     addResetButton();
     console.timeEnd('creating leaflet map');
 }
 
 function calcCenterOffsets () {
-	const MOBILE_LAYOUT_CENTERING_OFFSETS = [SVG_HEIGHT / 2, SVG_CONTAINER_WIDTH / 2];
-	const STANDARD_LAYOUT_CENTERING_OFFSETS = [SVG_HEIGHT / 2, SVG_WIDTH / 2];
+    const MOBILE_LAYOUT_CENTERING_OFFSETS = [SVG_HEIGHT / 2, SVG_CONTAINER_WIDTH / 2];
+    const STANDARD_LAYOUT_CENTERING_OFFSETS = [SVG_HEIGHT / 2, SVG_WIDTH / 2];
 
-	if (svgWidthExceedsContainerWidth()) {
-		//console.debug('mobile layout');
-		return MOBILE_LAYOUT_CENTERING_OFFSETS;
-	} else {
-		//console.debug('standard layout');
-		return STANDARD_LAYOUT_CENTERING_OFFSETS;
-	}
+    if (svgWidthExceedsContainerWidth()) {
+        //console.debug('mobile layout');
+        return MOBILE_LAYOUT_CENTERING_OFFSETS;
+    } else {
+        //console.debug('standard layout');
+        return STANDARD_LAYOUT_CENTERING_OFFSETS;
+    }
 }
 
 function svgWidthExceedsContainerWidth () {
-	return SVG_CONTAINER_WIDTH < SVG_WIDTH;
+    return SVG_CONTAINER_WIDTH < SVG_WIDTH;
 }
 
 function addSVGElements (svgElements) {
-	addSVGBackgroundElements(svgElements);
-	addSVGFrontElements(svgElements);
+    addSVGBackgroundElements(svgElements);
+    addSVGFrontElements(svgElements);
 }
 
 function addSVGBackgroundElements (svgElements) {
-	const backgroundElements = [ 'line' ];
-	addSVGElementsType(svgElements, backgroundElements);
+    const backgroundElements = [ 'line' ];
+    addSVGElementsType(svgElements, backgroundElements);
 }
 
 function addSVGFrontElements (svgElements) {
-	const frontElements = ['circle', 'image', 'text', 'a'];
-	addSVGElementsType(svgElements, frontElements);
+    const frontElements = ['circle', 'image', 'text', 'a'];
+    addSVGElementsType(svgElements, frontElements);
 }
 
 function addSVGElementsType (svgElements, includedElementTypes) {
-	for (const el of svgElements) {
-		if (includedElementTypes.includes(el.tagName)) {
-			addSVGElement(el);
-		}
-	}
+    for (const el of svgElements) {
+        if (includedElementTypes.includes(el.tagName)) {
+            addSVGElement(el);
+        }
+    }
 }
 
 function addSVGElement (svgElement) {
-	switch (svgElement.tagName) {
-		case 'circle':
-			addCircle(svgElement);
-			break;
-		case 'a':
-			addLink(svgElement);
-			break;
-		case 'line':
-			addLine(svgElement);
-			break;
-		case 'text':
-			addText(svgElement);
-			break;
-		case 'image':
-			addImage(svgElement);
-			break;
-		default:
-			console.error('tried to add unexpected svgElement of type ' + svgElement.tagName);
-			console.error(svgElement);
-	}
+    switch (svgElement.tagName) {
+        case 'circle':
+            addCircle(svgElement);
+            break;
+        case 'a':
+            addLink(svgElement);
+            break;
+        case 'line':
+            addLine(svgElement);
+            break;
+        case 'text':
+            addText(svgElement);
+            break;
+        case 'image':
+            addImage(svgElement);
+            break;
+        default:
+            console.error('tried to add unexpected svgElement of type ' + svgElement.tagName);
+            console.error(svgElement);
+    }
 }
 
 function addCircle (svgCircle) {
-	const x = Number(svgCircle.attributes.cx.value);
-	const y = Number(svgCircle.attributes.cy.value);
-	const r = Number(svgCircle.attributes.r.value);
-	const color = svgCircle.attributes.color.value;
+    const x = Number(svgCircle.attributes.cx.value);
+    const y = Number(svgCircle.attributes.cy.value);
+    const r = Number(svgCircle.attributes.r.value);
+    const color = svgCircle.attributes.color.value;
 
-	const circle = L.circle([y, x], {
-		radius: r,
-		color,
+    const circle = L.circle([y, x], {
+        radius: r,
+        color,
         weight: 4,
-		className: 'breedingChainsLeafletCircle'
-	});
+        className: 'breedingChainsLeafletCircle'
+    });
 
-	addPkmnPopup(svgCircle, circle);
+    addPkmnPopup(svgCircle, circle);
 
-	circle.addTo(map);
+    circle.addTo(map);
 }
 
 function addPkmnPopup (svgEl, leafletEl) {
@@ -141,9 +141,9 @@ function addPkmnPopup (svgEl, leafletEl) {
 
     const pkmnLinks = findSVGElements(groupId, 'a');
 
-	if (pkmnLinks.length !== 1) {
-		console.error('addImage: pkmnLinks array has unexpected length ' + pkmnLinks.length);
-	} else {
+    if (pkmnLinks.length !== 1) {
+        console.error('addImage: pkmnLinks array has unexpected length ' + pkmnLinks.length);
+    } else {
         const text = document.createElement('div');
 
         const pkmnLink = createPkmnLinkTag(pkmnLinks);
@@ -154,40 +154,40 @@ function addPkmnPopup (svgEl, leafletEl) {
             text.appendChild(learnabilityString);
         }
 
-		leafletEl.bindPopup(text);
-	}
+        leafletEl.bindPopup(text);
+    }
 }
 
 function findSVGElements (groupId, tagType) {
-	if (isNaN(groupId)) {
-		console.error('findSVGElements: param groupId is not a number: ' + groupId);
-		return [];
-	}
+    if (isNaN(groupId)) {
+        console.error('findSVGElements: param groupId is not a number: ' + groupId);
+        return [];
+    }
 
-	const filteredArray = [];
+    const filteredArray = [];
 
-	for (const svgChild of svgChildren) {
-		if (svgChild.attributes.groupid.value !== undefined
-				&& svgChild.attributes.groupid.value === groupId 
-				&& (tagType === undefined || svgChild.tagName === tagType)) {
-			filteredArray.push(svgChild);
-		}
-	}
+    for (const svgChild of svgChildren) {
+        if (svgChild.attributes.groupid.value !== undefined
+                && svgChild.attributes.groupid.value === groupId
+                && (tagType === undefined || svgChild.tagName === tagType)) {
+            filteredArray.push(svgChild);
+        }
+    }
 
-	return filteredArray;
+    return filteredArray;
 }
 
 function createPkmnLinkTag (pkmnLinks) {
-	const pkmnLink = pkmnLinks[0].attributes.href.value;
+    const pkmnLink = pkmnLinks[0].attributes.href.value;
 
-	const linkTag = document.createElement('a');
-	linkTag.href = pkmnLink;
+    const linkTag = document.createElement('a');
+    linkTag.href = pkmnLink;
 
-	let linkText = pkmnLinks[0].attributes['pkmn-name'].value;
-	const linkTextNode = document.createTextNode(linkText);
+    let linkText = pkmnLinks[0].attributes['pkmn-name'].value;
+    const linkTextNode = document.createTextNode(linkText);
     linkTag.appendChild(linkTextNode);
 
-	return linkTag;
+    return linkTag;
 }
 
 function buildLearnabilityString (learnability) {
@@ -225,104 +225,104 @@ function learnabilityCharToDescription (learnabilityChar) {
 }
 
 function addLink (svgLink) {
-	addSVGElements(svgLink.children);
+    addSVGElements(svgLink.children);
 }
 
 function addLine (svgLine) {
-	const x1 = Number(svgLine.attributes.x1.value);
-	const x2 = Number(svgLine.attributes.x2.value);
-	const y1 = Number(svgLine.attributes.y1.value);
-	const y2 = Number(svgLine.attributes.y2.value);
+    const x1 = Number(svgLine.attributes.x1.value);
+    const x2 = Number(svgLine.attributes.x2.value);
+    const y1 = Number(svgLine.attributes.y1.value);
+    const y2 = Number(svgLine.attributes.y2.value);
 
-	L.polyline([
-		[y1, x1],
-		[y2, x2]
-	], {
-		className: 'breedingChainsLeafletLine'
-	}).addTo(map);
+    L.polyline([
+        [y1, x1],
+        [y2, x2]
+    ], {
+        className: 'breedingChainsLeafletLine'
+    }).addTo(map);
 }
 
 function addText (svgText) {
-	const text = svgText.textContent;
+    const text = svgText.textContent;
 
-	const bbox = svgText.getBBox();
-	const width = bbox.width;
-	const height = bbox.height;
+    const bbox = svgText.getBBox();
+    const width = bbox.width;
+    const height = bbox.height;
 
-	const x = getLeafletTextXCoordinate(svgText.attributes.groupid.value);
-	const y = Number(svgText.attributes.y.value);
+    const x = getLeafletTextXCoordinate(svgText.attributes.groupid.value);
+    const y = Number(svgText.attributes.y.value);
 
-	L.marker([y - 2, x], {
-		icon: L.divIcon({
-			html: text,
-			iconSize: [width, height],
-			className: 'breedingChainsLeafletText'
-		})
-	}).addTo(map);
+    L.marker([y - 2, x], {
+        icon: L.divIcon({
+            html: text,
+            iconSize: [width, height],
+            className: 'breedingChainsLeafletText'
+        })
+    }).addTo(map);
 }
 
 function getLeafletTextXCoordinate (groupId) {
-	const lines = findSVGElements(groupId, 'line');
+    const lines = findSVGElements(groupId, 'line');
 
-	if (lines.length === 0) {
-		console.error('couldnt find line for text ' + svgText);
-		return 0;
-	}
+    if (lines.length === 0) {
+        console.error('couldnt find line for text ' + svgText);
+        return 0;
+    }
 
-	const x1 = Number(lines[0].attributes.x1.value);
-	const x2 = Number(lines[0].attributes.x2.value);
+    const x1 = Number(lines[0].attributes.x1.value);
+    const x2 = Number(lines[0].attributes.x2.value);
 
-	const lineWidth = Math.abs(x2 - x1);
-	const xDiff = lineWidth / 2;
-	const textX = x1 + xDiff;
+    const lineWidth = Math.abs(x2 - x1);
+    const xDiff = lineWidth / 2;
+    const textX = x1 + xDiff;
 
-	return textX;
+    return textX;
 }
 
 function addImage (svgImage) {
-	const x = Number(svgImage.attributes.x.value);
-	const y = Number(svgImage.attributes.y.value);
-	const width = Number(svgImage.attributes.width.value);
-	const height = Number(svgImage.attributes.height.value);
-	const href = svgImage.attributes['xlink:href'].value;
+    const x = Number(svgImage.attributes.x.value);
+    const y = Number(svgImage.attributes.y.value);
+    const width = Number(svgImage.attributes.width.value);
+    const height = Number(svgImage.attributes.height.value);
+    const href = svgImage.attributes['xlink:href'].value;
 
-	const icon = L.icon({
-		iconUrl: href,
-		iconSize: [width, height],
-		className: 'breedingChainsLeafletIcon'
-	});
+    const icon = L.icon({
+        iconUrl: href,
+        iconSize: [width, height],
+        className: 'breedingChainsLeafletIcon'
+    });
 
-	const marker = L.marker([y + height/2, x + width/2], {
-		icon
-	})
-	
-	addPkmnPopup(svgImage, marker);
+    const marker = L.marker([y + height/2, x + width/2], {
+        icon
+    })
 
-	marker.addTo(map);
+    addPkmnPopup(svgImage, marker);
+
+    marker.addTo(map);
 }
 
 function addHelpingLines () {
-	const RADIUS = 5;
-	const COLOR = 'black;'
-	L.circle([0, 0], {
-		radius: RADIUS,
-		color: COLOR,
-		className: 'breedingChainsLeafletCircle'
-	}).addTo(map);
+    const RADIUS = 5;
+    const COLOR = 'black;'
+    L.circle([0, 0], {
+        radius: RADIUS,
+        color: COLOR,
+        className: 'breedingChainsLeafletCircle'
+    }).addTo(map);
 
-	L.polyline([
-		[0, 0],
-		[100, 0]
-	], {
-		className: 'breedingChainsLeafletLine'
-	}).addTo(map);
+    L.polyline([
+        [0, 0],
+        [100, 0]
+    ], {
+        className: 'breedingChainsLeafletLine'
+    }).addTo(map);
 
-	L.polyline([
-		[0, 0],
-		[0, 100]
-	], {
-		className: 'breedingChainsLeafletLine'
-	}).addTo(map);
+    L.polyline([
+        [0, 0],
+        [0, 100]
+    ], {
+        className: 'breedingChainsLeafletLine'
+    }).addTo(map);
 }
 
 function addResetButton () {

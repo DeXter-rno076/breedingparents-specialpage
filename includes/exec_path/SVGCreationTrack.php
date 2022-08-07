@@ -8,43 +8,43 @@ require_once __DIR__.'/../svg_creation/SVGTag.php';
 require_once __DIR__.'/../Logger.php';
 
 class SVGCreationTrack extends Track {
-	private $frontendRoot;
+    private $frontendRoot;
 
-	public function __construct (VisualSubtree $frontendRoot) {
-		$this->frontendRoot = $frontendRoot;
-	}
+    public function __construct (VisualSubtree $frontendRoot) {
+        $this->frontendRoot = $frontendRoot;
+    }
 
-	public function passOn (): string {
-		$svgMap = $this->createSVGMapDiv();
-		$svgStructure = $this->createSVGStructure();
-		$this->addVisualStructuresToOutput($svgMap, $svgStructure);
+    public function passOn (): string {
+        $svgMap = $this->createSVGMapDiv();
+        $svgStructure = $this->createSVGStructure();
+        $this->addVisualStructuresToOutput($svgMap, $svgStructure);
 
-		return 'all ok';
-	}
+        return 'all ok';
+    }
 
-	private function createSVGMapDiv (): HTMLElement {
-		$mapDiv = new HTMLElement('div', [
-			'id' => 'breedingChainsSVGMap',
-		]);
-		return $mapDiv;
-	}
+    private function createSVGMapDiv (): HTMLElement {
+        $mapDiv = new HTMLElement('div', [
+            'id' => 'breedingChainsSVGMap',
+        ]);
+        return $mapDiv;
+    }
 
-	private function createSVGStructure (): HTMLElement {
-		Logger::statusLog('CREATING SVG STRUCTURE');
-		$timeStart = hrtime(true);
+    private function createSVGStructure (): HTMLElement {
+        Logger::statusLog('CREATING SVG STRUCTURE');
+        $timeStart = hrtime(true);
 
-		$svgRoot = new SVGTag($this->frontendRoot, Constants::UNUSED_GROUP_ID);
-		$svgStructureInHTML = $svgRoot->toHTML();
+        $svgRoot = new SVGTag($this->frontendRoot, Constants::UNUSED_GROUP_ID);
+        $svgStructureInHTML = $svgRoot->toHTML();
 
-		$timeEnd = hrtime(true);
-		$timeDiff = ($timeEnd - $timeStart) / 1000000000;
-		Logger::outputDebugMessage('svg creation needed: '.$timeDiff.'s');
+        $timeEnd = hrtime(true);
+        $timeDiff = ($timeEnd - $timeStart) / 1000000000;
+        Logger::outputDebugMessage('svg creation needed: '.$timeDiff.'s');
 
-		return $svgStructureInHTML;
-	}
+        return $svgStructureInHTML;
+    }
 
-	private function addVisualStructuresToOutput (HTMLElement $svgMapDiv, HTMLElement $svgStructure) {
-		$svgMapDiv->addToOutput();
-		$svgStructure->addToOutput();
-	}
+    private function addVisualStructuresToOutput (HTMLElement $svgMapDiv, HTMLElement $svgStructure) {
+        $svgMapDiv->addToOutput();
+        $svgStructure->addToOutput();
+    }
 }

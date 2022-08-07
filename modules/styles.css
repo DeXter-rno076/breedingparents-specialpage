@@ -28,8 +28,8 @@
 }
 
 #breedingChainsSVGMap {
-	width: 100%;
-	height: 80vh;
+    width: 100%;
+    height: 80vh;
     background-color: var(--light-background);
     border: 3px solid var(--light-border);
     border-radius: 0.5em;
@@ -41,51 +41,51 @@
 }
 
 #breedingChainsSVG line {
-	stroke: black;
-	stroke-width: 2;
+    stroke: black;
+    stroke-width: 2;
 }
 
 #breedingChainsSVG circle, #breedingChainsSVG rect,
 .breedingChainsSVGExample circle, .breedingChainsSVGExample rect {
-	stroke: black;
-	stroke-width: 2;
-	fill: none;
+    stroke: black;
+    stroke-width: 2;
+    fill: none;
 }
 
 #breedingChainsSVG circle[color=green] {
-	stroke: green;
+    stroke: green;
 }
 
 #breedingChainsSVG circle[color=yellow] {
-	stroke: yellow;
+    stroke: yellow;
 }
 
 .breedingChainsMessageBox {
-	width: 60%;
-	margin: 1em auto;
-	border-radius: 1em;
-	padding: 0.5em;
-	border-style: solid;
-	border-width: 0.5em;
-	text-align: center;
+    width: 60%;
+    margin: 1em auto;
+    border-radius: 1em;
+    padding: 0.5em;
+    border-style: solid;
+    border-width: 0.5em;
+    text-align: center;
 }
 
 .breedingChainsInfoMessage {
-	border-color: #3366cc;
+    border-color: #3366cc;
 }
 
 .breedingChainsAlertMessage, .breedingChainsErrorMessage {
-	border-color: #fa5f43;
+    border-color: #fa5f43;
 }
 
 @media only screen and (max-width: 600px) {
-	.breedingChainsMessageBox {
-		width: 90%;
-	}
+    .breedingChainsMessageBox {
+        width: 90%;
+    }
 }
 
 .breedingChainsLeafletText {
-	text-align: center;
+    text-align: center;
 }
 
 #breedingChainsMapResetButton {

@@ -2,32 +2,32 @@
 require_once 'BreedingTreeNode.php';
 
 class BreedingSubtree {
-	protected $roots;
-	protected $successors;
-	protected $hash;
+    protected $roots;
+    protected $successors;
+    protected $hash;
 
-	public function __construct (
-		BreedingTreeNode $initialRoot,
-		array $successors,
-		string $targetEggGroup,
-		array $blacklistedEggGroups
-	) {
-		$this->roots = [ $initialRoot ];
-		$this->successors = $successors;
-		$this->hash = BreedingSubtree::buildHash($targetEggGroup, $blacklistedEggGroups);	
-	}
+    public function __construct (
+        BreedingTreeNode $initialRoot,
+        array $successors,
+        string $targetEggGroup,
+        array $blacklistedEggGroups
+    ) {
+        $this->roots = [ $initialRoot ];
+        $this->successors = $successors;
+        $this->hash = BreedingSubtree::buildHash($targetEggGroup, $blacklistedEggGroups);
+    }
 
-	public function addRoot (BreedingTreeNode $root) {
-		$this->roots[] = $root;
-	}
+    public function addRoot (BreedingTreeNode $root) {
+        $this->roots[] = $root;
+    }
 
-	public function getRoots (): array {
-		return $this->roots;
-	}
+    public function getRoots (): array {
+        return $this->roots;
+    }
 
-	public function getSuccessors (): array {
-		return $this->successors;
-	}
+    public function getSuccessors (): array {
+        return $this->successors;
+    }
 
     public function addSuccessor (BreedingSubtree $node) {
         $this->successors[] = $node;
@@ -44,14 +44,14 @@ class BreedingSubtree {
         return count($successors) > 0;
     }
 
-	public function getHash (): string {
-		return $this->hash;
-	}
+    public function getHash (): string {
+        return $this->hash;
+    }
 
-	public static function buildHash (string $targetEggGroup, array $blacklistedEggGroups) {
+    public static function buildHash (string $targetEggGroup, array $blacklistedEggGroups) {
         //without sorting the egg groups the subtree structures don't stretch across multiple subtrees
         // -> far easier to handle (no sorting and dynamic line calculation needed)
         //sort($blacklistedEggGroups);
-		return $targetEggGroup.'-'.join('', $blacklistedEggGroups);
-	}
+        return $targetEggGroup.'-'.join('', $blacklistedEggGroups);
+    }
 }

@@ -9,22 +9,22 @@ require_once 'Logger.php';
 require_once 'HTMLElement.php';
 
 class SpecialBreedingChains extends SpecialPage {
-	public function __construct () {
-		parent::__construct('BreedingChains');
-	}
+    public function __construct () {
+        parent::__construct('BreedingChains');
+    }
 
-	public function execute ($args) {
-		Constants::$centralSpecialPageInstance = $this;
-		Constants::$centralOutputPageInstance = $this->getOutput();
+    public function execute ($args) {
+        Constants::$centralSpecialPageInstance = $this;
+        Constants::$centralOutputPageInstance = $this->getOutput();
 
-		Constants::$centralOutputPageInstance->setPageTitle(Constants::i18nMsg('breedingchains-title'));
+        Constants::$centralOutputPageInstance->setPageTitle(Constants::i18nMsg('breedingchains-title'));
 
-		$this->setHeaders();//seems like a must have
+        $this->setHeaders();//seems like a must have
         $this->addLoadingBar();
         $this->addFormContainer();
-		$this->addCSSandJS();
-		$this->startExecPath();
-	}
+        $this->addCSSandJS();
+        $this->startExecPath();
+    }
 
     private function addLoadingBar () {
         Constants::$centralOutputPageInstance->enableOOUI();
@@ -51,12 +51,12 @@ class SpecialBreedingChains extends SpecialPage {
 
     private function addCSSandJS () {
         $this->addJSConfigVars();
-		Constants::$centralOutputPageInstance->addModules('breedingChainsModules');
-	}
+        Constants::$centralOutputPageInstance->addModules('breedingChainsModules');
+    }
 
     private function addJSConfigVars () {
-		$moveSuggestions = $this->loadSplitExternalJSON('MediaWiki:BreedingChains/move suggestions ##INDEX##.json');
-		$pkmnSuggestions = array_keys((array) $moveSuggestions);
+        $moveSuggestions = $this->loadSplitExternalJSON('MediaWiki:BreedingChains/move suggestions ##INDEX##.json');
+        $pkmnSuggestions = array_keys((array) $moveSuggestions);
         $gameToSk = json_decode(file_get_contents(__DIR__.'/../manual_data/gamesToSk.json'));
 
         $user = $this->getUser();
@@ -79,7 +79,7 @@ class SpecialBreedingChains extends SpecialPage {
             'breedingchains-unknown-pkmn' => Constants::i18nMsg('breedingchains-unknown-pkmn'),
             'breedingchains-move-not-suggested' => Constants::i18nMsg('breedingchains-move-not-suggested'),
             'breedingchains-popup-header' => Constants::i18nMsg('breedingchains-popup-header'),
-            'breedingchains-popup-learns-d' => ((Constants::$targetGenNumber < 8) 
+            'breedingchains-popup-learns-d' => ((Constants::$targetGenNumber < 8)
                 ? Constants::i18nMsg('breedingchains-popup-learns-d-old') : Constants::i18nMsg('breedingchains-popup-learns-d-new')),
             'breedingchains-popup-learns-b' => Constants::i18nMsg('breedingchains-popup-learns-b'),
             'breedingchains-popup-learns-o' => ((Constants::$targetGenNumber < 8)
@@ -87,47 +87,47 @@ class SpecialBreedingChains extends SpecialPage {
             'breedingchains-popup-learns-e' => Constants::i18nMsg('breedingchains-popup-learns-e'),
             'breedingchains-popup-error' => Constants::i18nMsg('breedingchains-popup-error')
         ]);
-	}
+    }
 
     public function loadSplitExternalJSON (string $pageNameScheme): StdClass {
-		$pkmnDataArr = [];
-		$pageData = null;
-		$pageIndex = 0;
+        $pkmnDataArr = [];
+        $pageData = null;
+        $pageIndex = 0;
 
-		do {
-			$pkmnDataPageName = str_replace('##INDEX##', $pageIndex, $pageNameScheme);
-			$pageData = $this->getWikiPageContent($pkmnDataPageName);
+        do {
+            $pkmnDataPageName = str_replace('##INDEX##', $pageIndex, $pageNameScheme);
+            $pageData = $this->getWikiPageContent($pkmnDataPageName);
 
-			$pageDataArray = (array) $pageData;
-			$pkmnDataArr = array_merge($pkmnDataArr, $pageDataArray);
+            $pageDataArray = (array) $pageData;
+            $pkmnDataArr = array_merge($pkmnDataArr, $pageDataArray);
 
-			$pageIndex++;
-		} while (isset($pageData->continue));
+            $pageIndex++;
+        } while (isset($pageData->continue));
 
-		$pkmnDataObj = (object) $pkmnDataArr;
+        $pkmnDataObj = (object) $pkmnDataArr;
 
-		return $pkmnDataObj;
-	}
+        return $pkmnDataObj;
+    }
 
-	/*original code written by Buo and code
-	without deprecated parts written by Robbi (thanks ^^)
+    /*original code written by Buo and code
+    without deprecated parts written by Robbi (thanks ^^)
 
-	returns JSON objects and arrays
-	-> needs 2 return types which needs php 8*/
-	public function getWikiPageContent (string $title) {
-		$page = WikiPage::factory(Title::newFromText($title));
+    returns JSON objects and arrays
+    -> needs 2 return types which needs php 8*/
+    public function getWikiPageContent (string $title) {
+        $page = WikiPage::factory(Title::newFromText($title));
 
-		if(!$page->exists()) {
-			throw new Exception('wiki page '.$title.' not found');
-		}
+        if(!$page->exists()) {
+            throw new Exception('wiki page '.$title.' not found');
+        }
 
-		$pageData = ContentHandler::getContentText($page->getContent());
+        $pageData = ContentHandler::getContentText($page->getContent());
 
-		return json_decode($pageData);
-	}
+        return json_decode($pageData);
+    }
 
-	public function startExecPath () {
-		$successCode = '';
+    public function startExecPath () {
+        $successCode = '';
         try {
             $formValidationCheckPoint = new FormValidationCheckpoint($_GET);
             $successCode = $formValidationCheckPoint->passOn();
@@ -141,6 +141,6 @@ class SpecialBreedingChains extends SpecialPage {
             Logger::flush();
         }
 
-		return Status::newGood($successCode);
-	}
+        return Status::newGood($successCode);
+    }
 }

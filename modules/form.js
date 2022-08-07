@@ -71,7 +71,7 @@ $( function () {
     submitButton.on('click', submitForm);
     gameInput.on('change', function () {
         clearErrorsAndWarningsIfNonEmpty(gameInput, gameInputField);
-        
+
         if (!gameNames.includes(gameInput.getValue())) {
             gameInputField.setWarnings([
                 mw.config.get('breedingchains-unknown-game').replace('$1', gameInput.getValue())
@@ -135,7 +135,7 @@ $( function () {
             pkmnInputField,
             moveInputField
         ]);
-        innerFieldSets.push(textInputFieldset);    
+        innerFieldSets.push(textInputFieldset);
 
         if (mw.config.get('breedingchains-display-debug-checkboxes')) {
             const buttonFieldSet = new OO.ui.FieldsetLayout();
@@ -222,7 +222,7 @@ $( function () {
         if (displayStatusLogs.isSelected !== undefined && displayStatusLogs.isSelected()) {
             qs.append('displayStatusLogs', '1');
         }
-        if (createDetailedSuccessorFilterLogs.isSelected !== undefined 
+        if (createDetailedSuccessorFilterLogs.isSelected !== undefined
                 && createDetailedSuccessorFilterLogs.isSelected()) {
             qs.append('createDetailedSuccessorFilterLogs', '1');
         }

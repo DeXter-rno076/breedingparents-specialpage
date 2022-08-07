@@ -39,35 +39,35 @@ class FormValidationCheckpoint extends Checkpoint {
         $gameInput = trim($this->formData['targetGame']);
         $regex = '/[^a-zA-Z:\'ßẞüÜ2é ]/';
 
-		if (preg_match($regex, $gameInput)) {
-			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-game'));
-			$alertMessage->outputOnce();
-			return true;
-		} else {
+        if (preg_match($regex, $gameInput)) {
+            $alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-game'));
+            $alertMessage->outputOnce();
+            return true;
+        } else {
             return false;
         }
     }
 
     private function checkPkmnInput (): bool {
         $pkmnInput = trim($this->formData['targetPkmn']);
-		$regex = '/[^a-zA-Zßäéü\-♂♀2:\s]/';
-		if (preg_match($regex, $pkmnInput)) {
-			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-pkmn'));
-			$alertMessage->outputOnce();
-			return true;
-		} else {
+        $regex = '/[^a-zA-Zßäéü\-♂♀2:\s]/';
+        if (preg_match($regex, $pkmnInput)) {
+            $alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-pkmn'));
+            $alertMessage->outputOnce();
+            return true;
+        } else {
             return false;
         }
     }
 
     private function checkMoveInput (): bool {
         $moveInput = trim($this->formData['targetMove']);
-		$regex = '/[^a-zA-ZÜßäöü\- 2\s]/';
-		if (preg_match($regex, $moveInput)) {
-			$alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-move'));
-			$alertMessage->outputOnce();
-			return true;
-		} else {
+        $regex = '/[^a-zA-ZÜßäöü\- 2\s]/';
+        if (preg_match($regex, $moveInput)) {
+            $alertMessage = new AlertMessage(Constants::i18nMsg('breedingchains-invalid-move'));
+            $alertMessage->outputOnce();
+            return true;
+        } else {
             return false;
         }
     }

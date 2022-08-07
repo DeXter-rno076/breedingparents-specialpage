@@ -24,7 +24,7 @@ class BreedingRootSubtree extends BreedingSubtree {
     public function addRoot (BreedingTreeNode $node) {
         Logger::wlog('called addRoot on BreedingRootSubtree');
     }
-    
+
     public function getRoots (): array {
         return [$this->root];
     }

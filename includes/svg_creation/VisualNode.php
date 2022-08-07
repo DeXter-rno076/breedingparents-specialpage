@@ -11,147 +11,147 @@ require_once __DIR__.'/../Constants.php';
 use MediaWiki\MediaWikiServices;
 
 class VisualNode extends Pkmn {
-	private $isRoot;
+    private $isRoot;
 
-	private $x;
-	private $y;
+    private $x;
+    private $y;
 
-	private $iconName;
-	private $iconUrl = '';
-	private $iconWidth = 0;
-	private $iconHeight = 0;
-	private $fileError = null;
+    private $iconName;
+    private $iconUrl = '';
+    private $iconWidth = 0;
+    private $iconHeight = 0;
+    private $fileError = null;
 
-	private $groupId;
+    private $groupId;
     private $learnabilityCode;
     private $correctlyWrittenName;
 
-	public function __construct (BreedingTreeNode $breedingTreeNode) {
-		parent::__construct($breedingTreeNode->getName());
+    public function __construct (BreedingTreeNode $breedingTreeNode) {
+        parent::__construct($breedingTreeNode->getName());
 
-		$this->isRoot = $breedingTreeNode instanceof PkmnTreeRoot;
-		$this->groupId = Constants::generateGroupId();
+        $this->isRoot = $breedingTreeNode instanceof PkmnTreeRoot;
+        $this->groupId = Constants::generateGroupId();
         $this->learnabilityCode = $breedingTreeNode->getLearnabilityStatus()->buildLearnabilityCode();
-		$this->iconName = $breedingTreeNode->buildIconName();
+        $this->iconName = $breedingTreeNode->buildIconName();
         $this->correctlyWrittenName = $breedingTreeNode->getCorrectlyWrittenName();
-	}
+    }
 
-	public function setIconData () {
-		try {
-			$this->tryLoadAndSetIconData();
-		} catch (FileNotFoundException $e) {
-			$this->setFileError($e);
-		}
-	}
+    public function setIconData () {
+        try {
+            $this->tryLoadAndSetIconData();
+        } catch (FileNotFoundException $e) {
+            $this->setFileError($e);
+        }
+    }
 
-	private function tryLoadAndSetIconData () {
-		$iconFileObj = VisualNode::getIcon($this->iconName);
-		Logger::statusLog('icon file for '.$this.' successfully loaded');
+    private function tryLoadAndSetIconData () {
+        $iconFileObj = VisualNode::getIcon($this->iconName);
+        Logger::statusLog('icon file for '.$this.' successfully loaded');
 
-		$this->iconUrl = $iconFileObj->getUrl();
-		$this->iconWidth = $iconFileObj->getWidth();
-		$this->iconHeight = $iconFileObj->getHeight();
-	}
+        $this->iconUrl = $iconFileObj->getUrl();
+        $this->iconWidth = $iconFileObj->getWidth();
+        $this->iconHeight = $iconFileObj->getHeight();
+    }
 
-	public static function getIcon (string $fileURL): File {
-		$fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileURL);
+    public static function getIcon (string $fileURL): File {
+        $fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileURL);
 
-		if ($fileObj === false) {
-			throw new FileNotFoundException($fileURL);
-		}
+        if ($fileObj === false) {
+            throw new FileNotFoundException($fileURL);
+        }
 
-		return $fileObj;
-	}
+        return $fileObj;
+    }
 
-	private function setFileError (FileNotFoundException $e) {
-		Logger::statusLog('couldnt load file obj of '.$this);
-		$this->fileError = $e;
-	}	
+    private function setFileError (FileNotFoundException $e) {
+        Logger::statusLog('couldnt load file obj of '.$this);
+        $this->fileError = $e;
+    }
 
-	public function calculateDiagonal (): int {
-		return Constants::SVG_CIRCLE_DIAMETER;
-	}		
+    public function calculateDiagonal (): int {
+        return Constants::SVG_CIRCLE_DIAMETER;
+    }
 
     public function calcAndSetCenteredXCoordinate (int $deepness): int {
-		$uncenteredX = $deepness * Constants::PKMN_MARGIN_HORIZONTAL;
-		$this->x = $this->centerXCoordinate($uncenteredX);
+        $uncenteredX = $deepness * Constants::PKMN_MARGIN_HORIZONTAL;
+        $this->x = $this->centerXCoordinate($uncenteredX);
         Logger::statusLog('calculated x = '.$this->x.', for '.$this);
         return $this->x;
-	}
+    }
 
-	private function centerXCoordinate (int $x): int {
-		return $x - $this->getIconWidth() / 2; 
-	}
+    private function centerXCoordinate (int $x): int {
+        return $x - $this->getIconWidth() / 2;
+    }
 
-	public function getDisplayEventMarker (): bool {
-		return str_contains($this->learnabilityCode, 'e');
-	}
+    public function getDisplayEventMarker (): bool {
+        return str_contains($this->learnabilityCode, 'e');
+    }
 
-	public function getDisplayOldGenMarker (): bool {
-		return str_contains($this->learnabilityCode, 'o');
-	}
+    public function getDisplayOldGenMarker (): bool {
+        return str_contains($this->learnabilityCode, 'o');
+    }
 
-	public function getIconUrl (): string {
-		return $this->iconUrl;
-	}
+    public function getIconUrl (): string {
+        return $this->iconUrl;
+    }
 
-	public function getIconWidth (): int {
-		return $this->iconWidth;
-	}
+    public function getIconWidth (): int {
+        return $this->iconWidth;
+    }
 
-	public function getIconHeight (): int {
-		return $this->iconHeight;
-	}
+    public function getIconHeight (): int {
+        return $this->iconHeight;
+    }
 
-	public function getFileError (): ?FileNotFoundException {
-		return $this->fileError;
-	}
+    public function getFileError (): ?FileNotFoundException {
+        return $this->fileError;
+    }
 
-	public function getTreeSectionHeight (): int {
-		return $this->treeSectionHeight;
-	}
+    public function getTreeSectionHeight (): int {
+        return $this->treeSectionHeight;
+    }
 
-	public function getX (): int {
-		return $this->x;
-	}
+    public function getX (): int {
+        return $this->x;
+    }
 
-	public function getMiddleX (): int {
-		$middleX = $this->getX() + $this->getWidth() / 2;
-		return $middleX;
-	}
+    public function getMiddleX (): int {
+        $middleX = $this->getX() + $this->getWidth() / 2;
+        return $middleX;
+    }
 
-	public function getIconX (): int {
-		return $this->getX();
-	}
+    public function getIconX (): int {
+        return $this->getX();
+    }
 
     public function setY (int $y) {
         $this->y = $y;
     }
 
-	public function getY (): int {
-		return $this->y;
-	}
+    public function getY (): int {
+        return $this->y;
+    }
 
-	public function getMiddleY (): int {
-		$middleY = $this->getY() + $this->getHeight() / 2;
-		return $middleY;
-	}
+    public function getMiddleY (): int {
+        $middleY = $this->getY() + $this->getHeight() / 2;
+        return $middleY;
+    }
 
-	public function getWidth (): int {
-		return $this->iconWidth;
-	}
+    public function getWidth (): int {
+        return $this->iconWidth;
+    }
 
-	public function getHeight (): int {
-		return $this->iconHeight;
-	}
+    public function getHeight (): int {
+        return $this->iconHeight;
+    }
 
-	public function isRoot (): bool {
-		return $this->isRoot;
-	}
+    public function isRoot (): bool {
+        return $this->isRoot;
+    }
 
-	public function getGroupId (): int {
-		return $this->groupId;
-	}
+    public function getGroupId (): int {
+        return $this->groupId;
+    }
 
     public function getLearnabilityCode (): string {
         return $this->learnabilityCode;
@@ -161,33 +161,33 @@ class VisualNode extends Pkmn {
         return $this->correctlyWrittenName;
     }
 
-	public function getArticleLink (): string {
-		if (Constants::isPkmn($this->getName())) {
-			try {
-				$pkmnData = new PkmnData($this->getName());
-				$linkSuperPage = $pkmnData->getArticleLinkSuperPageName();
-				$linkName = Constants::i18nMsg('breedingchains-learnsetpage-link',
-					$linkSuperPage, Constants::$targetGenNumber);
-				return $linkName;
-			} catch (Exception $e) {
-				$eMessage = new ErrorMessage($e);
-				$eMessage->output();
-			}
-		} else {
-			return $this->getName();
-		}
-	}
+    public function getArticleLink (): string {
+        if (Constants::isPkmn($this->getName())) {
+            try {
+                $pkmnData = new PkmnData($this->getName());
+                $linkSuperPage = $pkmnData->getArticleLinkSuperPageName();
+                $linkName = Constants::i18nMsg('breedingchains-learnsetpage-link',
+                    $linkSuperPage, Constants::$targetGenNumber);
+                return $linkName;
+            } catch (Exception $e) {
+                $eMessage = new ErrorMessage($e);
+                $eMessage->output();
+            }
+        } else {
+            return $this->getName();
+        }
+    }
 
-	/**
-	 * @return string - VisualNode:<pkmn name>;(<x>;<y>);<branch position>;;
-	 */
-	public function getLogInfo (): string {
-		$msg = 'VisualNode:\'\'\''.$this->name.'\'\'\';('
-			.(isset($this->x) ? $this->x : '-').';'
-			.(isset($this->y) ? $this->y : '-').')';
-		$msg .= ';;';
-		return $msg;
-	}
+    /**
+     * @return string - VisualNode:<pkmn name>;(<x>;<y>);<branch position>;;
+     */
+    public function getLogInfo (): string {
+        $msg = 'VisualNode:\'\'\''.$this->name.'\'\'\';('
+            .(isset($this->x) ? $this->x : '-').';'
+            .(isset($this->y) ? $this->y : '-').')';
+        $msg .= ';;';
+        return $msg;
+    }
 
     public function calcSingleNodeHeight (): int {
         //todo replace magic number with constant
