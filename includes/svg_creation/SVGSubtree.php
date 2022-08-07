@@ -60,11 +60,10 @@ class SVGSubtree {
 
 	private function createNodeIcon (VisualNode $node): SVGLink {
 		Logger::statusLog($node.' has no file error set => can add icon');
-		$pkmnIconSVG = new SVGImg($node, $node->getGroupId());
+		$pkmnIconSVG = new SVGImg($node);
 		$linkSVG = new SVGLink(
 			$node,
 			$pkmnIconSVG,
-			$node->getGroupId()
 		);
 		return $linkSVG;
 	}
@@ -270,15 +269,15 @@ class SVGSubtree {
 			'yOffset' => $yOffset
 		];
 
-		$this->addCircle($htmlTagCreationOptions);
-		$this->addIconOrFileErrorToHTMLTagArray($htmlTagCreationOptions);
+		$this->addCircles($htmlTagCreationOptions);
+		$this->addIconsOrFileErrorsToHTMLTagArray($htmlTagCreationOptions);
 		$this->addnodeConnectionsToHTMLTagArray($htmlTagCreationOptions);
 		$this->addSuccessorsToHTMLTagArray($htmlTagCreationOptions);
 
 		return $tagArray;
 	}
 
-	private function addIconOrFileErrorToHTMLTagArray (array &$htmlTagCreationOptions) {
+	private function addIconsOrFileErrorsToHTMLTagArray (array &$htmlTagCreationOptions) {
         foreach ($this->nodeLinks as $nodeLink) {
     		array_push(
     			$htmlTagCreationOptions['tagArray'],
@@ -287,12 +286,11 @@ class SVGSubtree {
         }
 	}
 
-	private function addCircle (array &$htmlTagCreationOptions) {
-		$circleColor = '#3388ff';
-
-        foreach ($this->visualRoots as $root) {        
+	private function addCircles (array &$htmlTagCreationOptions) {
+        foreach ($this->visualRoots as $root) {
+            $circleColor = '#3388ff';
 		    if ($root->getDisplayOldGenMarker()) {
-		    	$circleColor = 'yellow';
+		    	$circleColor = '#ee0';
 		    } else if ($root->getDisplayEventMarker()) {
 		    	$circleColor = 'green';
 		    }

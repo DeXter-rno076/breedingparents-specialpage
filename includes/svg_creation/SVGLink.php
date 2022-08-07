@@ -11,8 +11,8 @@ class SVGLink extends SVGElement {
 	private $href;
 	private $innerEl;
 
-	public function __construct(VisualNode $visualNode, SVGImg $innerEl, int $groupId) {
-		parent::__construct('a', $groupId);
+	public function __construct(VisualNode $visualNode, SVGImg $innerEl) {
+		parent::__construct('a', $visualNode->getGroupId());
 		$this->href = $visualNode->getArticleLink();
 		$this->innerEl = $innerEl;
 

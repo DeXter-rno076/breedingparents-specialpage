@@ -15,8 +15,8 @@ class SVGImg extends SVGElement {
 
     private $learnabilityCode;
 
-	public function __construct (VisualNode $visualNode, int $groupId) {
-		parent::__construct('image', $groupId);
+	public function __construct (VisualNode $visualNode) {
+		parent::__construct('image', $visualNode->getGroupId());
 
 		$this->x = $visualNode->getX();
 		$this->y = $visualNode->getY();
@@ -26,6 +26,7 @@ class SVGImg extends SVGElement {
 		$this->href = $visualNode->getIconUrl();
 
         $this->learnabilityCode = $visualNode->getLearnabilityCode();
+        Logger::statusLog('learnability code for '.$visualNode->getName().': '.$this->learnabilityCode);
 
 		Logger::statusLog('created '.$this);
 	}
