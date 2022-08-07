@@ -48,7 +48,7 @@ $( function () {
         createDetailedSuccessorFilterLogs, {label: 'print detailed logs', align: 'inline'});
 
     const submitButton = new OO.ui.ButtonInputWidget({
-        label: 'submit',
+        label: mw.config.get('breedingchains-submit-text'),
         icon: 'check',
         flags: 'progressive',
         type: 'submit'
@@ -63,7 +63,9 @@ $( function () {
         clearErrorsAndWarningsIfNonEmpty(gameInput, gameInputField);
         
         if (!gameNames.includes(gameInput.getValue())) {
-            gameInputField.setWarnings(['Unbekannter Spielname.']);
+            gameInputField.setWarnings([
+                mw.config.get('breedingchains-unknown-game').replace('$1', gameInput.getValue())
+            ]);
         }
 
         changeMoveSuggestions();
@@ -72,7 +74,9 @@ $( function () {
         clearErrorsAndWarningsIfNonEmpty(pkmnInput, pkmnInputField);
 
         if (!pkmnNames.includes(pkmnInput.getValue())) {
-            pkmnInputField.setWarnings(['Unbekannter Pokémon-Name.']);
+            pkmnInputField.setWarnings([
+                mw.config.get('breedingchains-unknown-pkmn').replace('$1', pkmnInput.getValue())
+            ]);
         }
 
         changeMoveSuggestions();
@@ -84,6 +88,12 @@ $( function () {
     });
 
     $('#specialBreedingChainsLoadingBar').remove();
+    const breedingChainsSVGMap = $('#breedingChainsSVGMap');
+    if (breedingChainsSVGMap.length) {
+        breedingChainsSVGMap[0].scrollIntoView({
+            behavior: 'smooth'
+        });
+    }
 
     function clearErrorsAndWarningsIfNonEmpty (input, field) {
         if (input.getValue() !== '') {

@@ -72,7 +72,12 @@ class SpecialBreedingChains extends SpecialPage {
             'breedingchains-move-input-placeholder' => Constants::i18nMsg('breedingchains-move'),
             'breedingchains-game-required' => Constants::i18nMsg('breedingchains-game-required'),
             'breedingchains-pkmn-required' => Constants::i18nMsg('breedingchains-pkmn-required'),
-            'breedingchains-move-required' => Constants::i18nMsg('breedingchains-move-required')
+            'breedingchains-move-required' => Constants::i18nMsg('breedingchains-move-required'),
+            'breedingchains-whatshappening' => Constants::i18nMsg('breedingchains-whatshappening'),
+            'breedingchains-submit-text' => Constants::i18nMsg('breedingchains-submit-text'),
+            'breedingchains-unknown-game' => Constants::i18nMsg('breedingchains-unknown-game'),
+            'breedingchains-unknown-pkmn' => Constants::i18nMsg('breedingchains-unknown-pkmn'),
+            'breedingchains-unknown-move' => Constants::i18nMsg('breedingchains-unknown-move')
         ]);
 	}
 
