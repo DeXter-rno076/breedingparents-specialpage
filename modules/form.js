@@ -88,12 +88,8 @@ $( function () {
     });
 
     $('#specialBreedingChainsLoadingBar').remove();
-    const breedingChainsSVGMap = $('#breedingChainsSVGMap');
-    if (breedingChainsSVGMap.length) {
-        breedingChainsSVGMap[0].scrollIntoView({
-            behavior: 'smooth'
-        });
-    }
+
+    setInitialScrollState();
 
     function clearErrorsAndWarningsIfNonEmpty (input, field) {
         if (input.getValue() !== '') {
@@ -234,5 +230,23 @@ $( function () {
         }
 
         return errorOccured;
+    }
+
+    function setInitialScrollState () {
+        const msgBoxes = $('.breedingChainsMessageBox');
+        if (msgBoxes.length) {
+            msgBoxes[0].scrollIntoView({
+                behavior: 'smooth'
+            });
+            return;
+        }
+
+        const breedingChainsSVGMap = $('#breedingChainsSVGMap');
+        if (breedingChainsSVGMap.length) {
+            breedingChainsSVGMap[0].scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
     }
 });
