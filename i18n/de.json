@@ -14,7 +14,6 @@
 	"breedingchains-game": "Spiel:",
 	"breedingchains-evo": "Entwicklung",
 	"breedingchains-error": "Oh nein, das hätte nicht passieren sollen :( Bitte melde das auf unserem Discordserver oder in der [[PokéWiki:Auskunft|Auskunft]].<br /> Fehler: $1",
-	"breedingchains-unknown-pkmn": "Das Pokémon $1 ist mir unbekannt. Hast du dich eventuell vertippt?",
 	"breedingchains-cant-learn": "$1 kann die Attacke $2 '''nicht''' erlernen.",
 	"breedingchains-can-learn-directly-old-gen": "$1 kann die Attacke $2 direkt per Level-Up, TMVM oder Attacken-Lehrer erlernen.",
 	"breedingchains-can-learn-directly-new-gen": "$1 kann die Attacke $2 direkt per Level-Up, TMTP oder Attacken-Lehrer erlernen.",
@@ -32,9 +31,11 @@
 	"breedingchains-easteregg-greenchu": "Das Phänomen Greenchu ist noch weitgehend unerforscht. Dementsprechend wissen wir nicht, ob es $1 überhaupt erlernen kann. Selbst in der Entstehungsgeschichte bestehen noch große Lücken. Falls du dort etwas weißt, teile es uns bitte mit :D",
 	"breedingchains-easteregg-dexter": "... Ob ich $1 erlernen kann? Ich bin vielleicht angehender professioneller Druckerreparierer, Teilzeit-Mod und Discord-Hobbypsychologe, aber ich bin (leider oder zum Glück) kein Pokémon!",
 	"breedingchains-learnsetpage-link": "$1/Attacken#$2._Generation",
-	"breedingchains-unknown-move": "Die Attacke $1 ist mir unbekannt. Vermutlich hast du dich vertippt.",
-	"breedingchains-unknown-game": "Das Spiel $1 ist mir unbekannt oder unterstütze ich nicht. Benutze am besten den Dropdown der Eingabebox (in manchen Browsern ist ein Doppelklick auf die Box nötig). Beachte, dass nur Vorschläge angezeigt werden, die zum aktuell eingegebenen Text passen.",
+    "breedingchains-unknown-pkmn": "Das Pokémon $1 ist mir unbekannt. Hast du dich eventuell vertippt?",
+	"breedingchains-unknown-move": "Die Attacke $1 ist mir unbekannt. Hast du dich eventuell vertippt?",
+	"breedingchains-unknown-game": "Das Spiel $1 ist mir unbekannt oder unterstütze ich nicht. Hast du dich eventuell vertippt?",
     "breedingchains-game-required": "Bitte gib ein Spiel an.",
     "breedingchains-pkmn-required": "Bitte gib ein Pokémon an.",
-    "breedingchains-move-required": "Bitte gib eine Attacke an."
+    "breedingchains-move-required": "Bitte gib eine Attacke an.",
+    "breedingchains-whatshappening": "Keine Ahnung was hier zu sehen ist? Schau dir mal [[Zucht]] und vor allem [[Ei-Attacken]] an."
 }
