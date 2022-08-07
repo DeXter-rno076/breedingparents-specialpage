@@ -36,7 +36,7 @@
     "breedingchains-whatshappening": "No idea what's displayed here? Look into the pages [[Zucht]] and [[Ei-Attacken]].",
     "breedingchains-popup-learns-d-old": "Directly via level up, TM/HM or a move tutor",
     "breedingchains-popup-learns-d-new": "Directly via level up, TM/TR or a move tutor",
-    "breedingchains-popup-learns-b": "Via breeding with one of the directly following Pokémon on the right as a parent.",
+    "breedingchains-popup-learns-b": "Via breeding with one of the directly following Pokémon on the right as a parent. If however this Pokémon is the end of a path, it doesn't have any suiting breeding parents.",
     "breedingchains-popup-learns-o-old": "In an older generation via level up, TM/HM or a move tutor.",
     "breedingchains-popup-learns-o-new": "In an older generation via level up, TM/TR or a move tutor",
     "breedingchains-popup-learns-e": "Via an event distribution.",

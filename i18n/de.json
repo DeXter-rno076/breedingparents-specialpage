@@ -37,7 +37,7 @@
     "breedingchains-popup-header": "kann die Attacke über folgende Wege erlernen:",
     "breedingchains-popup-learns-d-old": "Direkt über Level-Up, TM/VM oder einen Attacken-Lehrer.",
     "breedingchains-popup-learns-d-new": "Direkt über Level-Up, TM/TP oder einen Attacken-Lehrer.",
-    "breedingchains-popup-learns-b": "Per Zucht mit einem rechts direkt folgenden Pokémon als Elter.",
+    "breedingchains-popup-learns-b": "Per Zucht mit einem rechts direkt folgenden Pokémon als Elter. Sollte dieses Pokémon jedoch am Ende eines Pfades sein, hat es keine passenden Zuchteltern.",
     "breedingchains-popup-learns-o-old": "In einer älteren Generation über Level-Up, TM/VM oder einem Attacken-Lehrer",
     "breedingchains-popup-learns-o-new": "In einer älteren Generation über Level-Up, TM/TP oder einem Attacken-Lehrer.",
     "breedingchains-popup-learns-e": "Durch eine Eventverteilung.",
