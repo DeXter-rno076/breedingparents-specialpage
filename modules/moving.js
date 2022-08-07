@@ -146,8 +146,13 @@ function addPkmnPopup (svgEl, leafletEl) {
 	} else {
         const text = document.createElement('div');
 
-        text.appendChild(createPkmnLinkTag(pkmnLinks));
-        text.appendChild(buildLearnabilityString(learnability));
+        const pkmnLink = createPkmnLinkTag(pkmnLinks);
+        text.appendChild(pkmnLink);
+        const learnabilityString = buildLearnabilityString(learnability);
+        if (learnabilityString !== '') {
+            pkmnLink.classList.add('breedingchains-popup-non-single-link')
+            text.appendChild(learnabilityString);
+        }
 
 		leafletEl.bindPopup(text);
 	}
@@ -191,6 +196,9 @@ function createPkmnLinkTag (pkmnLinks) {
 }
 
 function buildLearnabilityString (learnability) {
+    if (learnability === '') {
+        return '';
+    }
     const textDiv = document.createElement('div');
     const headerText = document.createTextNode(mw.config.get('breedingchains-popup-header'));
     textDiv.appendChild(headerText);

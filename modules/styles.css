@@ -35,7 +35,7 @@
     border-radius: 0.5em;
 }
 
-#breedingChainsSVGMap .leaflet-popup-content a {
+.breedingchains-popup-non-single-link {
     float: left;
     margin-right: 0.25em;
 }
