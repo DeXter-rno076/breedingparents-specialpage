@@ -142,7 +142,7 @@ class SVGSubtree {
             Logger::elog($visualSubtree.' has no roots');
             return 0;
         }
-		return $firstRoot->getMiddleX() + Constants::PKMN_MARGIN_HORIZONTAL / 3;
+		return $firstRoot->getMiddleX() + Constants::PKMN_MARGIN_HORIZONTAL / 1.5;
 	}
 
 	private function addLeftHalfConnectionLines (VisualSubtree $subtree) {
