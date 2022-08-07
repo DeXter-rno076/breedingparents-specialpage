@@ -11,8 +11,6 @@ require_once __DIR__.'/../Constants.php';
 use MediaWiki\MediaWikiServices;
 
 class VisualNode extends Pkmn {
-	private $displayEventMarker;
-	private $displayOldGenMarker;
 	private $isRoot;
 
 	private $x;
@@ -25,16 +23,14 @@ class VisualNode extends Pkmn {
 	private $fileError = null;
 
 	private $groupId;
-    private $learnability;
+    private $learnabilityCode;
 
 	public function __construct (BreedingTreeNode $breedingTreeNode) {
 		parent::__construct($breedingTreeNode->getName());
 
-		$this->displayEventMarker = $breedingTreeNode->getLearnabilityStatus()->getLearnsByEvent();
-		$this->displayOldGenMarker = $breedingTreeNode->getLearnabilityStatus()->getLearnsByOldGen();
 		$this->isRoot = $breedingTreeNode instanceof PkmnTreeRoot;
 		$this->groupId = Constants::generateGroupId();
-        $this->learnability = $breedingTreeNode->getLearnabilityStatus();
+        $this->learnabilityCode = $breedingTreeNode->getLearnabilityStatus()->buildLearnabilityCode();
 		$this->iconName = $breedingTreeNode->buildIconName();
 	}
 
@@ -85,11 +81,11 @@ class VisualNode extends Pkmn {
 	}
 
 	public function getDisplayEventMarker (): bool {
-		return $this->displayEventMarker;
+		return str_contains($this->learnabilityCode, 'e');
 	}
 
 	public function getDisplayOldGenMarker (): bool {
-		return $this->displayOldGenMarker;
+		return str_contains($this->learnabilityCode, 'o');
 	}
 
 	public function getIconUrl (): string {
@@ -155,7 +151,7 @@ class VisualNode extends Pkmn {
 	}
 
     public function getLearnabilityCode (): string {
-        return $this->learnability->buildLearnabilityCode();
+        return $this->learnabilityCode;
     }
 
 	public function getArticleLink (): string {
