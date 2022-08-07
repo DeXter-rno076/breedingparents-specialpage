@@ -4,9 +4,12 @@ $( function () {
     const moveSuggestions = mw.config.get('breedingchains-move-suggestions');
     const pkmnNames = Object.keys(moveSuggestions);
 
+    let currentMoveSuggestions = [];
+
     const qsParams = new Proxy(new URLSearchParams(window.location.search), {
         get: (searchParams, prop) => searchParams.get(prop),
     });
+
 
     const gameInput = new OO.ui.ComboBoxInputWidget({
         placeholder: mw.config.get('breedingchains-game-input-placeholder'),
@@ -15,12 +18,14 @@ $( function () {
     });
     const gameInputField = new OO.ui.FieldLayout(gameInput);
 
+
     const pkmnInput = new OO.ui.ComboBoxInputWidget({
         placeholder: mw.config.get('breedingchains-pkmn-input-placeholder'),
         value: qsParams.targetPkmn || undefined,
         options: arrayToOptionsArray(pkmnNames)
     });
     const pkmnInputField = new OO.ui.FieldLayout(pkmnInput);
+
 
     const moveInput = new OO.ui.ComboBoxInputWidget({
         placeholder: mw.config.get('breedingchains-move-input-placeholder'),
@@ -29,11 +34,13 @@ $( function () {
     });
     const moveInputField = new OO.ui.FieldLayout(moveInput);
 
+
     const displayDebugLogs = new OO.ui.CheckboxInputWidget({
         selected: qsParams.displayDebugLogs || false
     });
     const displayDebugLogsField = new OO.ui.FieldLayout(
         displayDebugLogs, {label: 'display debug logs', align: 'inline'});
+
 
     const displayStatusLogs = new OO.ui.CheckboxInputWidget({
         selected: qsParams.displayStatusLogs || false
@@ -41,11 +48,13 @@ $( function () {
     const displayStatusLogsField = new OO.ui.FieldLayout(
         displayStatusLogs, {label: 'display status logs', align: 'inline'});
 
+
     const createDetailedSuccessorFilterLogs = new OO.ui.CheckboxInputWidget({
         selected: qsParams.createDetailedSuccessorFilterLogs || false
     });
     const createDetailedSuccessorFilterLogsField = new OO.ui.FieldLayout(
         createDetailedSuccessorFilterLogs, {label: 'print detailed logs', align: 'inline'});
+
 
     const submitButton = new OO.ui.ButtonInputWidget({
         label: mw.config.get('breedingchains-submit-text'),
@@ -54,6 +63,7 @@ $( function () {
         type: 'submit'
     });
     const submitButtonField = new OO.ui.FieldLayout(submitButton);
+
 
     addComponents();
     changeMoveSuggestions();
@@ -83,12 +93,18 @@ $( function () {
     });
     moveInput.on('change', function () {
         clearErrorsAndWarningsIfNonEmpty(moveInput, moveInputField);
+        const moveInputStr = moveInput.getValue();
 
-        //todo set warning if move not in suggestions
+        if (moveInputStr !== '' && !currentMoveSuggestions.includes(moveInputStr)) {
+            moveInputField.setWarnings([
+                mw.config.get('breedingchains-move-not-suggested')
+                                .replace('$1', moveInputStr)
+                                .replace('$2', pkmnInput.getValue())
+            ]);
+        }
     });
 
     $('#specialBreedingChainsLoadingBar').remove();
-
     setInitialScrollState();
 
     function clearErrorsAndWarningsIfNonEmpty (input, field) {
@@ -108,7 +124,9 @@ $( function () {
     function addComponents () {
         const wrapperId = 'specialBreedingChainsFormContainer';
 
-        const outerFieldset = new OO.ui.FieldsetLayout();
+        const outerFieldset = new OO.ui.FieldsetLayout({
+            id: 'specialBreedingChainsForm'
+        });
         const innerFieldSets = [];
 
         const textInputFieldset = new OO.ui.FieldsetLayout();
@@ -159,6 +177,7 @@ $( function () {
         const targetSuggestionsAsOptionsArray = arrayToOptionsArray(targetSuggestions);
 
         moveInput.setOptions(targetSuggestionsAsOptionsArray);
+        currentMoveSuggestions = targetSuggestions;
     }
 
     function getMoveSuggestionsForGame (suggestions, game) {

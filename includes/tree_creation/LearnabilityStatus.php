@@ -9,6 +9,24 @@ class LearnabilityStatus {
 		return $this->learnsDirectly || $this->learnsByBreeding || $this->learnsByEvent || $this->learnsByOldGen;
 	}
 
+    /**
+     * learnability info encoded as a string
+     * char is set -> can learn in that way
+     * d - can learn directly
+     * b - can learn by breeding
+     * o - can learn in old gen
+     * e - can lern by event
+     */
+    public function buildLearnabilityCode (): string {
+        $code = '';
+        if ($this->learnsDirectly) $code .= 'd';
+        if ($this->learnsByBreeding) $code .= 'b';
+        if ($this->learnsByOldGen) $code .= 'o';
+        if ($this->learnsByEvent) $code .= 'e';
+
+        return $code;
+    }
+
 	public function setLearnsDirectly () {
 		$this->learnsDirectly = true;
 	}

@@ -77,7 +77,15 @@ class SpecialBreedingChains extends SpecialPage {
             'breedingchains-submit-text' => Constants::i18nMsg('breedingchains-submit-text'),
             'breedingchains-unknown-game' => Constants::i18nMsg('breedingchains-unknown-game'),
             'breedingchains-unknown-pkmn' => Constants::i18nMsg('breedingchains-unknown-pkmn'),
-            'breedingchains-unknown-move' => Constants::i18nMsg('breedingchains-unknown-move')
+            'breedingchains-move-not-suggested' => Constants::i18nMsg('breedingchains-move-not-suggested'),
+            'breedingchains-popup-header' => Constants::i18nMsg('breedingchains-popup-header'),
+            'breedingchains-popup-learns-d' => ((Constants::$targetGenNumber < 8) 
+                ? Constants::i18nMsg('breedingchains-popup-learns-d-old') : Constants::i18nMsg('breedingchains-popup-learns-d-new')),
+            'breedingchains-popup-learns-b' => Constants::i18nMsg('breedingchains-popup-learns-b'),
+            'breedingchains-popup-learns-o' => ((Constants::$targetGenNumber < 8)
+                ? Constants::i18nMsg('breedingchains-popup-learns-o-old') : Constants::i18nMsg('breedingchains-popup-learns-o-new')),
+            'breedingchains-popup-learns-e' => Constants::i18nMsg('breedingchains-popup-lears-e'),
+            'breedingchains-popup-error' => Constants::i18nMsg('breedingchains-popup-error')
         ]);
 	}
 

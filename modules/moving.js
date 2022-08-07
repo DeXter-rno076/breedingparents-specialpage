@@ -23,7 +23,7 @@ const map = L.map('breedingChainsSVGMap', {
 	crs: L.CRS.Simple,
 	center: calcCenterOffsets(),
 	zoom: 0,
-	minZoom: -8,
+	minZoom: -5,
 	maxZoom: 2,
 	zoomSnap: 0,
 	zoomDelta: WANTED_ZOOM_DELTA,
@@ -46,10 +46,12 @@ map.addControl(attributionControl);
 main();
 
 function main () {
+    console.time('creating leaflet map');
 	addSVGElements(svgChildren);
 	svgTag.style.display = 'none';
 	//addHelpingLines();
     addResetButton();
+    console.timeEnd('creating leaflet map');
 }
 
 function calcCenterOffsets () {
@@ -57,10 +59,10 @@ function calcCenterOffsets () {
 	const STANDARD_LAYOUT_CENTERING_OFFSETS = [SVG_HEIGHT / 2, SVG_WIDTH / 2];
 
 	if (svgWidthExceedsContainerWidth()) {
-		console.debug('mobile layout');
+		//console.debug('mobile layout');
 		return MOBILE_LAYOUT_CENTERING_OFFSETS;
 	} else {
-		console.debug('standard layout');
+		//console.debug('standard layout');
 		return STANDARD_LAYOUT_CENTERING_OFFSETS;
 	}
 }
@@ -128,38 +130,27 @@ function addCircle (svgCircle) {
 		className: 'breedingChainsLeafletCircle'
 	});
 
-	addPkmnPopup(svgCircle.attributes.groupid.value, circle);
+	addPkmnPopup(svgCircle, circle);
 
 	circle.addTo(map);
 }
 
-function addPkmnPopup (groupId, el) {
-	const pkmnLinks = findSVGElements(groupId, 'a');
+function addPkmnPopup (svgEl, leafletEl) {
+    const groupId = svgEl.attributes.groupid.value;
+    const learnability = svgEl.attributes.learnability.value;
+
+    const pkmnLinks = findSVGElements(groupId, 'a');
+
 	if (pkmnLinks.length !== 1) {
 		console.error('addImage: pkmnLinks array has unexpected length ' + pkmnLinks.length);
 	} else {
-		const linkTag = createPkmnLinkTag(pkmnLinks);
-		el.bindPopup(linkTag);
+        const text = document.createElement('div');
+
+        text.appendChild(createPkmnLinkTag(pkmnLinks));
+        text.appendChild(buildLearnabilityString(learnability));
+
+		leafletEl.bindPopup(text);
 	}
-}
-
-function createPkmnLinkTag (pkmnLinks) {
-	const pkmnLink = pkmnLinks[0].attributes.href.value;
-
-	const linkTag = document.createElement('a');
-	linkTag.href = pkmnLink;
-
-	let linkText = '';
-	if (pkmnLink.includes('/Attacken')) {
-		linkText = pkmnLink.substring(0, pkmnLink.indexOf('/Attacken'));
-	} else {
-		linkText = pkmnLink;
-	}
-	const linkTextNode = document.createTextNode(linkText);
-
-	linkTag.appendChild(linkTextNode);
-
-	return linkTag;
 }
 
 function findSVGElements (groupId, tagType) {
@@ -179,6 +170,55 @@ function findSVGElements (groupId, tagType) {
 	}
 
 	return filteredArray;
+}
+
+function createPkmnLinkTag (pkmnLinks) {
+	const pkmnLink = pkmnLinks[0].attributes.href.value;
+
+	const linkTag = document.createElement('a');
+	linkTag.href = pkmnLink;
+
+	let linkText = '';
+	if (pkmnLink.includes('/Attacken')) {
+		linkText = pkmnLink.substring(0, pkmnLink.indexOf('/Attacken'));
+	} else {
+		linkText = pkmnLink;
+	}
+	const linkTextNode = document.createTextNode(linkText);
+    linkTag.appendChild(linkTextNode);
+
+	return linkTag;
+}
+
+function buildLearnabilityString (learnability) {
+    const textDiv = document.createElement('div');
+    const headerText = document.createTextNode(mw.config.get('breedingchains-popup-header'));
+    textDiv.appendChild(headerText);
+    const list = document.createElement('ul');
+    textDiv.appendChild(list);
+    for (const char of learnability) {
+        const listItem = document.createElement('li');
+        const itemText = document.createTextNode(learnabilityCharToDescription(char));
+        listItem.appendChild(itemText);
+        list.appendChild(listItem);
+    }
+
+    return textDiv;
+}
+
+function learnabilityCharToDescription (learnabilityChar) {
+    switch (learnabilityChar) {
+        case 'd':
+            return mw.config.get('breedingchains-popup-learns-d');
+        case 'b':
+            return mw.config.get('breedingchains-popup-learns-b');
+        case 'o':
+            return mw.config.get('breedingchains-popup-learns-o');
+        case 'e':
+            return mw.config.get('breedingchains-popup-learns-e');
+        default:
+            return mw.config.get('breedingchains-popup-error').replace('$1', learnabilityChar);
+    }
 }
 
 function addLink (svgLink) {
@@ -253,7 +293,7 @@ function addImage (svgImage) {
 		icon
 	})
 	
-	addPkmnPopup(svgImage.attributes.groupid.value, marker);
+	addPkmnPopup(svgImage, marker);
 
 	marker.addTo(map);
 }
@@ -290,7 +330,6 @@ function addResetButton () {
     button.addEventListener('click', resetMap);
 
     svgMap.appendChild(button);
-    console.log('added reset button');
 }
 
 function resetMap () {

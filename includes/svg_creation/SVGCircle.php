@@ -10,12 +10,16 @@ class SVGCircle extends SVGElement {
 	private $radius;
 	private $color;
 
-	public function __construct (int $centerX, int $centerY, int $radius, string $color, int $groupId) {
-		parent::__construct('circle', $groupId);
+    private $learnabilityCode;
+
+	public function __construct (int $centerX, int $centerY, int $radius, string $color, VisualNode $visualNode) {
+		parent::__construct('circle', $visualNode->getGroupId());
 		$this->centerX = $centerX;
 		$this->centerY = $centerY;
 		$this->radius = $radius;
 		$this->color = $color;
+
+        $this->learnabilityCode = $visualNode->getLearnabilityCode();
 
 		Logger::statusLog('created '.$this);
 	}
@@ -26,7 +30,8 @@ class SVGCircle extends SVGElement {
 			'cy' => $this->centerY + $yOffset,
 			'r' => $this->radius,
 			'color' => $this->color,
-			'groupid' => $this->groupId
+			'groupid' => $this->groupId,
+            'learnability' => $this->learnabilityCode
 		]);
 
 		return $circle;

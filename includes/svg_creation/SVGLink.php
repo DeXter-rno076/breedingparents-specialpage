@@ -22,7 +22,7 @@ class SVGLink extends SVGElement {
 	public function toHTML (int $xOffset, int $yOffset): HTMLElement {
 		return new HTMLElement('a', [
 			'href' => $this->href,
-			'groupid' => $this->groupId
+			'groupid' => $this->groupId,
 		], [
 			$this->innerEl->toHTML($xOffset, $yOffset)
 		]);

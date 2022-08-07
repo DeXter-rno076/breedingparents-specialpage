@@ -7,7 +7,6 @@
 	"breedingchains": "BreedingChains",
 	"breedingchains-title": "Special:BreedingChains",
 	"breedingchains-desc": "[[Special:BreedingChains|Displays]] the possible breeding chains of a given Pokémon, move and gen.",
-
 	"breedingchains-pkmn": "Pokémon (for now german translation)",
 	"breedingchains-move": "Move (for now german translation)",
 	"breedingchains-gen": "Generation:",
@@ -15,8 +14,8 @@
 	"breedingchains-evo": "evolution",
 	"breedingchains-error": "Oh no :O, this should not have happened. Please report this on our Discord server or [[PokéWiki:Auskunft|here]]. Error: $1",
 	"breedingchains-cant-learn": "$1 '''cannot''' learn the move $2.",
-	"breedingchains-can-learn-directly-old-gen": "$1 can learn the move $2 directly via level up, TMHM or a move tutor",
-	"breedingchains-can-learn-directly-new-gen": "$1 can learn the move $2 directly via level up, TMTR or a move tutor.",
+	"breedingchains-can-learn-directly-old-gen": "$1 can learn the move $2 directly via level up, TM/HM or a move tutor",
+	"breedingchains-can-learn-directly-new-gen": "$1 can learn the move $2 directly via level up, TM/TR or a move tutor.",
 	"breedingchains-can-learn-event": "$1 can have the move $2 in an event distribution.",
 	"breedingchains-can-learn-oldgen": "$1 can learn the move $2 in an old game generation.",
 	"breedingchains-can-inherit-but-no-successors": "$1 could inherit the move $1, but it has no suitable breeding parents.",
@@ -34,8 +33,16 @@
     "breedingchains-unknown-pkmn": "The Pokémon $1 is unknown to me. Maybe you made a typo somewhere?",
 	"breedingchains-unknown-move": "The move $1 is unknown to me. Maybe you made a typo somewhere?",
 	"breedingchains-unknown-game": "The game $1 is unknown to me or I don't support it. Maybe you made a typo somewhere?",
+    "breedingchains-move-not-suggested": "$1 is not in the breeding moves of $2. This won't produce a breeding chains graphic.",
     "breedingchains-game-required": "Please set a game.",
     "breedingchains-pkmn-required": "Please set a Pokémon.",
     "breedingchains-move-required": "Please set a move.",
-    "breedingchains-whatshappening": "No idea what's displayed here? Look into this [[Zucht]] and especially this [[Ei-Attacken]]."
+    "breedingchains-whatshappening": "No idea what's displayed here? Look into the pages [[Zucht]] and [[Ei-Attacken]].",
+    "breedingchains-popup-learns-d-old": "Directly via level up, TM/HM or a move tutor",
+    "breedingchains-popup-learns-d-new": "Directly via level up, TM/TR or a move tutor",
+    "breedingchains-popup-learns-b": "Via breeding with one of the directly following Pokémon on the right as a parent.",
+    "breedingchains-popup-learns-o-old": "In an older generation via level up, TM/HM or a move tutor.",
+    "breedingchains-popup-learns-o-new": "In an older generation via level up, TM/TR or a move tutor",
+    "breedingchains-popup-learns-e": "Via an event distribution.",
+    "breedingchains-popup-learns-error": "Error: Unexpected learnability character: $1."
 }

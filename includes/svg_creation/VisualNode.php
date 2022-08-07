@@ -25,6 +25,7 @@ class VisualNode extends Pkmn {
 	private $fileError = null;
 
 	private $groupId;
+    private $learnability;
 
 	public function __construct (BreedingTreeNode $breedingTreeNode) {
 		parent::__construct($breedingTreeNode->getName());
@@ -33,8 +34,9 @@ class VisualNode extends Pkmn {
 		$this->displayOldGenMarker = $breedingTreeNode->getLearnabilityStatus()->getLearnsByOldGen();
 		$this->isRoot = $breedingTreeNode instanceof PkmnTreeRoot;
 		$this->groupId = Constants::generateGroupId();
+        $this->learnability = $breedingTreeNode->getLearnabilityStatus();
 		$this->iconName = $breedingTreeNode->buildIconName();
-	}	
+	}
 
 	public function setIconData () {
 		try {
@@ -151,6 +153,10 @@ class VisualNode extends Pkmn {
 	public function getGroupId (): int {
 		return $this->groupId;
 	}
+
+    public function getLearnabilityCode (): string {
+        return $this->learnability->buildLearnabilityCode();
+    }
 
 	public function getArticleLink (): string {
 		if (Constants::isPkmn($this->getName())) {

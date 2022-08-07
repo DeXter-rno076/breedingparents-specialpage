@@ -45,7 +45,7 @@ class PostBreedingTreeCreationCheckpoint extends Checkpoint {
 			$msgIdentifiers[] = 'breedingchains-can-learn-event';
 		}
 		if ($this->breedingTreeRootLearnabilityStatus->getLearnsByOldGen()) {
-			$msgIdentifiers[] = 'breedingchains-can-learn-oldgen';
+			$msgIdentifiers[] = $this->getLearnsInOldGenMsgIdentifier();
 		}
 
 		foreach ($msgIdentifiers as $msgIdentifier) {
@@ -56,9 +56,17 @@ class PostBreedingTreeCreationCheckpoint extends Checkpoint {
 
 	private function getLearnsDirectlyMsgIdentifier (): string {
 		if (Constants::$targetGenNumber < 8) {
-			return 'breedingchains-can-learn-directly-old-gen';
+			return 'breedingchains-can-learn-directly-old';
 		} else {
-			return 'breedingchains-can-learn-directly-new-gen';
+			return 'breedingchains-can-learn-directly-new';
 		}
 	}
+
+    private function getLearnsInOldGenMsgIdentifier (): string {
+        if (Constants::$targetGenNumber < 8) {
+            return 'breedingchains-can-learn-oldgen-old';
+        } else {
+            return 'breedingchains-can-learn-oldgen-new';
+        }
+    }
 }

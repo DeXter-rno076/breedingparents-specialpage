@@ -51,6 +51,7 @@ class BreedingSubtree {
 	public static function buildHash (string $targetEggGroup, array $blacklistedEggGroups) {
         //without sorting the egg groups the subtree structures don't stretch across multiple subtrees
         // -> far easier to handle (no sorting and dynamic line calculation needed)
+        //sort($blacklistedEggGroups);
 		return $targetEggGroup.'-'.join('', $blacklistedEggGroups);
 	}
 }

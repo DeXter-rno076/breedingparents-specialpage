@@ -317,7 +317,7 @@ class SVGSubtree {
 		$radius = $this->calculateOldGenMarkerRadius($node);
 
 		$oldGenMarker = new SVGCircle(
-			$middleX, $middleY, $radius, $color, $node->getGroupId());
+			$middleX, $middleY, $radius, $color, $node);
 
 		return $oldGenMarker->toHTML($xOffset, $yOffset);
 	}

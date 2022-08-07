@@ -44,13 +44,7 @@ class SVGCreationTrack extends Track {
 	}
 
 	private function addVisualStructuresToOutput (HTMLElement $svgMapDiv, HTMLElement $svgStructure) {
-		$this->addMarkerExplanations();
 		$svgMapDiv->addToOutput();
 		$svgStructure->addToOutput();
-	}
-
-	private function addMarkerExplanations () {
-		require_once __DIR__.'/../markerExamples.php';
-		$markerExamplesTable->addToOutput();
 	}
 }

@@ -10,17 +10,22 @@ class SVGImg extends SVGElement {
 	private $y;
 	private $width;
 	private $height;
-	private $href;
 
-	public function __construct (VisualNode $frontendPkmn, int $groupId) {
+    private $href;
+
+    private $learnabilityCode;
+
+	public function __construct (VisualNode $visualNode, int $groupId) {
 		parent::__construct('image', $groupId);
 
-		$this->x = $frontendPkmn->getX();
-		$this->y = $frontendPkmn->getY();
-		$this->width = $frontendPkmn->getIconWidth();
-		$this->height = $frontendPkmn->getIconHeight();
+		$this->x = $visualNode->getX();
+		$this->y = $visualNode->getY();
+		$this->width = $visualNode->getIconWidth();
+		$this->height = $visualNode->getIconHeight();
 
-		$this->href = $frontendPkmn->getIconUrl();
+		$this->href = $visualNode->getIconUrl();
+
+        $this->learnabilityCode = $visualNode->getLearnabilityCode();
 
 		Logger::statusLog('created '.$this);
 	}
@@ -32,7 +37,8 @@ class SVGImg extends SVGElement {
 			'width' => $this->width,
 			'height' => $this->height,
 			'xlink:href' => $this->href,
-			'groupid' => $this->groupId
+			'groupid' => $this->groupId,
+            'learnability' => $this->learnabilityCode
 		]);
 	}
 
