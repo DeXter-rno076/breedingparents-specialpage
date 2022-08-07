@@ -24,6 +24,7 @@ class VisualNode extends Pkmn {
 
 	private $groupId;
     private $learnabilityCode;
+    private $correctlyWrittenName;
 
 	public function __construct (BreedingTreeNode $breedingTreeNode) {
 		parent::__construct($breedingTreeNode->getName());
@@ -32,6 +33,7 @@ class VisualNode extends Pkmn {
 		$this->groupId = Constants::generateGroupId();
         $this->learnabilityCode = $breedingTreeNode->getLearnabilityStatus()->buildLearnabilityCode();
 		$this->iconName = $breedingTreeNode->buildIconName();
+        $this->correctlyWrittenName = $breedingTreeNode->getCorrectlyWrittenName();
 	}
 
 	public function setIconData () {
@@ -73,6 +75,7 @@ class VisualNode extends Pkmn {
     public function calcAndSetCenteredXCoordinate (int $deepness): int {
 		$uncenteredX = $deepness * Constants::PKMN_MARGIN_HORIZONTAL;
 		$this->x = $this->centerXCoordinate($uncenteredX);
+        Logger::statusLog('calculated x = '.$this->x.', for '.$this);
         return $this->x;
 	}
 
@@ -152,6 +155,10 @@ class VisualNode extends Pkmn {
 
     public function getLearnabilityCode (): string {
         return $this->learnabilityCode;
+    }
+
+    public function getCorrectlyWrittenName (): string {
+        return $this->correctlyWrittenName;
     }
 
 	public function getArticleLink (): string {

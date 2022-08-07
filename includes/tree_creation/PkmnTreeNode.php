@@ -204,6 +204,10 @@ class PkmnTreeNode extends BreedingTreeNode {
 		return 'Pokémon-Icon '.$this->data->getId().'.png';
 	}
 
+    public function getCorrectlyWrittenName (): string {
+        return $this->data->getCorrectlyWrittenName();
+    }
+
 	/**
 	 * @return string BreedingTreeNode:<pkmn name>;<successor count>;<learns by event>;<learns by old gen>;<is root>;;
 	 */

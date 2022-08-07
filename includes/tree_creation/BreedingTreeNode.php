@@ -6,8 +6,8 @@ require_once 'BreedingSubtree.php';
 abstract class BreedingTreeNode extends Pkmn {
 	//todo this belongs in PkmnTreeNode
 	protected $learnabilityStatus;
-	
-	protected $data;
+
+    protected $data;
 	
 	protected function __construct (string $nodeTitle) {
 		parent::__construct($nodeTitle);
@@ -22,6 +22,8 @@ abstract class BreedingTreeNode extends Pkmn {
 
 	//todo this doesnt belong in here but rather in a FrontendEntity sub class
 	public abstract function buildIconName (): string;
+
+    public abstract function getCorrectlyWrittenName(): string;
 
 	public abstract function getLogInfo (): string;
 }

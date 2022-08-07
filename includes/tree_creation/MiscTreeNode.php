@@ -23,6 +23,10 @@ class MiscTreeNode extends BreedingTreeNode {
         return new LearnabilityStatus();
     }
 
+    public function getCorrectlyWrittenName (): string {
+        return $this->getName();
+    }
+
 	public function getLogInfo (): string {
 		return 'MiscTreeNode:\'\'\''.$this->name.'\'\'\';;';
 	}

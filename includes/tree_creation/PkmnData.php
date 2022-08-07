@@ -208,6 +208,10 @@ class PkmnData extends Pkmn {
 		return $this->subpageLinkName;
 	}
 
+    public function getCorrectlyWrittenName (): string {
+        return $this->correctlyWrittenName;
+    }
+
 	/**
 	 * @return string PkmnData:<pkmn name>;;
 	 * Is never used, because PkmnData instances are created all the time

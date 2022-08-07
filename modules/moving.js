@@ -183,12 +183,7 @@ function createPkmnLinkTag (pkmnLinks) {
 	const linkTag = document.createElement('a');
 	linkTag.href = pkmnLink;
 
-	let linkText = '';
-	if (pkmnLink.includes('/Attacken')) {
-		linkText = pkmnLink.substring(0, pkmnLink.indexOf('/Attacken'));
-	} else {
-		linkText = pkmnLink;
-	}
+	let linkText = pkmnLinks[0].attributes['pkmn-name'].value;
 	const linkTextNode = document.createTextNode(linkText);
     linkTag.appendChild(linkTextNode);
 
