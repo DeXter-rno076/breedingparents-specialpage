@@ -6,7 +6,6 @@ require_once __DIR__.'/../Constants.php';
 require_once 'FrontendTreeCreationTrack.php';
 
 class PostBreedingTreeCreationCheckpoint extends Checkpoint {
-	private $breedingTreeRootSubtree;
 	private $breedingTreeRootLearnabilityStatus;
 	
 	public function __construct (BreedingRootSubtree $breedingTreeRoot) {
@@ -21,7 +20,6 @@ class PostBreedingTreeCreationCheckpoint extends Checkpoint {
 				Constants::$targetPkmnNameOriginalInput, Constants::$targetMoveNameOriginalInput);
 			return $this->terminationCode;
 		}
-		$this->reactToNonTerminatingBreedingTreeState();
 
 		if ($this->breedingTreeRoot->hasSuccessors()) {
 			$frontendTreeCreationTrack = new FrontendTreeCreationTrack($this->breedingTreeRoot);
@@ -31,42 +29,4 @@ class PostBreedingTreeCreationCheckpoint extends Checkpoint {
 			return $this->terminationCode;
 		}
 	}
-
-	private function reactToNonTerminatingBreedingTreeState () {
-		$msgIdentifiers = [];
-		if ($this->breedingTreeRootLearnabilityStatus->getLearnsDirectly()) {
-			$msgIdentifiers[] = $this->getLearnsDirectlyMsgIdentifier();
-		}
-		if (!$this->breedingTreeRoot->hasSuccessors() 
-				&& $this->breedingTreeRootLearnabilityStatus->getLearnsByBreeding()) {
-			$msgIdentifiers[] = 'breedingchains-can-inherit-but-no-successors';
-		}
-		if ($this->breedingTreeRootLearnabilityStatus->getLearnsByEvent()) {
-			$msgIdentifiers[] = 'breedingchains-can-learn-event';
-		}
-		if ($this->breedingTreeRootLearnabilityStatus->getLearnsByOldGen()) {
-			$msgIdentifiers[] = $this->getLearnsInOldGenMsgIdentifier();
-		}
-
-		foreach ($msgIdentifiers as $msgIdentifier) {
-			$this->outputInfoMessage($msgIdentifier, Constants::$targetPkmnNameOriginalInput,
-				Constants::$targetMoveNameOriginalInput);
-		}
-	}
-
-	private function getLearnsDirectlyMsgIdentifier (): string {
-		if (Constants::$targetGenNumber < 8) {
-			return 'breedingchains-can-learn-directly-old';
-		} else {
-			return 'breedingchains-can-learn-directly-new';
-		}
-	}
-
-    private function getLearnsInOldGenMsgIdentifier (): string {
-        if (Constants::$targetGenNumber < 8) {
-            return 'breedingchains-can-learn-oldgen-old';
-        } else {
-            return 'breedingchains-can-learn-oldgen-new';
-        }
-    }
 }
