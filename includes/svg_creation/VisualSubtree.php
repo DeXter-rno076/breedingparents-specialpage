@@ -85,11 +85,20 @@ class VisualSubtree {
 
 	private function sortSuccessors () {
 		usort($this->successors, function ($first, $second) {
-			return $first->subtreeHeight <=> $second->subtreeHeight;
+			return $first->getSortingQuantity() <=> $second->getSortingQuantity();
 		});
 		Logger::statusLog('successor array of '.$this.' with treeSectionHeightKeys after pure sorting: '
 			.json_encode($this->successors));
 	}
+
+    private function getSortingQuantity (): int {
+        //this pushes old gen learning pkmn outside
+        if ($this->visualRoots[0]->getDisplayOldGenMarker()) {
+            return $this->subtreeHeight + 1;
+        } else {
+            return $this->subtreeHeight;
+        }
+    }
 
 	/**
 	 * todo explain this
