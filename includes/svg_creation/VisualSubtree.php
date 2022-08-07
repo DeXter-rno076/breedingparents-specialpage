@@ -160,7 +160,8 @@ class VisualSubtree {
             Logger::statusLog('calculating y coordinates for roots of '.$this);
             //todo successors may be empty
             $rootsHeight = $this->calcRootsHeight();
-            $rootsAreWiderThanSuccessors = $rootsHeight > $this->successors[0]->getSubtreeHeight();
+            $rootsAreWiderThanSuccessors = $rootsHeight > $this->calcSuccessorsHeight();
+
             $top = 0;
             if ($rootsAreWiderThanSuccessors) {
                 $top = $offset;
@@ -173,7 +174,8 @@ class VisualSubtree {
                 $bottom = $offset + $rootsHeight;
             } else {
                 $lastSuccessorsRoots = $this->successors[count($this->successors) - 1]->getRoots();
-                $bottom = $lastSuccessorsRoots[count($lastSuccessorsRoots) - 1]->getY();
+                $lastSuccessorsLastRoot = $lastSuccessorsRoots[count($lastSuccessorsRoots) - 1];
+                $bottom = $lastSuccessorsLastRoot->getY() + $lastSuccessorsLastRoot->calcSingleNodeHeight();
             }
 
             $nodeHeight = $this->visualRoots[0]->calcSingleNodeHeight();
@@ -198,11 +200,7 @@ class VisualSubtree {
     }
 
     private function calcInitialSuccessorOffset (int $offset): int {
-        $successorsHeightSum = 0;
-        foreach ($this->successors as $successor) {
-            $successorsHeightSum += $successor->subtreeHeight;
-        }
-        
+        $successorsHeightSum = $this->calcSuccessorsHeight();        
         return $offset + ($this->subtreeHeight - $successorsHeightSum)/2;
     }
 
