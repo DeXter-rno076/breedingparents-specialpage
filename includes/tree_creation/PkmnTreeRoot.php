@@ -15,7 +15,7 @@ class PkmnTreeRoot extends PkmnTreeNode {
     /**
      * @param array $eggGroupBlacklist - is ignored because tree roots always start a new blacklist
      */
-    public function createBreedingSubtree (array $eggGroupBlacklist): BreedingRootSubtree {
+    public function createBreedingSubtree (array $eggGroupBlacklist) {
         Logger::statusLog('creating tree root node of '.$this);
         $rootSubtree = new BreedingRootSubtree($this, []);
         if ($this->data->canLearnDirectly()) {
@@ -107,6 +107,10 @@ class PkmnTreeRoot extends PkmnTreeNode {
         }
 
         $lowestEvoNodeSubTree = $lowestEvoInstance->createBreedingSubtree([]);
+        if (is_null($lowestEvoNodeSubTree)) {
+            Logger::elog($lowestEvoInstance.'->createBreedingSubtree() returned null');
+            return null;
+        }
         $lowestEvoNode = $lowestEvoNodeSubTree->getRoot();
 
         if ($lowestEvoNode->getLearnabilityStatus()->canLearn()) {

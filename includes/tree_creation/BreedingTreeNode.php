@@ -14,7 +14,7 @@ abstract class BreedingTreeNode extends Pkmn {
         $this->learnabilityStatus = new LearnabilityStatus();
     }
 
-    public abstract function createBreedingSubtree (array $eggGroupBlacklist): ?BreedingSubtree;
+    public abstract function createBreedingSubtree (array $eggGroupBlacklist);
 
     public function getLearnabilityStatus (): LearnabilityStatus {
         return $this->learnabilityStatus;

@@ -9,16 +9,24 @@ require_once 'PostBreedingTreeCreationCheckpoint.php';
 class BreedingTreeCreationTrack extends Track {
     public function passOn (): string {
         $breedingTreeRoot = $this->createBreedingSubTree();
+        if (is_null($breedingTreeRoot)) {
+            Logger::elog('critical error in creating breeding tree, aborting');
+            return 'critical error in breeding tree creation';
+        }
         $postBreedingTreeCreationCheckpoint = new PostBreedingTreeCreationCheckpoint($breedingTreeRoot);
         return $postBreedingTreeCreationCheckpoint->passOn();
     }
 
-    private function createBreedingSubTree (): BreedingSubtree {
+    private function createBreedingSubTree (): ?BreedingSubtree {
         Logger::statusLog('CREATING BREEDING TREE NODES');
         $timeStart = hrtime(true);
 
         $breedingTreeRoot = new PkmnTreeRoot(Constants::$targetPkmnName);
         $breedingTreeRoot = $breedingTreeRoot->createBreedingSubtree([]);
+        if (is_null($breedingTreeRoot)) {
+            Logger::elog($breedingTreeRoot.'->createBreedingSubTree() returned null');
+            return null;
+        }
 
         $timeEnd = hrtime(true);
         $timeDiff = ($timeEnd - $timeStart) / 1000000000;

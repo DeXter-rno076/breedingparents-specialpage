@@ -17,7 +17,7 @@ class PkmnTreeNode extends BreedingTreeNode {
         parent::__construct($this->data->getName());
     }
 
-    public function createBreedingSubtree (array $eggGroupBlacklist): ?BreedingSubtree {
+    public function createBreedingSubtree (array $eggGroupBlacklist) {
         Logger::statusLog('creating tree node of '.$this.' with eggGroupBlacklist: '.json_encode($eggGroupBlacklist));
         /*in this single spot parameter $eggGroupBlacklist MUST NOT be
         pass by reference (this would create wrong breeding trees, more information in the documentation)*/
