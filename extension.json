@@ -28,6 +28,10 @@
                 "leaflet.css",
                 "styles.css"
             ],
+            "dependencies": [
+                "oojs-ui-core",
+                "oojs-ui.styles.icons-interactions"
+            ],
             "scripts": [
                 "leaflet.js",
                 "moving.js",
