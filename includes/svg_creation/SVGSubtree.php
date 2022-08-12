@@ -72,7 +72,7 @@ class SVGSubtree {
         Logger::statusLog('adding connection structure after '.$this);
 
         if (!$visualSubtree->hasSuccessors()) {
-            logger::statuslog($visualSubtree.' has no successors => not adding any lines');
+            Logger::statusLog($visualSubtree.' has no successors => not adding any lines');
         } else if ($visualSubtree->hasEvoConnection()) {
             if (count($visualSubtree->getRoots()) > 1 || count($visualSubtree->getSuccessors()) > 1) {
                 Logger::elog($visualSubtree.' has multiple roots or successors even though it has an evo connection');
