@@ -61,7 +61,7 @@ class VisualSubtree {
     private function calcRootsHeight (): int {
         $totalHeight = 0;
         foreach ($this->visualRoots as $root) {
-            $totalHeight += $root->calcSingleNodeHeight($root);
+            $totalHeight += $root->calcHeight();
         }
         return $totalHeight;
     }
@@ -142,13 +142,14 @@ class VisualSubtree {
         }
     }
 
+    //split up (too long method)
     private function setYCoords (int $offset): int {
         if (count($this->visualRoots) === 1) {
             $root = $this->visualRoots[0];
-            $nodeHeight = $root->calcSingleNodeHeight();
-            $root->setY($offset + ($this->subtreeHeight - $root->getIconHeight())/2);
-            Logger::statusLog('calculated y = '.$root->getY().' for single root of '.$this
-                .', offset='.$offset.', node height='.$nodeHeight);
+            $nodeHeight = $root->calcHeight();
+            $root->setY($offset + ($this->subtreeHeight - $root->calcHeight())/2);
+            Logger::statusLog('calculated y = '.$root->getTopY().' for '.$root
+                .', subtree height = '.$this->subtreeHeight.', offset = '.$offset);
         }
 
         $currentSuccessorOffset = $this->calcInitialSuccessorOffset($offset);
@@ -160,48 +161,71 @@ class VisualSubtree {
             Logger::statusLog('calculating y coordinates for roots of '.$this);
             //todo successors may be empty
             $rootsHeight = $this->calcRootsHeight();
-            $rootsAreWiderThanSuccessors = $rootsHeight > $this->calcSuccessorsHeight();
+            $rootsAreWiderThanSuccessors = $rootsHeight > $this->getSuccessorsHeight();
 
             $top = 0;
             if ($rootsAreWiderThanSuccessors) {
+                Logger::statusLog('roots are wider than successors');
                 $top = $offset;
             } else {
-                $top = $this->successors[0]->getRoots()[0]->getY();
+                Logger::statusLog('successors are wider than roots');
+                $top = $this->getHighestSuccessorYCoordinate();
             }
 
             $bottom = 0;
             if ($rootsAreWiderThanSuccessors) {
                 $bottom = $offset + $rootsHeight;
             } else {
-                $lastSuccessorsRoots = $this->successors[count($this->successors) - 1]->getRoots();
-                $lastSuccessorsLastRoot = $lastSuccessorsRoots[count($lastSuccessorsRoots) - 1];
-                $bottom = $lastSuccessorsLastRoot->getY() + $lastSuccessorsLastRoot->calcSingleNodeHeight();
+                $bottom = $this->getLowestSuccessorYCoordinate();
             }
 
-            $nodeHeight = $this->visualRoots[0]->calcSingleNodeHeight();
-            $height = $bottom - $top + $nodeHeight;
+            $nodeHeight = $this->visualRoots[0]->calcHeight();
+            $height = $bottom - $top;
             $rootsOffset = $offset + ($height - count($this->visualRoots)*$nodeHeight)/2;
 
             Logger::statusLog('offset='.$offset.',top y='.$top.', bottom y='.$bottom.', node height='.$nodeHeight
                 .', total height='.$height.' => calculated roots offset='.$rootsOffset);
 
             for ($i = 0; $i < count($this->visualRoots); $i++) {
-                $this->visualRoots[$i]->setY($rootsOffset + $i*$nodeHeight);
-            }
-
-            for ($i = 0; $i < count($this->visualRoots); $i++) {
                 $root = $this->visualRoots[$i];
-                $root->setY($root->getY() - $root->getIconHeight()/2);
-                Logger::statusLog('y = '.$root->getY().' for '.$root->getName());
+                $root->setY($rootsOffset + $i*$nodeHeight);
+                Logger::statusLog('y = '.$root->getTopY().' for '.$root->getName());
             }
         }
 
         return $this->subtreeHeight;
     }
 
+    private function getSuccessorsHeight (): int {
+        $totalHeight = 0;
+        foreach ($this->successors as $successor) {
+            $totalHeight += $successor->subtreeHeight;
+        }
+        return $totalHeight;
+    }
+
     private function calcInitialSuccessorOffset (int $offset): int {
-        $successorsHeightSum = $this->calcSuccessorsHeight();
+        $successorsHeightSum = $this->getSuccessorsHeight();
         return $offset + ($this->subtreeHeight - $successorsHeightSum)/2;
+    }
+
+    private function getHighestSuccessorYCoordinate (): int {
+        if (count($this->successors) === 0) {
+            return PHP_INT_MAX;
+        }
+        $firstSuccessor = $this->successors[0];
+        $firstSuccessorRoot = $firstSuccessor->getRoots()[0];
+        return min($firstSuccessorRoot->getTopY(), $firstSuccessor->getHighestSuccessorYCoordinate());
+    }
+
+    private function getLowestSuccessorYCoordinate (): int {
+        if (count($this->successors) === 0) {
+            return 0;
+        }
+        $lastSuccessor = $this->successors[count($this->successors) - 1];
+        $lastSuccessorRoots = $lastSuccessor->getRoots();
+        $lastSuccessorRoot = $lastSuccessorRoots[count($lastSuccessorRoots) - 1];
+        return max($lastSuccessorRoot->getBottomY(), $lastSuccessor->getLowestSuccessorYCoordinate());
     }
 
     private function setXCoords (int $deepness = 0) {

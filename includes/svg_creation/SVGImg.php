@@ -18,8 +18,8 @@ class SVGImg extends SVGElement {
     public function __construct (VisualNode $visualNode) {
         parent::__construct('image', $visualNode->getGroupId());
 
-        $this->x = $visualNode->getX();
-        $this->y = $visualNode->getY();
+        $this->x = $visualNode->getIconX();
+        $this->y = $visualNode->getIconY();
         $this->width = $visualNode->getIconWidth();
         $this->height = $visualNode->getIconHeight();
 

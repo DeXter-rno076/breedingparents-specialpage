@@ -73,22 +73,21 @@ class VisualNode extends Pkmn {
     }
 
     public function calcAndSetCenteredXCoordinate (int $deepness): int {
-        $uncenteredX = $deepness * Constants::PKMN_MARGIN_HORIZONTAL;
-        $this->x = $this->centerXCoordinate($uncenteredX);
+        $this->x = $deepness * Constants::PKMN_MARGIN_HORIZONTAL;
         Logger::statusLog('calculated x = '.$this->x.', for '.$this);
         return $this->x;
     }
 
-    private function centerXCoordinate (int $x): int {
-        return $x - $this->getIconWidth() / 2;
+    public function getDisplayEventMarker (): bool {
+        return $this->str_contains($this->learnabilityCode, 'e');
     }
 
-    public function getDisplayEventMarker (): bool {
-        return str_contains($this->learnabilityCode, 'e');
+    private function str_contains (string $haystack, string $needle): bool {
+        return strpos($haystack, $needle) !== false;
     }
 
     public function getDisplayOldGenMarker (): bool {
-        return str_contains($this->learnabilityCode, 'o');
+        return $this->str_contains($this->learnabilityCode, 'o');
     }
 
     public function getIconUrl (): string {
@@ -116,33 +115,42 @@ class VisualNode extends Pkmn {
     }
 
     public function getMiddleX (): int {
-        $middleX = $this->getX() + $this->getWidth() / 2;
-        return $middleX;
+        return $this->getX() + $this->calcWidth()/2;
     }
 
     public function getIconX (): int {
-        return $this->getX();
+        return $this->getMiddleX() - $this->iconWidth/2;
     }
 
     public function setY (int $y) {
         $this->y = $y;
     }
 
-    public function getY (): int {
+    public function getTopY (): int {
         return $this->y;
     }
 
     public function getMiddleY (): int {
-        $middleY = $this->getY() + $this->getHeight() / 2;
+        $middleY = $this->y + $this->calcHeight()/2;
         return $middleY;
     }
 
-    public function getWidth (): int {
-        return $this->iconWidth;
+    public function getBottomY (): int {
+        return $this->y + $this->calcHeight();
     }
 
-    public function getHeight (): int {
-        return $this->iconHeight;
+    public function getIconY (): int {
+        return $this->getMiddleY() - $this->iconHeight/2;
+    }
+
+    public function calcHeight (): int {
+        //todo replace magic number with constant
+        $pureHeight = $this->calculateDiagonal() + 10;
+        return $pureHeight + 2*Constants::SVG_CIRCLE_MARGIN;
+    }
+
+    public function calcWidth (): int {
+        return $this->calcHeight();
     }
 
     public function isRoot (): bool {
@@ -187,11 +195,5 @@ class VisualNode extends Pkmn {
             .(isset($this->y) ? $this->y : '-').')';
         $msg .= ';;';
         return $msg;
-    }
-
-    public function calcSingleNodeHeight (): int {
-        //todo replace magic number with constant
-        $pureHeight = $this->calculateDiagonal() + 10;
-        return $pureHeight + 2*Constants::SVG_CIRCLE_MARGIN;
     }
 }
