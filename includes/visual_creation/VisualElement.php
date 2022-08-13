@@ -1,7 +1,5 @@
 <?php
-require_once __DIR__.'/../HTMLElement.php';
-
-abstract class SVGElement {
+abstract class VisualElement {
     protected $tagType;
     protected $groupId = null;
 
@@ -14,9 +12,9 @@ abstract class SVGElement {
         return $this->tagType;
     }
 
-    public abstract function toHTML (int $xOffset, int $yOffset): HTMLElement;
-
     public abstract function getLogInfo (): string;
+
+    public abstract function compile (int $xOffset, int $yOffset);
 
     public function __toString (): string {
         return $this->getLogInfo();

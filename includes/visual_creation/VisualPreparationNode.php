@@ -9,8 +9,10 @@ require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../Constants.php';
 
 use MediaWiki\MediaWikiServices;
+use VisualPreparationNode as GlobalVisualPreparationNode;
 
-class VisualNode extends Pkmn {
+class VisualPreparationNode extends Pkmn {
+    private static $iconCache = [];
     private $isRoot;
 
     private $x;
@@ -45,7 +47,7 @@ class VisualNode extends Pkmn {
     }
 
     private function tryLoadAndSetIconData () {
-        $iconFileObj = VisualNode::getIcon($this->iconName);
+        $iconFileObj = VisualPreparationNode::getIcon($this->iconName);
         Logger::statusLog('icon file for '.$this.' successfully loaded');
 
         $this->iconUrl = $iconFileObj->getUrl();
@@ -54,13 +56,18 @@ class VisualNode extends Pkmn {
     }
 
     public static function getIcon (string $fileURL): File {
+        if (isset(VisualPreparationNode::$iconCache[$fileURL])) {
+            return VisualPreparationNode::$iconCache[$fileURL];
+        }
         $fileObj = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileURL);
 
         if ($fileObj === false) {
             throw new FileNotFoundException($fileURL);
         }
 
-        return $fileObj;
+        VisualPreparationNode::$iconCache[$fileURL] = $fileObj;
+
+        return VisualPreparationNode::$iconCache[$fileURL];
     }
 
     private function setFileError (FileNotFoundException $e) {
@@ -69,11 +76,11 @@ class VisualNode extends Pkmn {
     }
 
     public function calculateDiagonal (): int {
-        return Constants::SVG_CIRCLE_DIAMETER;
+        return Constants::VISUAL_CIRCLE_DIAMETER;
     }
 
     public function calcAndSetCenteredXCoordinate (int $deepness): int {
-        $this->x = $deepness * Constants::PKMN_MARGIN_HORIZONTAL;
+        $this->x = $deepness * Constants::VISUAL_NODE_MARGIN_HORIZONTAL;
         Logger::statusLog('calculated x = '.$this->x.', for '.$this);
         return $this->x;
     }
@@ -146,7 +153,7 @@ class VisualNode extends Pkmn {
     public function calcHeight (): int {
         //todo replace magic number with constant
         $pureHeight = $this->calculateDiagonal() + 10;
-        return $pureHeight + 2*Constants::SVG_CIRCLE_MARGIN;
+        return $pureHeight + 2*Constants::VISUAL_CIRCLE_MARGIN;
     }
 
     public function calcWidth (): int {
@@ -187,10 +194,10 @@ class VisualNode extends Pkmn {
     }
 
     /**
-     * @return string - VisualNode:<pkmn name>;(<x>;<y>);<branch position>;;
+     * @return string - VisualPreparationNode:<pkmn name>;(<x>;<y>);<branch position>;;
      */
     public function getLogInfo (): string {
-        $msg = 'VisualNode:\'\'\''.$this->name.'\'\'\';('
+        $msg = 'VisualPreparationNode:\'\'\''.$this->name.'\'\'\';('
             .(isset($this->x) ? $this->x : '-').';'
             .(isset($this->y) ? $this->y : '-').')';
         $msg .= ';;';

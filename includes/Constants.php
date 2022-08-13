@@ -24,17 +24,16 @@ abstract class Constants {
     public static $displayStatuslogs = false;
     public static $createDetailedSuccessorFilterLogs = false;
 
-    public const PKMN_MARGIN_HORIZONTAL = 200;
-    public const PKMN_ICON_LINE_MARGIN = 10;
-    public const SVG_RECTANGLE_PADDING = 5;
-    public const SVG_PKMN_SAFETY_MARGIN = 10;
-    public const SVG_CIRCLE_MARGIN = 4;
-    public const SVG_LINE_WIDTH = 2;
+    public const VISUAL_NODE_MARGIN_HORIZONTAL = 200;
+    public const VISUAL_NODE_ICON_LINE_MARGIN = 10;
+    public const VISUAL_NODE_SAFETY_MARGIN = 10;
+    public const VISUAL_CIRCLE_MARGIN = 4;
+    public const VISUAL_LINE_WIDTH = 2;
     public const SVG_SAFETY_MARGIN = 50;
     public const SVG_OFFSET = 50;
     public const APPROXIMATE_STRING_HEIGHT = 16;
-    public const SVG_TEXT_LINE_MARGIN = 4;
-    public const SVG_CIRCLE_DIAMETER = 60;
+    public const VISUAL_TEXT_LINE_MARGIN = 4;
+    public const VISUAL_CIRCLE_DIAMETER = 60;
 
     public static $GAME_LIST;
     public static $GAMES_TO_GEN;

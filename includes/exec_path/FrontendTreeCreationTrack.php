@@ -1,7 +1,7 @@
 <?php
 require_once 'Track.php';
 require_once __DIR__.'/../tree_creation/BreedingRootSubtree.php';
-require_once __DIR__.'/../svg_creation/VisualSubtree.php';
+require_once __DIR__.'/../visual_creation/VisualPreparationSubtree.php';
 require_once __DIR__.'/../Logger.php';
 require_once 'SVGCreationTrack.php';
 
@@ -18,16 +18,16 @@ class FrontendTreeCreationTrack extends Track {
         return $svgCreationTrack->passOn();
     }
 
-    private function createFrontendRoot (): VisualSubtree {
-        Logger::statusLog('CREATING VISUALNODE INSTANCES');
+    private function createFrontendRoot (): VisualPreparationSubtree {
+        Logger::statusLog('PREPARING VISUAL TREE');
         $timeStart = hrtime(true);
 
-        $visualRoot = new VisualSubtree($this->breedingTreeRoot);
+        $visualRoot = new VisualPreparationSubtree($this->breedingTreeRoot);
         $visualRoot->prep();
 
         $timeEnd = hrtime(true);
         $timeDiff = ($timeEnd - $timeStart) / 1000000000;
-        Logger::outputDebugMessage('creating frontend pkmn tree needed: '.$timeDiff.'s');
+        Logger::outputDebugMessage('preparing visual tree needed: '.$timeDiff.'s');
 
         return $visualRoot;
     }

@@ -1,14 +1,13 @@
 $( function () {
-    const svgTag = document.getElementById('breedingChainsSVG');
-    if (svgTag !== null) {
-        const svgChildren = svgTag.children;
-        const svgMap = document.getElementById('breedingChainsSVGMap');
+    const visualStructure = mw.config.get('breedingchains-visual-structure');
+    if (visualStructure !== null) {
+        const container = document.getElementById('breedingChainsSVGMap');
 
-        const SVG_CONTAINER_WIDTH = svgMap.clientWidth;
-        const SVG_TAG_VIEWBOX = svgTag.attributes.viewBox.value;
-        const SVG_TAG_VIEWBOX_VALUES = SVG_TAG_VIEWBOX.split(' ');
-        const SVG_WIDTH = SVG_TAG_VIEWBOX_VALUES[2];
-        const SVG_HEIGHT = SVG_TAG_VIEWBOX_VALUES[3];
+        const CONTAINER_WIDTH = container.clientWidth;
+        const VISUAL_STRUCTURE_VIEWBOX = visualStructure.viewbox;
+        const VISUAL_STRUCTURE_VIEWBOX_VALUES = VISUAL_STRUCTURE_VIEWBOX.split(' ');
+        const VISUAL_STRUCTURE_WIDTH = VISUAL_STRUCTURE_VIEWBOX_VALUES[2];
+        const VISUAL_STRUCTURE_HEIGHT = VISUAL_STRUCTURE_VIEWBOX_VALUES[3];
 
         /*mouse wheel events are handled strangely across browsers.
         Some work as intended via the zoomDelta option, some not and for those
@@ -46,15 +45,15 @@ $( function () {
 
         function main () {
             console.time('creating leaflet map');
-            addSVGElements(svgChildren);
+            addVisualElements(visualStructure.innerContent);
             //addHelpingLines();
             addResetButton();
             console.timeEnd('creating leaflet map');
         }
 
         function calcCenterOffsets () {
-            const MOBILE_LAYOUT_CENTERING_OFFSETS = [SVG_HEIGHT / 2, SVG_CONTAINER_WIDTH / 2];
-            const STANDARD_LAYOUT_CENTERING_OFFSETS = [SVG_HEIGHT / 2, SVG_WIDTH / 2];
+            const MOBILE_LAYOUT_CENTERING_OFFSETS = [VISUAL_STRUCTURE_HEIGHT / 2, CONTAINER_WIDTH / 2];
+            const STANDARD_LAYOUT_CENTERING_OFFSETS = [VISUAL_STRUCTURE_HEIGHT / 2, VISUAL_STRUCTURE_WIDTH / 2];
 
             if (svgWidthExceedsContainerWidth()) {
                 //console.debug('mobile layout');
@@ -66,78 +65,78 @@ $( function () {
         }
 
         function svgWidthExceedsContainerWidth () {
-            return SVG_CONTAINER_WIDTH < SVG_WIDTH;
+            return CONTAINER_WIDTH < VISUAL_STRUCTURE_WIDTH;
         }
 
-        function addSVGElements (svgElements) {
-            addSVGBackgroundElements(svgElements);
-            addSVGFrontElements(svgElements);
+        function addVisualElements (visualElements) {
+            addSVGBackgroundElements(visualElements);
+            addSVGFrontElements(visualElements);
         }
         
-        function addSVGBackgroundElements (svgElements) {
+        function addSVGBackgroundElements (visualElements) {
             const backgroundElements = [ 'line' ];
-            addSVGElementsType(svgElements, backgroundElements);
+            addSVGElementsType(visualElements, backgroundElements);
         }
         
-        function addSVGFrontElements (svgElements) {
+        function addSVGFrontElements (visualElements) {
             const frontElements = ['circle', 'image', 'text', 'a'];
-            addSVGElementsType(svgElements, frontElements);
+            addSVGElementsType(visualElements, frontElements);
         }
-        
-        function addSVGElementsType (svgElements, includedElementTypes) {
-            for (const el of svgElements) {
-                if (includedElementTypes.includes(el.tagName)) {
+
+        function addSVGElementsType (visualElements, includedElementTypes) {
+            for (const el of visualElements) {
+                if (includedElementTypes.includes(el.tag)) {
                     addSVGElement(el);
                 }
             }
         }
-        
-        function addSVGElement (svgElement) {
-            switch (svgElement.tagName) {
+
+        function addSVGElement (visualElement) {
+            switch (visualElement.tag) {
                 case 'circle':
-                    addCircle(svgElement);
+                    addCircle(visualElement);
                     break;
                 case 'a':
-                    addLink(svgElement);
+                    addLink(visualElement);
                     break;
                 case 'line':
-                    addLine(svgElement);
+                    addLine(visualElement);
                     break;
                 case 'text':
-                    addText(svgElement);
+                    addText(visualElement);
                     break;
                 case 'image':
-                    addImage(svgElement);
+                    addImage(visualElement);
                     break;
                 default:
-                    console.error('tried to add unexpected svgElement of type ' + svgElement.tagName);
-                    console.error(svgElement);
+                    console.error('tried to add unexpected visual element of type ' + visualElement.tag);
+                    console.error(visualElement);
             }
         }
         
-        function addCircle (svgCircle) {
-            const x = Number(svgCircle.attributes.cx.value);
-            const y = Number(svgCircle.attributes.cy.value);
-            const r = Number(svgCircle.attributes.r.value);
-            const color = svgCircle.attributes.color.value;
+        function addCircle (visualCircle) {
+            const x = Number(visualCircle.cx);
+            const y = Number(visualCircle.cy);
+            const r = Number(visualCircle.r);
+            const color = visualCircle.color;
         
-            const circle = L.circle([y, x], {
+            const leafletCircle = L.circle([y, x], {
                 radius: r,
                 color,
                 weight: 4,
                 className: 'breedingChainsLeafletCircle'
             });
         
-            addPkmnPopup(svgCircle, circle);
+            addPkmnPopup(visualCircle, leafletCircle);
         
-            circle.addTo(map);
+            leafletCircle.addTo(map);
         }
         
-        function addPkmnPopup (svgEl, leafletEl) {
-            const groupId = svgEl.attributes.groupid.value;
-            const learnability = svgEl.attributes.learnability.value;
+        function addPkmnPopup (visualEl, leafletEl) {
+            const groupId = visualEl.groupid;
+            const learnability = visualEl.learnability;
         
-            const pkmnLinks = findSVGElements(groupId, 'a');
+            const pkmnLinks = findVisualElementsByGroupAndTag(groupId, 'a');
         
             if (pkmnLinks.length !== 1) {
                 console.error('addImage: pkmnLinks array has unexpected length ' + pkmnLinks.length);
@@ -156,19 +155,21 @@ $( function () {
             }
         }
         
-        function findSVGElements (groupId, tagType) {
+        //todo this only searches through top level tags (names implies a complete search)
+        function findVisualElementsByGroupAndTag (groupId, tagType) {
             if (isNaN(groupId)) {
-                console.error('findSVGElements: param groupId is not a number: ' + groupId);
+                console.error('findVisualElementsByGroupAndTag: param groupId of tag '
+                    + tagType + ' is not a number: ' + groupId);
                 return [];
             }
         
             const filteredArray = [];
         
-            for (const svgChild of svgChildren) {
-                if (svgChild.attributes.groupid.value !== undefined
-                        && svgChild.attributes.groupid.value === groupId
-                        && (tagType === undefined || svgChild.tagName === tagType)) {
-                    filteredArray.push(svgChild);
+            for (const visualChild of visualStructure.innerContent) {
+                if (visualChild.groupid !== undefined
+                        && visualChild.groupid === groupId
+                        && (tagType === undefined || visualChild.tag === tagType)) {
+                    filteredArray.push(visualChild);
                 }
             }
         
@@ -176,12 +177,12 @@ $( function () {
         }
         
         function createPkmnLinkTag (pkmnLinks) {
-            const pkmnLink = pkmnLinks[0].attributes.href.value;
+            const pkmnLink = pkmnLinks[0].href;
         
             const linkTag = document.createElement('a');
             linkTag.href = pkmnLink;
         
-            let linkText = pkmnLinks[0].attributes['pkmn-name'].value;
+            let linkText = pkmnLinks[0]['pkmn-name'];
             const linkTextNode = document.createTextNode(linkText);
             linkTag.appendChild(linkTextNode);
         
@@ -203,7 +204,7 @@ $( function () {
                 listItem.appendChild(itemText);
                 list.appendChild(listItem);
             }
-        
+
             return textDiv;
         }
         
@@ -221,16 +222,16 @@ $( function () {
                     return mw.config.get('breedingchains-popup-error').replace('$1', learnabilityChar);
             }
         }
-        
+
         function addLink (svgLink) {
-            addSVGElements(svgLink.children);
+            addVisualElements(svgLink.innerContent);
         }
         
         function addLine (svgLine) {
-            const x1 = Number(svgLine.attributes.x1.value);
-            const x2 = Number(svgLine.attributes.x2.value);
-            const y1 = Number(svgLine.attributes.y1.value);
-            const y2 = Number(svgLine.attributes.y2.value);
+            const x1 = Number(svgLine.x1);
+            const x2 = Number(svgLine.x2);
+            const y1 = Number(svgLine.y1);
+            const y2 = Number(svgLine.y2);
         
             L.polyline([
                 [y1, x1],
@@ -240,13 +241,13 @@ $( function () {
             }).addTo(map);
         }
         
-        function addText (svgText) {
-            const text = svgText.textContent;
+        function addText (visualText) {
+            const text = visualText.text;
         
-            const textMetrics = getTextMetrics(text, getCanvasFont(svgText));
+            const textMetrics = getTextMetrics(text, getCanvasFont());
         
-            const x = getLeafletTextXCoordinate(svgText.attributes.groupid.value);
-            const y = Number(svgText.attributes.y.value);
+            const x = getLeafletTextXCoordinate(visualText.groupid);
+            const y = Number(visualText.y);
         
             L.marker([y + 2, x], {
                 icon: L.divIcon({
@@ -258,15 +259,15 @@ $( function () {
         }
         
         function getLeafletTextXCoordinate (groupId) {
-            const lines = findSVGElements(groupId, 'line');
+            const lines = findVisualElementsByGroupAndTag(groupId, 'line');
         
             if (lines.length === 0) {
                 console.error('couldnt find line for text ' + svgText);
                 return 0;
             }
         
-            const x1 = Number(lines[0].attributes.x1.value);
-            const x2 = Number(lines[0].attributes.x2.value);
+            const x1 = Number(lines[0].x1);
+            const x2 = Number(lines[0].x2);
         
             const lineWidth = Math.abs(x2 - x1);
             const xDiff = lineWidth / 2;
@@ -275,12 +276,12 @@ $( function () {
             return textX;
         }
         
-        function addImage (svgImage) {
-            const x = Number(svgImage.attributes.x.value);
-            const y = Number(svgImage.attributes.y.value);
-            const width = Number(svgImage.attributes.width.value);
-            const height = Number(svgImage.attributes.height.value);
-            const href = svgImage.attributes['xlink:href'].value;
+        function addImage (visualImage) {
+            const x = Number(visualImage.x);
+            const y = Number(visualImage.y);
+            const width = Number(visualImage.width);
+            const height = Number(visualImage.height);
+            const href = visualImage['xlink:href'];
         
             const icon = L.icon({
                 iconUrl: href,
@@ -292,7 +293,7 @@ $( function () {
                 icon
             })
         
-            addPkmnPopup(svgImage, marker);
+            addPkmnPopup(visualImage, marker);
         
             marker.addTo(map);
         }
@@ -328,9 +329,9 @@ $( function () {
         
             button.addEventListener('click', resetMap);
         
-            svgMap.appendChild(button);
+            container.appendChild(button);
         }
-        
+
         function resetMap () {
             map.setView(calcCenterOffsets(), 0);
         }

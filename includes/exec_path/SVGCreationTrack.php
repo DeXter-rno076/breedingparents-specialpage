@@ -1,22 +1,22 @@
 <?php
 require_once 'Track.php';
-require_once __DIR__.'/../svg_creation/VisualNode.php';
-require_once __DIR__.'/../svg_creation/VisualSubtree.php';
+require_once __DIR__.'/../visual_creation/VisualPreparationNode.php';
+require_once __DIR__.'/../visual_creation/VisualPreparationSubtree.php';
 require_once __DIR__.'/../HTMLElement.php';
 require_once __DIR__.'/../Constants.php';
-require_once __DIR__.'/../svg_creation/SVGTag.php';
+require_once __DIR__.'/../visual_creation/json/JSONRoot.php';
 require_once __DIR__.'/../Logger.php';
 
 class SVGCreationTrack extends Track {
     private $frontendRoot;
 
-    public function __construct (VisualSubtree $frontendRoot) {
+    public function __construct (VisualPreparationSubtree $frontendRoot) {
         $this->frontendRoot = $frontendRoot;
     }
 
     public function passOn (): string {
         $svgMap = $this->createSVGMapDiv();
-        $svgStructure = $this->createSVGStructure();
+        $svgStructure = $this->createVisualStructure();
         $this->addVisualStructuresToOutput($svgMap, $svgStructure);
 
         return 'all ok';
@@ -29,22 +29,24 @@ class SVGCreationTrack extends Track {
         return $mapDiv;
     }
 
-    private function createSVGStructure (): HTMLElement {
-        Logger::statusLog('CREATING SVG STRUCTURE');
+    private function createVisualStructure (): array {
+        Logger::statusLog('CREATING VISUAL STRUCTURE');
         $timeStart = hrtime(true);
 
-        $svgRoot = new SVGTag($this->frontendRoot, Constants::UNUSED_GROUP_ID);
-        $svgStructureInHTML = $svgRoot->toHTML();
+        $visualRoot = new JSONRoot($this->frontendRoot, Constants::UNUSED_GROUP_ID);
+        $compiledVisualStructure = $visualRoot->compile();
 
         $timeEnd = hrtime(true);
         $timeDiff = ($timeEnd - $timeStart) / 1000000000;
-        Logger::outputDebugMessage('svg creation needed: '.$timeDiff.'s');
+        Logger::outputDebugMessage('visual creation needed: '.$timeDiff.'s');
 
-        return $svgStructureInHTML;
+        return $compiledVisualStructure;
     }
 
-    private function addVisualStructuresToOutput (HTMLElement $svgMapDiv, HTMLElement $svgStructure) {
-        $svgMapDiv->addToOutput();
-        $svgStructure->addToOutput();
+    private function addVisualStructuresToOutput (HTMLElement $map, array $visualStructure) {
+        $map->addToOutput();
+        Constants::$centralOutputPageInstance->addJsConfigVars([
+            'breedingchains-visual-structure' => $visualStructure
+        ]);
     }
 }

@@ -1,32 +1,35 @@
 <?php
 require_once __DIR__.'/../tree_creation/BreedingSubtree.php';
 require_once __DIR__.'/../Logger.php';
-require_once 'VisualNode.php';
+require_once 'VisualPreparationNode.php';
 require_once __DIR__.'/../tree_creation/PkmnData.php';
 require_once __DIR__.'/../Constants.php';
 
-class VisualSubtree {
+class VisualPreparationSubtree {
     private $successors = [];
     private $visualRoots = [];
     private $subtreeHeight;
 
     public function __construct (BreedingSubtree $breedingSubtree) {
         foreach ($breedingSubtree->getRoots() as $breedingRoot) {
-            $this->visualRoots[] = new VisualNode($breedingRoot);
+            $this->visualRoots[] = new VisualPreparationNode($breedingRoot);
         }
         foreach ($breedingSubtree->getSuccessors() as $successor) {
-            $successorSubtree = new VisualSubtree($successor);
+            $successorSubtree = new VisualPreparationSubtree($successor);
             $this->addSuccessor($successorSubtree);
         }
     }
 
     public function prep () {
+        $timeStart = hrtime(true);
         $this->setIconData();
+        $timeEnd = hrtime(true);
+        $timeDiff = ($timeEnd - $timeStart) / 1000000000;
+        Logger::outputDebugMessage('loading icons (part of preparing visual tree) needed: '.$timeDiff.'s');
         //todo some prep methods need subtree height -> somehow enforce correct order of calls
         $this->calcAndSetSubtreeHeight();
 
         $this->orderSuccessors();
-
 
         $this->setYCoords(0);
         $this->setXCoords();
@@ -92,6 +95,7 @@ class VisualSubtree {
             .json_encode($this->successors));
     }
 
+    //used by usort call in sortSuccessors
     private function getSortingQuantity (): int {
         //this pushes old gen learning pkmn outside
         if ($this->visualRoots[0]->getDisplayOldGenMarker()) {
@@ -238,7 +242,7 @@ class VisualSubtree {
         }
     }
 
-    private function addSuccessor (VisualSubtree $subtree) {
+    private function addSuccessor (VisualPreparationSubtree $subtree) {
         $this->successors[] = $subtree;
     }
 
@@ -268,7 +272,7 @@ class VisualSubtree {
         return $this->successors;
     }
 
-    public function getFirstPkmnSuccessor (): VisualNode {
+    public function getFirstPkmnSuccessor (): VisualPreparationNode {
         foreach ($this->successors as $successor) {
             $firstPkmnRoot = $successor->getFirstPkmnRoot();
             if (!is_null($firstPkmnRoot)) {
@@ -277,7 +281,7 @@ class VisualSubtree {
         }
     }
 
-    public function getFirstPkmnRoot (): VisualNode {
+    public function getFirstPkmnRoot (): VisualPreparationNode {
         foreach ($this->visualRoots as $root) {
             if (Constants::isPkmn($root->getName())) {
                 return $root;
@@ -312,7 +316,7 @@ class VisualSubtree {
     }
 
     public function getLogInfo (): string {
-        $str = 'VisualSubtree';
+        $str = 'VisualPreparationSubtree';
         foreach ($this->visualRoots as $root) {
             $str .= '-'.$root->getName();
         }
