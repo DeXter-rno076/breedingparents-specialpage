@@ -1,12 +1,14 @@
 <?php
 class LearnabilityStatus {
     private $learnsDirectly = false;
+    private $couldLearnByBreeding = false;
     private $learnsByBreeding = false;
     private $learnsByEvent = false;
     private $learnsByOldGen = false;
 
     public function canLearn (): bool {
-        return $this->learnsDirectly || $this->learnsByBreeding || $this->learnsByEvent || $this->learnsByOldGen;
+        return $this->learnsDirectly || $this->couldLearnByBreeding || $this->learnsByBreeding 
+        	|| $this->learnsByEvent || $this->learnsByOldGen;
     }
 
     /**
@@ -29,6 +31,10 @@ class LearnabilityStatus {
 
     public function setLearnsDirectly () {
         $this->learnsDirectly = true;
+    }
+    
+    public function setCouldLearnByBreeding () {
+    	$this->couldLearnByBreeding = true;
     }
 
     public function setLearnsByBreeding () {
@@ -53,6 +59,10 @@ class LearnabilityStatus {
 
     public function getLearnsDirectly (): bool {
         return $this->learnsDirectly;
+    }
+
+    public function getCouldLearnByBreeding (): bool {
+    	return $thisr->couldLearnByBreeding;
     }
 
     public function getLearnsByBreeding (): bool {

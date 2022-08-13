@@ -25,7 +25,8 @@ class PostBreedingTreeCreationCheckpoint extends Checkpoint {
             $frontendTreeCreationTrack = new FrontendTreeCreationTrack($this->breedingTreeRoot);
             return $frontendTreeCreationTrack->passOn();
         } else {
-
+	    $this->outputInfoMessage('breedingchains-can-inherit-but-no-successors',
+	    	Constants::$targetPkmnNameOriginalInput, Constants::$targetMoveNameOriginalInput);
             return $this->terminationCode;
         }
     }

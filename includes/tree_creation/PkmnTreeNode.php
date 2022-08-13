@@ -39,7 +39,7 @@ class PkmnTreeNode extends BreedingTreeNode {
 
         if ($this->data->canLearnByBreeding()) {
             Logger::statusLog($this.' could inherit the move');
-            $this->learnabilityStatus->setLearnsByBreeding();
+            $this->learnabilityStatus->setCouldLearnByBreeding();
 
             $hash = BreedingSubtree::buildHash($this->getTargetEggGroup($eggGroupBlacklist), $eggGroupBlacklist);
             if (!SuccessorFilter::isSpecialCase($this->data) && isset(PkmnTreeNode::$subtrees[$hash])) {
@@ -53,6 +53,7 @@ class PkmnTreeNode extends BreedingTreeNode {
 
             if ($subtree->hasSuccessors()) {
                 Logger::statusLog($this.' can inherit the move, successors found');
+                $this->learnabilityStatus->setLearnsByBreeding();
                 PkmnTreeNode::$subtrees[$hash] = $subtree;
                 return $subtree;
             }
