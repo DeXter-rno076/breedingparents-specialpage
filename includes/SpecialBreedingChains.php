@@ -104,6 +104,8 @@ class SpecialBreedingChains extends SpecialPage {
             $pageIndex++;
         } while (isset($pageData->continue));
 
+        unset($pkmnDataArr['continue']);
+
         $pkmnDataObj = (object) $pkmnDataArr;
 
         return $pkmnDataObj;
