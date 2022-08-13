@@ -40,6 +40,7 @@ class SVGTag extends SVGElement {
             'id' => $this->id,
             'xmlns' => 'http://www.w3.org/2000/svg',
             'viewbox' => '0 0 '.$this->width.' '.$this->height,
+            'style' => 'display: none;',
             'groupid' => $this->groupId
         ]);
 
