@@ -8,7 +8,7 @@ class JSONConnection extends VisualConnection {
         parent::__construct($line, $groupId, $text);
     }
 
-    protected function instantiateText (int $textX, int $textY, string $text, int $groupId): JSONText {
+    protected function instantiateText (int $textX, int $textY, string $text, int $groupId): VisualText {
         return new JSONText($textX, $textY, $text, $groupId);
     }
 
