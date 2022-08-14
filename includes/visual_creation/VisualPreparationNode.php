@@ -181,8 +181,7 @@ class VisualPreparationNode extends Pkmn {
             try {
                 $pkmnData = PkmnData::cachedConstruct($this->getName());
                 $linkSuperPage = $pkmnData->getArticleLinkSuperPageName();
-                $linkName = Constants::i18nMsg('breedingchains-learnsetpage-link',
-                    $linkSuperPage, Constants::$targetGenNumber);
+                $linkName = $linkSuperPage.'/Attacken#'.Constants::$targetGenNumber.'. Generation';
                 return $linkName;
             } catch (Exception $e) {
                 $eMessage = ErrorMessage::constructWithError($e);
