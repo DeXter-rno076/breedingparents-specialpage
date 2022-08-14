@@ -34,17 +34,20 @@ class PkmnTreeRoot extends PkmnTreeNode {
 
         if ($this->data->canLearnByBreeding()) {
             Logger::statusLog($this.' could inherit the move');
-            $this->learnabilityStatus->setLearnsByBreeding();
+            $this->learnabilityStatus->setCouldLearnByBreeding();
             $emptyEggGroupBlacklist = [];
             $successors = $this->selectSuccessors($emptyEggGroupBlacklist);
             $rootSubtree->addSuccessors($successors);
 
             if ($rootSubtree->hasSuccessors()) {
+                $this->learnabilityStatus->setLearnsByBreeding();
                 Logger::statusLog($this.' can inherit the move, successors found');
             }
         } else {
             $evoSuccessor = $this->tryBreedingChainOverLowestEvolution();
             if (!is_null($evoSuccessor)) {
+                //todo learnsByBreeding is unclean here
+                $this->learnabilityStatus->setLearnsByBreeding();
                 $rootSubtree->addSuccessor($evoSuccessor);
             }
         }
@@ -76,7 +79,7 @@ class PkmnTreeRoot extends PkmnTreeNode {
             $firstSubTreeBlacklist[] = $this->data->getEggGroup2();
         }
 
-        $successors = $this->createSuccessorsTreeSection($firstSubTreeBlacklist, $eggGroup1);
+        $successors = $this->createSuccessorsTreeSection($firstSubTreeBlacklist, $eggGroup1, $eggGroup1);
         if ($this->data->hasSecondEggGroup()) {
             $eggGroup2 = $this->data->getEggGroup2();
 
@@ -101,7 +104,7 @@ class PkmnTreeRoot extends PkmnTreeNode {
             $lowestEvoName = $this->data->getLowestEvo();
             $lowestEvoInstance = new PkmnTreeRoot($lowestEvoName);
         } catch (AttributeNotFoundException $e) {
-            $errorMessage = new ErrorMessage($e);
+            $errorMessage = ErrorMessage::constructWithError($e);
             $errorMessage->output();
             return null;
         }
@@ -112,11 +115,13 @@ class PkmnTreeRoot extends PkmnTreeNode {
             return null;
         }
         $lowestEvoNode = $lowestEvoNodeSubTree->getRoot();
+        $evoLearnability = $lowestEvoNode->getLearnabilityStatus();
 
-        if ($lowestEvoNode->getLearnabilityStatus()->canLearn()) {
+        if ($evoLearnability->getCouldLearnByBreeding()) {
+            $this->learnabilityStatus->setCouldLearnByBreeding();
+        }
+        if ($evoLearnability->canLearn()) {
             if ($this->breedingChainOverLowestEvolutionHasAnAdvantage($lowestEvoNodeSubTree)) {
-                //todo learnsByBreeding is unclean here
-                $this->learnabilityStatus->setLearnsByBreeding();
                 return $lowestEvoNodeSubTree;
             }
         }

@@ -5,16 +5,23 @@ require_once __DIR__.'/../Constants.php';
 require_once __DIR__.'/../tree_creation/PkmnTreeRoot.php';
 require_once __DIR__.'/../tree_creation/BreedingSubtree.php';
 require_once 'PostBreedingTreeCreationCheckpoint.php';
+require_once __DIR__.'/../output_messages/ErrorMessage.php';
 
 class BreedingTreeCreationTrack extends Track {
     public function passOn (): string {
-        $breedingTreeRoot = $this->createBreedingSubTree();
-        if (is_null($breedingTreeRoot)) {
-            Logger::elog('critical error in creating breeding tree, aborting');
-            return 'critical error in breeding tree creation';
+        try {
+            $breedingTreeRoot = $this->createBreedingSubTree();
+            if (is_null($breedingTreeRoot)) {
+                Logger::elog('critical error in creating breeding tree, aborting');
+                return 'critical error in breeding tree creation';
+            }
+            $postBreedingTreeCreationCheckpoint = new PostBreedingTreeCreationCheckpoint($breedingTreeRoot);
+            return $postBreedingTreeCreationCheckpoint->passOn();
+        } catch (Exception $e) {
+            $eMsg = ErrorMessage::constructWithError($e);
+            $eMsg->output();
+            return 'exception thrown in breeding tree creation';
         }
-        $postBreedingTreeCreationCheckpoint = new PostBreedingTreeCreationCheckpoint($breedingTreeRoot);
-        return $postBreedingTreeCreationCheckpoint->passOn();
     }
 
     private function createBreedingSubTree (): ?BreedingSubtree {

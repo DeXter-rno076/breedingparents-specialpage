@@ -3,12 +3,22 @@ require_once __DIR__.'/../Constants.php';
 require_once 'OutputMessage.php';
 
 class ErrorMessage extends OutputMessage {
+    private static $errorHappened = false;
     private static $alreadyOutputtedOneTimeMessages = [];
 
-    public function __construct (Exception $e) {
-        $errorMessageForOutput = $this->shortenErrorMessage((string) $e);
+    public function __construct (string $eMsg) {
+        ErrorMessage::$errorHappened = true;
+        $errorMessageForOutput = $this->shortenErrorMessage($eMsg);
         $msg = Constants::i18nMsg('breedingchains-error', $errorMessageForOutput);
         parent::__construct($msg);
+    }
+
+    public static function constructWithError (Exception $e): ErrorMessage {
+        return new ErrorMessage($e->__toString());
+    }
+
+    public static function errorHappened (): bool {
+        return ErrorMessage::$errorHappened;
     }
 
     private function shortenErrorMessage (string $e): string {

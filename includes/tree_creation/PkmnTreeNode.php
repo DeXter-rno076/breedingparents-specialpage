@@ -7,6 +7,7 @@ require_once 'SuccessorMixer.php';
 require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
 require_once __DIR__.'/../Constants.php';
+require_once __DIR__.'/../output_messages/ErrorMessage.php';
 
 class PkmnTreeNode extends BreedingTreeNode {
     private static $subtrees = [];
@@ -126,12 +127,17 @@ class PkmnTreeNode extends BreedingTreeNode {
      * @param Array &$eggGroupBlacklist
      * @param string $whitelisted currently handled egg group
      */
-    protected function createSuccessorsTreeSection (array &$eggGroupBlacklist, string $targetEggGroup): array {
+    protected function createSuccessorsTreeSection (array &$eggGroupBlacklist,
+            string $targetEggGroup, string $whitelisted = null): array {
         Logger::statusLog('calling '.__FUNCTION__.' on '.$this.' eggGroupBlacklist: '
                             .json_encode($eggGroupBlacklist));
 
         $eggGroupPkmn = Constants::$externalEggGroupsJSON->$targetEggGroup;
-        $filter = new SuccessorFilter($eggGroupBlacklist, $this);
+        if (is_null($eggGroupPkmn)) {
+            Logger::elog('unknown egg group "'.$targetEggGroup.'"');
+            return [];
+        }
+        $filter = new SuccessorFilter($eggGroupBlacklist, $this, $whitelisted);
         $listOfPotentialSuccessors = $filter->filter($eggGroupPkmn);
 
         $eggGroupBlacklist[] = $targetEggGroup;

@@ -185,7 +185,7 @@ class VisualPreparationNode extends Pkmn {
                     $linkSuperPage, Constants::$targetGenNumber);
                 return $linkName;
             } catch (Exception $e) {
-                $eMessage = new ErrorMessage($e);
+                $eMessage = ErrorMessage::constructWithError($e);
                 $eMessage->output();
             }
         } else {

@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__.'/../exceptions/AttributeNotFoundException.php';
-require_once __DIR__.'/../output_messages/ErrorMessage.php';
 require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../Constants.php';
 
@@ -43,15 +42,18 @@ require_once 'BreedingTreeNode.php';
 class SuccessorFilter {
     private $eggGroupBlacklist;
     private $currentPkmnTreeNodeData;
+    private $whitelisted;
 
     /**
      * @throws AttributeNotFoundException
      */
-    public function __construct (array $eggGroupBlacklist, PkmnTreeNode $currentPkmnTreeNode) {
+    public function __construct (array $eggGroupBlacklist,
+            PkmnTreeNode $currentPkmnTreeNode, string $whitelisted = null) {
         Logger::statusLog('creating SuccessorFilter instance with: '
             .'eggGroupBlacklist: '.json_encode($eggGroupBlacklist));
         $this->eggGroupBlacklist = $eggGroupBlacklist;
         $this->currentPkmnTreeNodeData = new PkmnData($currentPkmnTreeNode->getName());
+        $this->whitelisted = $whitelisted;
     }
 
     public static function isSpecialCase (PkmnData $pkmnData): bool {
@@ -105,8 +107,7 @@ class SuccessorFilter {
                 $pkmnData = new PkmnData($pkmnName);
                 return !$pkmnData->existsInThisGame();
             } catch (AttributeNotFoundException $e) {
-                $errorMessage = new ErrorMessage($e);
-                $errorMessage->output();
+                Logger::elog($e->__toString());
                 return true;
             }
         };
@@ -130,8 +131,7 @@ class SuccessorFilter {
             try {
                 $pkmnData = new PkmnData($pkmnName);
             } catch (AttributeNotFoundException $e) {
-                $errorMessage = new ErrorMessage($e);
-                $errorMessage->output();
+                Logger::elog($e->__toString());
                 return true;
             }
             $unpairableStatus = $pkmnData->isUnpairable();
@@ -172,8 +172,7 @@ class SuccessorFilter {
                         return false;
                     }
                 } catch (Exception $e) {
-                    $eMsg = new ErrorMessage($e);
-                    $eMsg->output();
+                    Logger::elog($e->__toString());
                     return false;
                 }
             });
@@ -193,8 +192,7 @@ class SuccessorFilter {
                     return false;
                 }
             } catch (AttributeNotFoundException $e) {
-                $eMsg = new ErrorMessage($e);
-                $eMsg->output();
+                Logger::elog($e->__toString());
             }
         }
         return true;
@@ -213,8 +211,7 @@ class SuccessorFilter {
                     return false;
                 }
             } catch (AttributeNotFoundException $e) {
-                $eMsg = new ErrorMessage($e);
-                $eMsg->output();
+                Logger::elog($e->__toString());
             }
         }
         return true;
@@ -230,8 +227,7 @@ class SuccessorFilter {
                 $pkmnData = new PkmnData($pkmnName);
                 return $pkmnData->isFemaleOnly() && !$this->currentPkmnTreeNodeData->hasAsEvolution($pkmnName);
             } catch (AttributeNotFoundException $e) {
-                $eMsg = new ErrorMessage($e);
-                $eMsg->output();
+                Logger::elog($e->__toString());
                 return false;
             }
         });
@@ -246,21 +242,31 @@ class SuccessorFilter {
             try {
                 $pkmnData = new PkmnData($pkmn);
             } catch (AttributeNotFoundException $e) {
-                $errorMessage = new ErrorMessage($e);
-                $errorMessage->output();
+                Logger::elog($e->__toString());
                 return true;
             }
 
-            if ($this->eggGroupIsBlacklisted($pkmnData->getEggGroup1(), $pkmn)) {
+            $eggGroup1 = $pkmnData->getEggGroup1();
+            $eggGroup2 = $pkmnData->getEggGroup2();
+            if ($this->isWhitelisted($eggGroup1, $eggGroup2)) {
+                return false;
+            }
+
+            if ($this->eggGroupIsBlacklisted($eggGroup1, $pkmn)) {
                 return true;
             }
             if ($pkmnData->hasSecondEggGroup()) {
-                return $this->eggGroupIsBlacklisted($pkmnData->getEggGroup2(), $pkmn);
+                return $this->eggGroupIsBlacklisted($eggGroup2, $pkmn);
             }
             return false;
         };
 
         return $this->remove($successorList, $pkmnIsBlacklisted);
+    }
+
+    private function isWhitelisted (string $eggGroup1, string $eggGroup2): bool {
+        if (is_null($this->whitelisted)) return false;
+        return $this->whitelisted === $eggGroup1 || $this->whitelisted === $eggGroup2;
     }
 
     private function eggGroupIsBlacklisted (string $eggGroup): bool {
@@ -290,8 +296,7 @@ class SuccessorFilter {
             try {
                 $pkmnData = new PkmnData($pkmn);
             } catch (AttributeNotFoundException $e) {
-                $errorMessage = new ErrorMessage($e);
-                $errorMessage->output();
+                Logger::elog($e->__toString());
                 return true;
             }
             //female pkmn cant pass on moves from gen 2 - 5

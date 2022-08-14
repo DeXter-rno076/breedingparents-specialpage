@@ -15,19 +15,25 @@ class PostBreedingTreeCreationCheckpoint extends Checkpoint {
     }
 
     public function passOn (): string {
+        if ($this->checkForErrors()) {
+            return $this->errorCode;
+        }
+
+        if ($this->breedingTreeRootLearnabilityStatus->getCouldLearnByBreeding()
+                && !$this->breedingTreeRootLearnabilityStatus->getLearnsByBreeding()) {
+
+            $this->outputInfoMessage('breedingchains-can-inherit-but-no-successors',
+                Constants::$targetPkmnNameOriginalInput, Constants::$targetMoveNameOriginalInput);
+            return $this->terminationCode;
+        }
+
         if (!$this->breedingTreeRootLearnabilityStatus->canLearn()) {
             $this->outputInfoMessage('breedingchains-cant-learn',
                 Constants::$targetPkmnNameOriginalInput, Constants::$targetMoveNameOriginalInput);
             return $this->terminationCode;
         }
 
-        if ($this->breedingTreeRoot->hasSuccessors()) {
-            $frontendTreeCreationTrack = new FrontendTreeCreationTrack($this->breedingTreeRoot);
-            return $frontendTreeCreationTrack->passOn();
-        } else {
-	    $this->outputInfoMessage('breedingchains-can-inherit-but-no-successors',
-	    	Constants::$targetPkmnNameOriginalInput, Constants::$targetMoveNameOriginalInput);
-            return $this->terminationCode;
-        }
+        $frontendTreeCreationTrack = new FrontendTreeCreationTrack($this->breedingTreeRoot);
+        return $frontendTreeCreationTrack->passOn();
     }
 }

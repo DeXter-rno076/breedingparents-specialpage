@@ -12,6 +12,16 @@ abstract class Logger {
         }
     }
 
+    public static function erroHappened (): bool {
+        return count(Logger::$elogCache) > 0;
+    }
+
+    public static function getELogs (): array {
+        //php has copy-on-write by default
+        $copy = Logger::$elogCache;
+        return $copy;
+    }
+
     public static function elog (string $msg) {
         array_push(Logger::$elogCache, $msg);
         array_push(Logger::$statusLogCache, $msg);

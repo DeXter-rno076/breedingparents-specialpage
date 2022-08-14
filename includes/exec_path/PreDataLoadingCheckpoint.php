@@ -9,6 +9,10 @@ class PreDataLoadingCheckPoint extends Checkpoint {
     }
 
     public function passOn (): string {
+        if ($this->checkForErrors()) {
+            return $this->errorCode;
+        }
+
         if ($this->moveIsUnknown()) {
             $this->outputInfoMessage('breedingchains-unknown-move', Constants::$targetMoveNameOriginalInput);
             return $this->terminationCode;

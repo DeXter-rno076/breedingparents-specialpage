@@ -12,6 +12,10 @@ class FormValidationCheckpoint extends Checkpoint {
     }
 
     public function passOn (): string {
+        if ($this->checkForErrors()) {
+            return $this->errorCode;
+        }
+
         if ($this->formIsEmpty()) {
             return 'form is empty';
         }

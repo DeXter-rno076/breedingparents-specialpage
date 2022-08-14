@@ -7,7 +7,7 @@ class LearnabilityStatus {
     private $learnsByOldGen = false;
 
     public function canLearn (): bool {
-        return $this->learnsDirectly || $this->couldLearnByBreeding || $this->learnsByBreeding 
+        return $this->learnsDirectly || $this->learnsByBreeding 
         	|| $this->learnsByEvent || $this->learnsByOldGen;
     }
 
@@ -25,6 +25,7 @@ class LearnabilityStatus {
         if ($this->learnsByBreeding) $code .= 'b';
         if ($this->learnsByOldGen) $code .= 'o';
         if ($this->learnsByEvent) $code .= 'e';
+        if ($this->couldLearnByBreeding) $code .= 'm';
 
         return $code;
     }
@@ -62,7 +63,7 @@ class LearnabilityStatus {
     }
 
     public function getCouldLearnByBreeding (): bool {
-    	return $thisr->couldLearnByBreeding;
+    	return $this->couldLearnByBreeding;
     }
 
     public function getLearnsByBreeding (): bool {

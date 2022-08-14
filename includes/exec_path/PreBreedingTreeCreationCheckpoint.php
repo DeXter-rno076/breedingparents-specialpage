@@ -9,6 +9,10 @@ class PreBreedingTreeCreationCheckpoint extends Checkpoint {
     }
 
     public function passOn (): string {
+        if ($this->checkForErrors()) {
+            return $this->errorCode;
+        }
+
         //todo check whether move has a typo or generally if it's a move
         if ($this->targetPkmnNameIsUnknown()) {
             $this->outputTargetPkmnNameIsUnknownMsg();

@@ -9,6 +9,10 @@ class EasterEggCheckPoint extends Checkpoint {
     }
 
     public function passOn (): string {
+        if ($this->checkForErrors()) {
+            return $this->errorCode;
+        }
+
         if ($this->isGreenchuEasterEgg()) {
             $this->outputGreenchuEasterEggMsg();
             return $this->terminationCode;

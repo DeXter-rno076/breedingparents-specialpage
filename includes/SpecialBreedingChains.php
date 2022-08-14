@@ -14,16 +14,21 @@ class SpecialBreedingChains extends SpecialPage {
     }
 
     public function execute ($args) {
-        Constants::$centralSpecialPageInstance = $this;
-        Constants::$centralOutputPageInstance = $this->getOutput();
+        try {
+            Constants::$centralSpecialPageInstance = $this;
+            Constants::$centralOutputPageInstance = $this->getOutput();
 
-        Constants::$centralOutputPageInstance->setPageTitle(Constants::i18nMsg('breedingchains-title'));
+            Constants::$centralOutputPageInstance->setPageTitle(Constants::i18nMsg('breedingchains-title'));
 
-        $this->setHeaders();//seems like a must have
-        $this->addLoadingBar();
-        $this->addFormContainer();
-        $this->addCSSandJS();
-        $this->startExecPath();
+            $this->setHeaders();//seems like a must have
+            $this->addLoadingBar();
+            $this->addFormContainer();
+            $this->addCSSandJS();
+            $this->startExecPath();
+        } catch (Exception $e) {
+            $eMsg = ErrorMessage::constructWithError($e);
+            $eMsg->output();
+        }
     }
 
     private function addLoadingBar () {
@@ -85,7 +90,7 @@ class SpecialBreedingChains extends SpecialPage {
             'breedingchains-popup-learns-o' => ((Constants::$targetGenNumber < 8)
                 ? Constants::i18nMsg('breedingchains-popup-learns-o-old') : Constants::i18nMsg('breedingchains-popup-learns-o-new')),
             'breedingchains-popup-learns-e' => Constants::i18nMsg('breedingchains-popup-learns-e'),
-            'breedingchains-popup-error' => Constants::i18nMsg('breedingchains-popup-error')
+            'breedingchains-popup-error' => Constants::i18nMsg('breedingchains-popup-learns-error')
         ]);
     }
 
@@ -134,7 +139,7 @@ class SpecialBreedingChains extends SpecialPage {
             $formValidationCheckPoint = new FormValidationCheckpoint($_GET);
             $successCode = $formValidationCheckPoint->passOn();
         } catch (Exception $e) {
-            $eMsg = new ErrorMessage($e);
+            $eMsg = ErrorMessage::constructWithError($e);
             $eMsg->output();
 
             return Status::newFatal((string) $e);
