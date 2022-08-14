@@ -22,7 +22,7 @@
     "breedingchains-easteregg-dexter": "... Ob ich $1 erlernen kann? Ich bin vielleicht angehender professioneller Druckerreparierer, Teilzeit-Mod und Discord-Hobbypsychologe, aber ich bin (leider oder zum Glück) kein Pokémon!",
     "breedingchains-unknown-pkmn": "Das Pokémon $1 ist mir unbekannt. Hast du dich eventuell vertippt?",
     "breedingchains-unknown-move": "Die Attacke $1 ist mir unbekannt. Hast du dich eventuell vertippt?",
-    "breedingchains-unknown-game": "Das Spiel $1 ist mir unbekannt oder unterstütze ich nicht. Hast du dich eventuell vertippt?",
+    "breedingchains-unknown-game": "Das Spiel $1 ist mir unbekannt oder unterstütze ich nicht (z. B. weil dort keine Pokémon-Zucht möglich ist). Hast du dich eventuell vertippt?",
     "breedingchains-pkmn-doesnt-exist": "$1 existiert in $2 nicht.",
     "breedingchains-move-not-suggested": "$1 ist nicht in den Zuchtattacken von $2. Dies wird keine Zuchtketten-Grafik erzeugen können.",
     "breedingchains-game-required": "Bitte gib ein Spiel an.",
