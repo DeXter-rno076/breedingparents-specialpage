@@ -22,7 +22,7 @@ $( function () {
     const pkmnInput = new OO.ui.ComboBoxInputWidget({
         placeholder: mw.config.get('breedingchains-pkmn-input-placeholder'),
         value: qsParams.targetPkmn || undefined,
-        options: arrayToOptionsArray(pkmnNames)
+        options: []
     });
     const pkmnInputField = new OO.ui.FieldLayout(pkmnInput);
 
@@ -274,6 +274,7 @@ $( function () {
         const gameSk = gameToSk[gameInput.getValue()];
         if (gameSk === undefined) {
             pkmnInput.setOptions(arrayToOptionsArray(pkmnNames));
+            return;
         }
 
         const targetedPkmn = Object.entries(moveSuggestions).filter(([pkmnName, suggestions]) => {
@@ -284,7 +285,6 @@ $( function () {
         });
 
         const targetedPkmnNames = targetedPkmn.map(item => item[0]);
-        console.log(targetedPkmnNames);
 
         pkmnInput.setOptions(arrayToOptionsArray(targetedPkmnNames));
     }
