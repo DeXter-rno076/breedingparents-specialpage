@@ -35,6 +35,7 @@ class ConstantsInitializationTrack extends Track {
             return true;
         }
         $targetGameString = Constants::$GAME_LIST->$gameInput;
+        Constants::$targetGameOriginalInput = $gameInput;
         Constants::$targetGameString = $targetGameString;
         Constants::$targetGenNumber = Constants::$GAMES_TO_GEN->$targetGameString;
 

@@ -13,6 +13,7 @@ abstract class Constants {
 
     public static $targetPkmnNameOriginalInput;
     public static $targetMoveNameOriginalInput;
+    public static $targetGameOriginalInput;
 
     public static $centralOutputPageInstance;
     public static $centralSpecialPageInstance;
