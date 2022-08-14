@@ -199,6 +199,7 @@ $( function () {
             const list = document.createElement('ul');
             textDiv.appendChild(list);
             for (const char of learnability) {
+                if (char === 'm') continue;
                 const listItem = document.createElement('li');
                 const itemText = document.createTextNode(learnabilityCharToDescription(char));
                 listItem.appendChild(itemText);
@@ -244,15 +245,18 @@ $( function () {
         function addText (visualText) {
             const text = visualText.text;
         
+            //actually the CSS does all the centering work, but the width must be at least the text's
+            //width and should not be too high, because otherwise, the text would overlap adjecant nodes
+
             const textMetrics = getTextMetrics(text, getCanvasFont());
-        
+
             const x = getLeafletTextXCoordinate(visualText.groupid);
             const y = Number(visualText.y);
         
-            L.marker([y + 2, x], {
+            L.marker([y, x], {
                 icon: L.divIcon({
                     html: text,
-                    iconSize: [textMetrics.width, textMetrics.height],
+                    iconSize: [textMetrics.width, 10],
                     className: 'breedingChainsLeafletText'
                 })
             }).addTo(map);
@@ -352,13 +356,14 @@ $( function () {
             const metrics = context.measureText(text);
             return metrics;
         }
-        
+
         function getCanvasFont(el = document.body) {
-          const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
-          const fontSize = getCssStyle(el, 'font-size') || '16px';
-          const fontFamily = getCssStyle(el, 'font-family') || 'Times New Roman';
-          
-          return `${fontWeight} ${fontSize} ${fontFamily}`;
+            const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
+            const fontSize = getCssStyle(el, 'font-size') || '16px';
+            const fontFamily = getCssStyle(el, 'font-family') || 'Times New Roman';
+            
+            const font = fontWeight + ' ' + fontSize + ' ' + fontFamily;
+            return font;
         }
         
         function getCssStyle(element, prop) {
