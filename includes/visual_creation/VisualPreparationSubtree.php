@@ -91,8 +91,6 @@ class VisualPreparationSubtree {
         usort($this->successors, function ($first, $second) {
             return $first->getSortingQuantity() <=> $second->getSortingQuantity();
         });
-        Logger::statusLog('successor array of '.$this.' with treeSectionHeightKeys after pure sorting: '
-            .json_encode($this->successors));
     }
 
     //used by usort call in sortSuccessors

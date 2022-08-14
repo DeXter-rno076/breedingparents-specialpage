@@ -108,16 +108,12 @@ class PkmnData extends Pkmn {
      */
     public function canLearnDirectly (): bool {
         $directlyLearnability = $this->checkLearnsetType($this->directLearnsets, 'directly');
-        if ($directlyLearnability) {
-            Logger::statusLog($this->name.' can learn the move directly');
-        }
         return $directlyLearnability;
     }
 
     private function checkLearnsetType (Array $learnsetList, string $learnsetType): bool {
         foreach ($learnsetList as $move) {
             if ($move === Constants::$targetMoveName) {
-                Logger::statusLog('found target move in '.$learnsetType.' learnset');
                 return true;
             }
         }
@@ -134,25 +130,16 @@ class PkmnData extends Pkmn {
         }
 
         $breedingLearnability = $this->checkLearnsetType($this->breedingLearnsets, 'breeding');
-        if ($breedingLearnability) {
-            Logger::statusLog($this->name.' can inherit the move');
-        }
         return $breedingLearnability;
     }
 
     public function canLearnByEvent (): bool {
         $eventLearnability = $this->checkLearnsetType($this->eventLearnsets, 'event');
-        if ($eventLearnability) {
-            Logger::statusLog($this->name.' can learn the move via event');
-        }
         return $eventLearnability;
     }
 
     public function canLearnByOldGen (): bool {
         $oldGenLearnability = $this->checkLearnsetType($this->oldGenLearnsets, 'old gen');
-        if ($oldGenLearnability) {
-            Logger::statusLog($this->name.' can learn the move via old gen');
-        }
         return $oldGenLearnability;
     }
 
