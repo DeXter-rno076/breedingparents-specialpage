@@ -297,7 +297,7 @@ class VisualPreparationSubtree {
         if (is_null($firstSuccessor)) {
             return false;
         }
-        $firstSuccessorJSONData = new PkmnData($firstSuccessor->getName());
+        $firstSuccessorJSONData = PkmnData::cachedConstruct($firstSuccessor->getName());
 
         //evo connections always have one root and one successor
         $firstRoot = $this->visualRoots[0];

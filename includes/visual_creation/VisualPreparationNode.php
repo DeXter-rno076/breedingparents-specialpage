@@ -179,7 +179,7 @@ class VisualPreparationNode extends Pkmn {
     public function getArticleLink (): string {
         if (Constants::isPkmn($this->getName())) {
             try {
-                $pkmnData = new PkmnData($this->getName());
+                $pkmnData = PkmnData::cachedConstruct($this->getName());
                 $linkSuperPage = $pkmnData->getArticleLinkSuperPageName();
                 $linkName = Constants::i18nMsg('breedingchains-learnsetpage-link',
                     $linkSuperPage, Constants::$targetGenNumber);

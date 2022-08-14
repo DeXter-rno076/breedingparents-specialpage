@@ -13,7 +13,7 @@ class PkmnTreeNode extends BreedingTreeNode {
     private static $subtrees = [];
 
     public function __construct (string $pkmnName) {
-        $this->data = new PkmnData($pkmnName);
+        $this->data = PkmnData::cachedConstruct($pkmnName);
 
         parent::__construct($this->data->getName());
     }

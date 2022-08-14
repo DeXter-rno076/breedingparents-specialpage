@@ -43,7 +43,7 @@ class PreBreedingTreeCreationCheckpoint extends Checkpoint {
     private function targetPkmnDoesntExistInTargetGame (): bool {
         $pkmnName = Constants::$targetPkmnName;
         try {
-            $pkmnData = new PkmnData($pkmnName);
+            $pkmnData = PkmnData::cachedConstruct($pkmnName);
             return !$pkmnData->existsInThisGame();
         } catch (Exception $e) {
             $eMsg = ErrorMessage::constructWithError($e);

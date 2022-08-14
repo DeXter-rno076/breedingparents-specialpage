@@ -58,7 +58,7 @@ class SuccessorFilter {
         Logger::statusLog('creating SuccessorFilter instance with: '
             .'eggGroupBlacklist: '.json_encode($eggGroupBlacklist));
         $this->eggGroupBlacklist = $eggGroupBlacklist;
-        $this->currentPkmnTreeNodeData = new PkmnData($currentPkmnTreeNode->getName());
+        $this->currentPkmnTreeNodeData = PkmnData::cachedConstruct($currentPkmnTreeNode->getName());
         $this->whitelisted = $whitelisted;
     }
 
@@ -110,7 +110,7 @@ class SuccessorFilter {
         }
         $doesNotExist = function (string $pkmnName): bool {
             try {
-                $pkmnData = new PkmnData($pkmnName);
+                $pkmnData = PkmnData::cachedConstruct($pkmnName);
                 return !$pkmnData->existsInThisGame();
             } catch (AttributeNotFoundException $e) {
                 Logger::elog($e->__toString());
@@ -135,7 +135,7 @@ class SuccessorFilter {
         $isUnpairable = function (string $pkmnName): bool {
             $pkmnData = null;
             try {
-                $pkmnData = new PkmnData($pkmnName);
+                $pkmnData = PkmnData::cachedConstruct($pkmnName);
             } catch (AttributeNotFoundException $e) {
                 Logger::elog($e->__toString());
                 return true;
@@ -181,7 +181,7 @@ class SuccessorFilter {
             }
             return $this->remove($successorList, function (string $potSuccessorName): bool {
                 try {
-                    $potSuccessorData = new PkmnData($potSuccessorName);
+                    $potSuccessorData = PkmnData::cachedConstruct($potSuccessorName);
                     if ($potSuccessorData->isMaleOnly() || $potSuccessorData->hasNoGender()) {
                         return !$this->currentPkmnTreeNodeData->hasAsEvolution($potSuccessorName);
                     } else {
@@ -203,7 +203,7 @@ class SuccessorFilter {
         }
         foreach ($evos as $evoName) {
             try {
-                $evoData = new PkmnData($evoName);
+                $evoData = PkmnData::cachedConstruct($evoName);
                 if (!$evoData->isMaleOnly()) {
                     return false;
                 }
@@ -222,7 +222,7 @@ class SuccessorFilter {
         }
         foreach ($evos as $evoName) {
             try {
-                $evoData = new PkmnData($evoName);
+                $evoData = PkmnData::cachedConstruct($evoName);
                 if (!$evoData->hasNoGender()) {
                     return false;
                 }
@@ -240,7 +240,7 @@ class SuccessorFilter {
         }
         return $this->remove($successorList, function (string $pkmnName) {
             try {
-                $pkmnData = new PkmnData($pkmnName);
+                $pkmnData = PkmnData::cachedConstruct($pkmnName);
                 return $pkmnData->isFemaleOnly() && !$this->currentPkmnTreeNodeData->hasAsEvolution($pkmnName);
             } catch (AttributeNotFoundException $e) {
                 Logger::elog($e->__toString());
@@ -256,7 +256,7 @@ class SuccessorFilter {
         $pkmnIsBlacklisted = function (string $pkmn): bool {
             $pkmnData = null;
             try {
-                $pkmnData = new PkmnData($pkmn);
+                $pkmnData = PkmnData::cachedConstruct($pkmn);
             } catch (AttributeNotFoundException $e) {
                 Logger::elog($e->__toString());
                 return true;
@@ -310,7 +310,7 @@ class SuccessorFilter {
         $isFemale = function (string $pkmn): bool {
             $pkmnData = null;
             try {
-                $pkmnData = new PkmnData($pkmn);
+                $pkmnData = PkmnData::cachedConstruct($pkmn);
             } catch (AttributeNotFoundException $e) {
                 Logger::elog($e->__toString());
                 return true;

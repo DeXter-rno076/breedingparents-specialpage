@@ -116,7 +116,7 @@ abstract class VisualSubtree extends VisualComplex {
 
     private function calculateNodeConnectionMarginLeft (VisualPreparationNode $successor): int {
         return $successor->getMiddleX() - $successor->calculateDiagonal()/2
-            - Constants::VISUAL_CIRCLE_MARGIN;// + Constants::LINE_WIDTH/2;
+            - Constants::VISUAL_CIRCLE_MARGIN;
     }
 
     private function addConnections (array $connections) {

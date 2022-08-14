@@ -7,6 +7,7 @@ require_once __DIR__.'/../Logger.php';
 require_once 'PkmnTreeNode.php';
 
 class PkmnData extends Pkmn {
+    private static $cache = [];
     private $id;
     private $game;
     private $exists;
@@ -40,7 +41,7 @@ class PkmnData extends Pkmn {
     private $eventLearnsets;
     private $oldGenLearnsets;
 
-    public function __construct (string $name) {
+    private function __construct (string $name) {
         $pkmnCommons = Constants::$externalPkmnGenCommons->$name;
         $pkmnDiffs = Constants::$externalPkmnGameDiffs->$name;
 
@@ -48,6 +49,15 @@ class PkmnData extends Pkmn {
 
         $this->addCommons($pkmnCommons);
         $this->addDiffs($pkmnDiffs);
+    }
+
+    public static function cachedConstruct (string $name): PkmnData {
+        if (isset(PkmnData::$cache[$name])) {
+            return PkmnData::$cache[$name];
+        }
+        $pkmnData = new PkmnData($name);
+        PkmnData::$cache[$name] = $pkmnData;
+        return PkmnData::$cache[$name];
     }
 
     /**
