@@ -3,6 +3,12 @@ $( function () {
     const gameNames = Object.keys(gameToSk);
     const moveSuggestions = mw.config.get('breedingchains-move-suggestions');
     const pkmnNames = Object.keys(moveSuggestions);
+    const pkmnOptions = Object.entries(moveSuggestions).map(function([pkmnName, suggestions]) {
+        return {
+            option: new OO.ui.MenuOptionWidget({data: pkmnName, label: pkmnName}),
+            suggestions
+        }
+    });
 
     let currentMoveSuggestions = [];
 
@@ -80,7 +86,9 @@ $( function () {
         }
 
         changeMoveSuggestions();
+        console.time('changing pkmn suggestions');
         changePkmnSuggestions();
+        console.timeEnd('changing pkmn suggestions');
     });
     pkmnInput.on('change', function () {
         clearErrorsAndWarningsIfNonEmpty(pkmnInput, pkmnInputField);
@@ -273,19 +281,19 @@ $( function () {
     function changePkmnSuggestions () {
         const gameSk = gameToSk[gameInput.getValue()];
         if (gameSk === undefined) {
-            pkmnInput.setOptions(arrayToOptionsArray(pkmnNames));
+            pkmnInput.getMenu().clearItems().addItems(pkmnOptions.map(item => item.option));
             return;
         }
 
-        const targetedPkmn = Object.entries(moveSuggestions).filter(([pkmnName, suggestions]) => {
+        const targetedPkmn = pkmnOptions.filter(({option, suggestions}) => {
             const targetedSuggestions = suggestions.find(item => {
                 return item.games.includes(gameSk)
             });
             return targetedSuggestions !== undefined && targetedSuggestions.moves.length > 0;
         });
 
-        const targetedPkmnNames = targetedPkmn.map(item => item[0]);
+        const targetedPkmnOptions = targetedPkmn.map(item => item.option);
 
-        pkmnInput.setOptions(arrayToOptionsArray(targetedPkmnNames));
+        pkmnInput.getMenu().clearItems().addItems(targetedPkmnOptions);
     }
 });
