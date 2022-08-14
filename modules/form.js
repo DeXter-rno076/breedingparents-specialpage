@@ -67,6 +67,7 @@ $( function () {
 
     addComponents();
     changeMoveSuggestions();
+    changePkmnSuggestions();
 
     submitButton.on('click', submitForm);
     gameInput.on('change', function () {
@@ -79,6 +80,7 @@ $( function () {
         }
 
         changeMoveSuggestions();
+        changePkmnSuggestions();
     });
     pkmnInput.on('change', function () {
         clearErrorsAndWarningsIfNonEmpty(pkmnInput, pkmnInputField);
@@ -266,6 +268,24 @@ $( function () {
                 behavior: 'smooth'
             });
         }
+    }
 
+    function changePkmnSuggestions () {
+        const gameSk = gameToSk[gameInput.getValue()];
+        if (gameSk === undefined) {
+            pkmnInput.setOptions(arrayToOptionsArray(pkmnNames));
+        }
+
+        const targetedPkmn = Object.entries(moveSuggestions).filter(([pkmnName, suggestions]) => {
+            const targetedSuggestions = suggestions.find(item => {
+                return item.games.includes(gameSk)
+            });
+            return targetedSuggestions !== undefined && targetedSuggestions.moves.length > 0;
+        });
+
+        const targetedPkmnNames = targetedPkmn.map(item => item[0]);
+        console.log(targetedPkmnNames);
+
+        pkmnInput.setOptions(arrayToOptionsArray(targetedPkmnNames));
     }
 });
