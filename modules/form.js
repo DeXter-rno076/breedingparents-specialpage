@@ -1,4 +1,6 @@
 $( function () {
+    addCustomMethods();
+
     const gameToSk = mw.config.get('breedingchains-game-to-sk');
     const gameNames = Object.keys(gameToSk);
     const moveSuggestions = mw.config.get('breedingchains-move-suggestions');
@@ -70,12 +72,12 @@ $( function () {
     });
     const submitButtonField = new OO.ui.FieldLayout(submitButton);
 
-
     addComponents();
     changeMoveSuggestions();
     changePkmnSuggestions();
 
     submitButton.on('click', submitForm);
+
     gameInput.on('change', function () {
         clearErrorsAndWarningsIfNonEmpty(gameInput, gameInputField);
 
@@ -90,6 +92,7 @@ $( function () {
         changePkmnSuggestions();
         console.timeEnd('changing pkmn suggestions');
     });
+
     pkmnInput.on('change', function () {
         clearErrorsAndWarningsIfNonEmpty(pkmnInput, pkmnInputField);
 
@@ -145,6 +148,7 @@ $( function () {
             pkmnInputField,
             moveInputField
         ]);
+
         innerFieldSets.push(textInputFieldset);
 
         if (mw.config.get('breedingchains-display-debug-checkboxes')) {
@@ -281,7 +285,6 @@ $( function () {
     function changePkmnSuggestions () {
         const gameSk = gameToSk[gameInput.getValue()];
         if (gameSk === undefined) {
-            pkmnInput.getMenu().clearItems().addItems(pkmnOptions.map(item => item.option));
             return;
         }
 
@@ -294,6 +297,93 @@ $( function () {
 
         const targetedPkmnOptions = targetedPkmn.map(item => item.option);
 
-        pkmnInput.getMenu().clearItems().addItems(targetedPkmnOptions);
+        pkmnInput.setOptionsFast(targetedPkmnOptions);
+    }
+
+    /**
+     * For changePkmnSuggestions a way to set a LOT of options fast is needed
+     * this custom setOpionsFast function does two things for that:
+     *      - as input it directly takes MenuOptionWidget obects so that they only have to be created once
+     *      - default OO.EmitterList.prototype.addItems has two event emits that are VERY performance heavy
+     *          but they are appearently irrelevant for displaying the options -> are cut out
+     */
+    function addCustomMethods () {
+        OO.ui.ComboBoxInputWidget.prototype.setOptionsFast = function (options) {
+            this.getMenu()
+                .clearItems()
+                .addItemsFast(options);
+            return this;
+        }
+    
+        OO.ui.MenuSelectWidget.prototype.addItemsFast = function ( items, index ) {
+            if ( !items || !items.length ) {
+                return this;
+            }
+        
+            // Parent method
+            OO.ui.MenuSelectWidget.super.prototype.addItemsFast.call( this, items, index );
+        
+            this.updateItemVisibility();
+        
+            return this;
+        };
+    
+        OO.ui.SelectWidget.prototype.addItemsFast = function ( items, index ) {
+            if ( !items || !items.length ) {
+                return this;
+            }
+        
+            // Mixin method
+            OO.ui.mixin.GroupWidget.prototype.addItemsFast.call( this, items, index );
+    
+            // Always provide an index, even if it was omitted
+            this.emit( 'add', items, index === undefined ? this.items.length - items.length - 1 : index );
+        
+            return this;
+        };
+    
+        OO.ui.mixin.GroupWidget.prototype.addItemsFast = function ( items, index ) {
+            if ( !items || !items.length ) {
+                return this;
+            }
+        
+            // Mixin method
+            OO.EmitterList.prototype.addItemsFast.call( this, items, index );
+    
+            this.emit( 'change', this.getItems() );
+            return this;
+        };
+        
+        OO.EmitterList.prototype.addItemsFast = function ( items, index ) {
+            if ( !Array.isArray( items ) ) {
+                items = [ items ];
+            }
+    
+            if ( items.length === 0 ) {
+                return this;
+            }
+    
+            index = normalizeArrayIndex( this.items, index );
+    
+            for ( var i = 0; i < items.length; i++ ) {
+                var oldIndex = this.items.indexOf( items[ i ] );
+    
+                if ( oldIndex !== -1 ) {
+                    // Move item to new index
+                    index = this.moveItem( items[ i ], index );
+                } else {
+                    // insert item at index
+                    index = this.insertItem( items[ i ], index );
+                }
+                index++;
+            }
+            return this;
+        };
+
+        function normalizeArrayIndex( arr, index ) {
+            return ( index === undefined || index < 0 || index >= arr.length ) ?
+                arr.length :
+                index;
+        }
     }
 });
