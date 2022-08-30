@@ -21,6 +21,8 @@ class SpecialBreedingChains extends SpecialPage {
             Constants::$centralOutputPageInstance->setPageTitle(Constants::i18nMsg('breedingchains-title'));
 
             $this->setHeaders();//seems like a must have
+
+            //adding loading bar and form container must happen before adding js
             $this->addLoadingBar();
             $this->addFormContainer();
             $this->addCSSandJS();
