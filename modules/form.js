@@ -300,6 +300,18 @@ $( function () {
         pkmnInput.setOptionsFast(targetedPkmnOptions);
     }
 
+    function addCustomMethods () {
+        addFastOptionsSetting();
+
+        /**
+         * automatic focus on dropdown button click is extremely annoying on mobile phones
+         */
+        OO.ui.ComboBoxInputWidget.prototype.onDropdownButtonClick = function () {
+            this.menu.toggle();
+            //this.focus();
+        };
+    }
+
     /**
      * For changePkmnSuggestions a way to set a LOT of options fast is needed
      * this custom setOpionsFast function does two things for that:
@@ -307,7 +319,7 @@ $( function () {
      *      - default OO.EmitterList.prototype.addItems has two event emits that are VERY performance heavy
      *          but they are appearently irrelevant for displaying the options -> are cut out
      */
-    function addCustomMethods () {
+    function addFastOptionsSetting () {
         OO.ui.ComboBoxInputWidget.prototype.setOptionsFast = function (options) {
             this.getMenu()
                 .clearItems()
