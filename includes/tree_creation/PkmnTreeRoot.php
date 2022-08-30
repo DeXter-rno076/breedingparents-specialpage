@@ -46,8 +46,7 @@ class PkmnTreeRoot extends PkmnTreeNode {
         } else {
             $evoSuccessor = $this->tryBreedingChainOverLowestEvolution();
             if (!is_null($evoSuccessor)) {
-                //todo learnsByBreeding is unclean here
-                $this->learnabilityStatus->setLearnsByBreeding();
+                $this->learnabilityStatus->setLearnsFromEvo();
                 $rootSubtree->addSuccessor($evoSuccessor);
             }
         }

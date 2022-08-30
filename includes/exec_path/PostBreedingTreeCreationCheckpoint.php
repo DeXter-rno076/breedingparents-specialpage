@@ -20,7 +20,8 @@ class PostBreedingTreeCreationCheckpoint extends Checkpoint {
         }
 
         if ($this->breedingTreeRootLearnabilityStatus->getCouldLearnByBreeding()
-                && !$this->breedingTreeRootLearnabilityStatus->getLearnsByBreeding()) {
+                && !$this->breedingTreeRootLearnabilityStatus->getLearnsByBreeding()
+                && !$this->breedingTreeRootLearnabilityStatus->getLearnsFromEvo()) {
 
             $this->outputInfoMessage('breedingchains-can-inherit-but-no-successors',
                 Constants::$targetPkmnNameOriginalInput, Constants::$targetMoveNameOriginalInput);

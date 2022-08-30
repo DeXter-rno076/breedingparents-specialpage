@@ -190,7 +190,7 @@ $( function () {
         }
         
         function buildLearnabilityString (learnability) {
-            if (learnability === '') {
+            if (learnability === '' || learnability.includes('c')) {
                 return '';
             }
             const textDiv = document.createElement('div');
