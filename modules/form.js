@@ -71,55 +71,18 @@ const submitButtonField = new OO.ui.FieldLayout(submitButton);
 addComponents();
 changeMoveSuggestions();
 changePkmnSuggestions();
+checkAndSetGameInputWarnings();
+checkAndSetPkmnInputWarnings();
+checkAndSetMoveInputWarnings();
 
-
-submitButton.on('click', submitForm);
-
-gameInput.on('change', function () {
-    clearErrorsAndWarningsIfNonEmpty(gameInput, gameInputField);
-
-    if (!gameNames.includes(gameInput.getValue())) {
-        gameInputField.setWarnings([
-            mw.config.get('breedingchains-unknown-game').replace('$1', gameInput.getValue())
-        ]);
-    }
-
-    changeMoveSuggestions();
-    changePkmnSuggestions();
-});
-
-pkmnInput.on('change', function () {
-    clearErrorsAndWarningsIfNonEmpty(pkmnInput, pkmnInputField);
-
-    if (pkmnInput.getValue() !== '' && !pkmnNames.includes(pkmnInput.getValue())) {
-        pkmnInputField.setWarnings([
-            mw.config.get('breedingchains-unknown-pkmn').replace('$1', pkmnInput.getValue())
-        ]);
-    }
-
-    changeMoveSuggestions();
-});
-moveInput.on('change', function () {
-    clearErrorsAndWarningsIfNonEmpty(moveInput, moveInputField);
-    const moveInputStr = moveInput.getValue();
-
-    if (moveInputStr !== '' && !currentMoveSuggestions.includes(moveInputStr)) {
-        moveInputField.setWarnings([
-            mw.config.get('breedingchains-move-not-suggested')
-                            .replace('$1', moveInputStr)
-                            .replace('$2', pkmnInput.getValue())
-        ]);
-    }
-});
+addEventListeners();
 
 console.timeEnd('creating form');
 $('#specialBreedingChainsLoadingBar').remove();
 setInitialScrollState();
 
-function clearErrorsAndWarningsIfNonEmpty (input, field) {
-    if (input.getValue() !== '') {
-        field.setErrors([]).setWarnings([]);
-    }
+function clearErrorsAndWarnings (field) {
+    field.setErrors([]).setWarnings([]);
 }
 
 function arrayToOptionsArray (array) {
@@ -170,6 +133,60 @@ function addComponents () {
     $(`#${wrapperId}`).append(
         outerFieldset.$element
     );
+}
+
+function addEventListeners () {
+    submitButton.on('click', submitForm);
+
+    gameInput.on('change', function () {
+        clearErrorsAndWarnings(gameInputField);
+
+        checkAndSetGameInputWarnings();
+
+        changeMoveSuggestions();
+        changePkmnSuggestions();
+    });
+
+    pkmnInput.on('change', function () {
+        clearErrorsAndWarnings(pkmnInputField);
+
+        checkAndSetPkmnInputWarnings();
+
+        changeMoveSuggestions();
+    });
+    moveInput.on('change', function () {
+        clearErrorsAndWarnings(moveInputField);
+        
+        checkAndSetMoveInputWarnings();
+    });
+}
+
+function checkAndSetGameInputWarnings () {
+    if (gameInput.getValue() !== '' && !gameNames.includes(gameInput.getValue())) {
+        gameInputField.setWarnings([
+            mw.config.get('breedingchains-unknown-game').replace('$1', gameInput.getValue())
+        ]);
+    }
+}
+
+function checkAndSetPkmnInputWarnings () {
+    if (pkmnInput.getValue() !== '' && !pkmnNames.includes(pkmnInput.getValue())) {
+        pkmnInputField.setWarnings([
+            mw.config.get('breedingchains-unknown-pkmn').replace('$1', pkmnInput.getValue())
+        ]);
+    }
+}
+
+function checkAndSetMoveInputWarnings () {
+    const moveInputStr = moveInput.getValue();
+
+    if (moveInputStr !== '' && !currentMoveSuggestions.includes(moveInputStr)) {
+        moveInputField.setWarnings([
+            mw.config.get('breedingchains-move-not-suggested')
+                            .replace('$1', moveInputStr)
+                            .replace('$2', pkmnInput.getValue())
+        ]);
+    }
 }
 
 function changeMoveSuggestions () {
@@ -300,6 +317,8 @@ function changePkmnSuggestions () {
 
 function createPkmnOptions () {
     return new Promise(resolve => {
+        //Promise.resolve().then to prevent this from just executing synchronously
+        //  resulting in no performance benefit
         Promise.resolve().then(() => {
             const result = Object.entries(moveSuggestions).map(function([pkmnName, suggestions]) {
                 return {
