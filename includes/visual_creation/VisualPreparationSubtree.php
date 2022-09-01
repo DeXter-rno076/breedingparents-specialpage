@@ -104,7 +104,6 @@ class VisualPreparationSubtree {
     }
 
     /**
-     * todo explain this
      * short draft: the smaller the sub tree, the closer to the middle
      * sortSuccessors sorts all successors descending
      * changeOrderToFromMiddleToOuterLayern starts from the end and jumps 2 indices at a time to the start
@@ -144,7 +143,7 @@ class VisualPreparationSubtree {
         }
     }
 
-    //split up (too long method)
+    //todo split up (too long method)
     private function setYCoords (int $offset): int {
         if (count($this->visualRoots) === 1) {
             $root = $this->visualRoots[0];
@@ -161,7 +160,9 @@ class VisualPreparationSubtree {
 
         if (count($this->visualRoots) > 1) {
             Logger::statusLog('calculating y coordinates for roots of '.$this);
-            //todo successors may be empty
+            if (count($this->successors) === 0) {
+                throw new InvalidStateException('breeding subtree with multiple roots has no successors');
+            }
             $rootsHeight = $this->calcRootsHeight();
             $rootsAreWiderThanSuccessors = $rootsHeight > $this->getSuccessorsHeight();
 
