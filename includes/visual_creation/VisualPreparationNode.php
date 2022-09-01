@@ -9,7 +9,6 @@ require_once __DIR__.'/../Logger.php';
 require_once __DIR__.'/../Constants.php';
 
 use MediaWiki\MediaWikiServices;
-use VisualPreparationNode as GlobalVisualPreparationNode;
 
 class VisualPreparationNode extends Pkmn {
     private static $iconCache = [];
@@ -55,7 +54,7 @@ class VisualPreparationNode extends Pkmn {
         $this->iconHeight = $iconFileObj->getHeight();
     }
 
-    public static function getIcon (string $fileURL): File {
+    private static function getIcon (string $fileURL): File {
         if (isset(VisualPreparationNode::$iconCache[$fileURL])) {
             return VisualPreparationNode::$iconCache[$fileURL];
         }
