@@ -45,6 +45,7 @@ class PkmnTreeNode extends BreedingTreeNode {
             $hash = BreedingSubtree::buildHash($this->getTargetEggGroup($eggGroupBlacklist), $eggGroupBlacklist);
             if (!SuccessorFilter::isSpecialCase($this->data) && isset(PkmnTreeNode::$subtrees[$hash])) {
                 Logger::statusLog($this.' is compatible with existing subtree, adding to hash '.$hash);
+                $this->learnabilityStatus->setLearnsByBreeding();
                 $cachedSubtree = PkmnTreeNode::$subtrees[$hash];
                 $cachedSubtree->addRoot($this);
                 return null;
