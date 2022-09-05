@@ -29,7 +29,7 @@
     "breedingchains-game-required": "Please set a game.",
     "breedingchains-pkmn-required": "Please set a Pokémon.",
     "breedingchains-move-required": "Please set a move.",
-    "breedingchains-whatshappening": "No idea what's displayed here? Look into the pages [[Zucht]] and [[Ei-Attacken]].",
+    "breedingchains-whatshappening": "Click Pokémon for more info. No idea what's displayed here? Look into the pages [[Zucht]] and [[Ei-Attacken]].",
     "breedingchains-popup-learns-d-old": "Directly via level up, TM/HM or a move tutor.",
     "breedingchains-popup-learns-d-new": "Directly via level up, TM/TR or a move tutor.",
     "breedingchains-popup-learns-b": "Via breeding with one of the directly following Pokémon on the right as a parent.",
