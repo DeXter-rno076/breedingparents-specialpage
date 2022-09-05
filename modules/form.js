@@ -139,24 +139,30 @@ function addEventListeners () {
     submitButton.on('click', submitForm);
 
     gameInput.on('change', function () {
-        clearErrorsAndWarnings(gameInputField);
-
-        checkAndSetGameInputWarnings();
-
         changeMoveSuggestions();
         changePkmnSuggestions();
+
+        clearErrorsAndWarnings(gameInputField);
+        clearErrorsAndWarnings(pkmnInputField);
+        clearErrorsAndWarnings(moveInputField);
+
+        checkAndSetPkmnInputWarnings();
+        checkAndSetMoveInputWarnings();
+        checkAndSetGameInputWarnings();
     });
 
     pkmnInput.on('change', function () {
+        changeMoveSuggestions();
+
         clearErrorsAndWarnings(pkmnInputField);
+        clearErrorsAndWarnings(moveInputField);
 
         checkAndSetPkmnInputWarnings();
-
-        changeMoveSuggestions();
+        checkAndSetMoveInputWarnings();
     });
     moveInput.on('change', function () {
         clearErrorsAndWarnings(moveInputField);
-        
+
         checkAndSetMoveInputWarnings();
     });
 }
@@ -170,9 +176,16 @@ function checkAndSetGameInputWarnings () {
 }
 
 function checkAndSetPkmnInputWarnings () {
-    if (pkmnInput.getValue() !== '' && !pkmnNames.includes(pkmnInput.getValue())) {
+    if (pkmnInput.getValue() === '') return;
+
+    if (!pkmnNames.includes(pkmnInput.getValue())) {
         pkmnInputField.setWarnings([
             mw.config.get('breedingchains-unknown-pkmn').replace('$1', pkmnInput.getValue())
+        ]);
+    } else if (currentMoveSuggestions.length === 0) {
+        pkmnInputField.setWarnings([
+            mw.config.get('breedingchains-pkmn-has-no-breedingmoves').replace('$1', pkmnInput.getValue())
+            .replace('$2', gameInput.getValue())
         ]);
     }
 }
@@ -180,7 +193,8 @@ function checkAndSetPkmnInputWarnings () {
 function checkAndSetMoveInputWarnings () {
     const moveInputStr = moveInput.getValue();
 
-    if (moveInputStr !== '' && !currentMoveSuggestions.includes(moveInputStr)) {
+    if (moveInputStr !== '' && currentMoveSuggestions.length > 0 
+            && !currentMoveSuggestions.includes(moveInputStr)) {
         moveInputField.setWarnings([
             mw.config.get('breedingchains-move-not-suggested')
                             .replace('$1', moveInputStr)
@@ -191,6 +205,7 @@ function checkAndSetMoveInputWarnings () {
 
 function changeMoveSuggestions () {
     moveInput.setOptions([]);
+    currentMoveSuggestions = [];
 
     const pkmnName = pkmnInput.getValue();
     const suggestions = moveSuggestions[pkmnName];

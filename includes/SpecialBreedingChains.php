@@ -84,6 +84,7 @@ class SpecialBreedingChains extends SpecialPage {
             'breedingchains-submit-text' => Constants::i18nMsg('breedingchains-submit-text'),
             'breedingchains-unknown-game' => Constants::i18nMsg('breedingchains-unknown-game'),
             'breedingchains-unknown-pkmn' => Constants::i18nMsg('breedingchains-unknown-pkmn'),
+            'breedingchains-pkmn-has-no-breedingmoves' => Constants::i18nMsg('breedingchains-pkmn-has-no-breedingmoves'),
             'breedingchains-move-not-suggested' => Constants::i18nMsg('breedingchains-move-not-suggested'),
             'breedingchains-popup-header' => Constants::i18nMsg('breedingchains-popup-header'),
             'breedingchains-popup-learns-d' => ((Constants::$targetGenNumber < 8)

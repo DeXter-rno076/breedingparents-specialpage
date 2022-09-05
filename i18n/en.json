@@ -18,6 +18,7 @@
     "breedingchains-invalid-pkmn": "Invalid character in the Pokémon name. You probably made a typo somewhere.",
     "breedingchains-invalid-move": "Invalid character in the move name. You probably made a typo somewhere.",
     "breedingchains-pkmn-doesnt-exist": "$1 does not exist in $2",
+    "breedingchains-pkmn-has-no-breedingmoves": "$1 has no breeding moves in $2. This won't produce a breeding chains graphic.",
     "breedingchains-submit-text": "search",
     "breedingchains-easteregg-greenchu": "Das Phänomen Greenchu ist noch weitgehend unerforscht. Dementsprechend wissen wir nicht, ob es $1 überhaupt erlernen kann. Selbst in der Entstehungsgeschichte bestehen noch große Lücken. Falls du dort etwas weißt, teile es uns bitte mit :D",
     "breedingchains-easteregg-dexter": "... Ob ich $1 erlernen kann? Ich bin vielleicht angehender professioneller Druckerreparierer, Teilzeit-Mod und Discord-Hobbypsychologe, aber ich bin (leider oder zum Glück) kein Pokémon!",
