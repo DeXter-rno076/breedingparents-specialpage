@@ -20,6 +20,7 @@ class LearnabilityStatus {
      * b - can learn by breeding
      * o - can learn in old gen
      * e - can lern by event
+     * m - maybe learns by breeding (could inherit)
      * c - learns from evo (learns as a *c*hild (yes, I know, but event was faster))
      */
     public function buildLearnabilityCode (): string {

@@ -5,6 +5,19 @@ const gameToSk = mw.config.get('breedingchains-game-to-sk');
 const gameNames = Object.keys(gameToSk);
 const moveSuggestions = mw.config.get('breedingchains-move-suggestions');
 const pkmnNames = Object.keys(moveSuggestions);
+const renamedMoves = {
+    "Pfund": "Klaps",
+    "Schnabel": "Pikser",
+    "Konfustrahl": "Konfusstrahl",
+    "Giftblick": "Schlangenblick",
+    "Gesichte": "Scharfblick",
+    "Rollentausch": "Rollenspiel",
+    "Wertewechsel": "Fähigkeitentausch",
+    "Fauna-Statue": "Flora-Statue",
+    "Pflanzsäulen": "Pflanzensäulen",
+    "Staffette": "Stafette",
+    "Verwandler": "Wandler"
+};
 
 const pkmnOptionsPromise = createPkmnOptions();
 
@@ -13,7 +26,6 @@ let currentMoveSuggestions = [];
 const qsParams = new Proxy(new URLSearchParams(window.location.search), {
     get: (searchParams, prop) => searchParams.get(prop),
 });
-
 
 const gameInput = new OO.ui.ComboBoxInputWidget({
     placeholder: mw.config.get('breedingchains-game-input-placeholder'),
@@ -192,12 +204,13 @@ function checkAndSetPkmnInputWarnings () {
 
 function checkAndSetMoveInputWarnings () {
     const moveInputStr = moveInput.getValue();
+    const targetedMove = renamedMoves[moveInputStr] || moveInputStr;
 
-    if (moveInputStr !== '' && currentMoveSuggestions.length > 0 
-            && !currentMoveSuggestions.includes(moveInputStr)) {
+    if (targetedMove !== '' && currentMoveSuggestions.length > 0 
+            && !currentMoveSuggestions.includes(targetedMove)) {
         moveInputField.setWarnings([
             mw.config.get('breedingchains-move-not-suggested')
-                            .replace('$1', moveInputStr)
+                            .replace('$1', targetedMove)
                             .replace('$2', pkmnInput.getValue())
         ]);
     }

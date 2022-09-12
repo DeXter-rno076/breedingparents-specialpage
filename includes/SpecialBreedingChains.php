@@ -25,8 +25,8 @@ class SpecialBreedingChains extends SpecialPage {
             //adding loading bar and form container must happen before adding js
             $this->addLoadingBar();
             $this->addFormContainer();
-            $this->addCSSandJS();
             $this->startExecPath();
+            $this->addCSSandJS();
         } catch (Exception $e) {
             $eMsg = ErrorMessage::constructWithError($e);
             $eMsg->output();

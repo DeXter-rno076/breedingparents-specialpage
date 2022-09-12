@@ -137,7 +137,7 @@ $( function () {
             const learnability = visualEl.learnability;
         
             const pkmnLinks = findVisualElementsByGroupAndTag(groupId, 'a');
-        
+
             if (pkmnLinks.length !== 1) {
                 console.error('addImage: pkmnLinks array has unexpected length ' + pkmnLinks.length);
             } else {

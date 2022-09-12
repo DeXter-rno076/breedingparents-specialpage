@@ -7,8 +7,8 @@
     clear: both;/*field layout messages are a bit broken when combined with floating inputs*/
 }
 
-.oo-ui-menuSelectWidget {
-    z-index: 4000;/*leaflet has crazily high z-indices and sometimes leaflet map and text suggestions overlap each other*/
+#ooui-1 {
+    z-index: 4000 !important;/*leaflet has crazily high z-indices and sometimes leaflet map and text suggestions overlap each other*/
 }
 
 #specialBreedingChainsLoadingBar {
