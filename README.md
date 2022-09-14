@@ -5,34 +5,20 @@ The data sets are created via the program lying in breedingparents-data in the s
 
 The name of this specialpage was changed to BreedingChains / Zuchtketten at the end to prevent misunderstandings about its usage, but this repo is still named breedingparents because messing with Git later on without exactly knownig what you're doing is always a bad idea.
 
-# testing
-* Shardrago (LP)
 
 # next steps
-* text input
-  * better suggestions (really allow shortcuts?)
-*
 * adjust needed php version
 * create fancy docs of the general algorithms and ideas
-*
-* performance problems -> Glurak Konter g8 (still relevant for separated games?)
-* somehow remove legend (a bit chaos with infomessages, legend and breeding tree map)
-
-## visual stuff
-* colors for old gen and event are todo
-
-## needs data stuff
-
-## time plan
 
 # bugs
+* SuccessorFilter: The male-only and unknown-only requirements probably have to check the basis Pokémon too when checking for male-only/unknown-only evo line
+* evolution connections can also appear in the middle of a path: Baby-Pokémon can receive a move, evolve and then pass it on to others
 
 # quality of life todos
 * mouse wheel: switch between scrolling and zooming
 * old gen -> say which specific game
 
 # after 'release' (aka. never)
-* set single successors to same y coord as the predecessor
 * move single successors closer to their neighbours => less whitespace
 * maybe put tutor learnsets into a separate list and handle it like event or old gen
 
