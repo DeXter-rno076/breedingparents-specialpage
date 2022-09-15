@@ -7,7 +7,7 @@
     clear: both;/*field layout messages are a bit broken when combined with floating inputs*/
 }
 
-#ooui-1 {
+#ooui-1, #ooui-3, #ooui-5 {
     z-index: 4000 !important;/*leaflet has crazily high z-indices and sometimes leaflet map and text suggestions overlap each other*/
 }
 
