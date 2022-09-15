@@ -370,6 +370,88 @@ function addCustomMethods () {
         this.menu.toggle();
         //this.focus();
     };
+
+    OO.ui.MenuSelectWidget.prototype.toggle = function ( visible ) {
+        visible = ( visible === undefined ? !this.visible : !!visible ) && !!this.items.length;
+        var change = visible !== this.isVisible();
+    
+        if ( visible && !this.warnedUnattached && !this.isElementAttached() ) {
+            OO.ui.warnDeprecation( 'MenuSelectWidget#toggle: Before calling this method, the menu must be attached to the DOM.' );
+            this.warnedUnattached = true;
+        }
+    
+        if ( change && visible ) {
+            // Reset position before showing the popup again. It's possible we no longer need to flip
+            // (e.g. if the user scrolled).
+            this.setVerticalPosition( this.originalVerticalPosition );
+        }
+    
+        // Parent method
+        OO.ui.MenuSelectWidget.super.prototype.toggle.call( this, visible );
+    
+        if ( change ) {
+            if ( visible ) {
+    
+                if ( this.width ) {
+                    this.setIdealSize( this.width );
+                } else if ( this.$floatableContainer ) {
+                    this.$clippable.css( 'width', 'auto' );
+                    this.setIdealSize(
+                        this.$floatableContainer[ 0 ].offsetWidth > this.$clippable[ 0 ].offsetWidth ?
+                            // Dropdown is smaller than handle so expand to width
+                            this.$floatableContainer[ 0 ].offsetWidth :
+                            // Dropdown is larger than handle so auto size
+                            'auto'
+                    );
+                    this.$clippable.css( 'width', '' );
+                }
+    
+                this.togglePositioning( !!this.$floatableContainer );
+                this.toggleClipping( true );
+    
+                if ( !this.screenReaderMode ) {
+                    this.bindDocumentKeyDownListener();
+                    this.bindDocumentKeyPressListener();
+                }
+    
+                //!flipping the options is removed here because we want to display it in the way we told it to
+                //!no other way.
+    
+                this.$focusOwner.attr( 'aria-expanded', 'true' );
+                this.$focusOwner.attr( 'aria-owns', this.getElementId() );
+    
+                var selectedItem = !this.multiselect && this.findSelectedItem();
+                if ( selectedItem ) {
+                    // TODO: Verify if this is even needed; This is already done on highlight changes
+                    // in SelectWidget#highlightItem, so we should just need to highlight the item
+                    // we need to highlight here and not bother with attr or checking selections.
+                    this.$focusOwner.attr( 'aria-activedescendant', selectedItem.getElementId() );
+                    selectedItem.scrollElementIntoView( { duration: 0 } );
+                }
+    
+                // Auto-hide
+                if ( this.autoHide ) {
+                    this.getElementDocument().addEventListener( 'mousedown', this.onDocumentMouseDownHandler, true );
+                }
+    
+                this.emit( 'ready' );
+            } else {
+                this.$focusOwner.removeAttr( 'aria-activedescendant' );
+                if ( !this.screenReaderMode ) {
+                    this.unbindDocumentKeyDownListener();
+                    this.unbindDocumentKeyPressListener();
+                }
+                this.$focusOwner.attr( 'aria-expanded', 'false' );
+                this.$focusOwner.removeAttr( 'aria-owns' );
+                this.getElementDocument().removeEventListener( 'mousedown', this.onDocumentMouseDownHandler, true );
+                this.togglePositioning( false );
+                this.toggleClipping( false );
+                this.lastHighlightedItem = null;
+            }
+        }
+    
+        return this;
+    };
 }
 
 /**
