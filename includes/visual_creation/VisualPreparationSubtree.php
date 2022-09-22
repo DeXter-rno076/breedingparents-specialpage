@@ -149,7 +149,7 @@ class VisualPreparationSubtree {
             $root = $this->visualRoots[0];
             $nodeHeight = $root->calcHeight();
             $root->setY($offset + ($this->subtreeHeight - $root->calcHeight())/2);
-            Logger::statusLog('calculated y = '.$root->getTopY().' for '.$root
+            Logger::statusLog('calculated y = '.$root->getY().' for '.$root
                 .', subtree height = '.$this->subtreeHeight.', offset = '.$offset);
         }
 
@@ -182,6 +182,7 @@ class VisualPreparationSubtree {
                 $bottom = $this->getLowestSuccessorYCoordinate();
             }
 
+            //todo this assumes all roots have the same height
             $nodeHeight = $this->visualRoots[0]->calcHeight();
             $height = $bottom - $top;
             $rootsOffset = $offset + ($height - count($this->visualRoots)*$nodeHeight)/2;
@@ -192,7 +193,7 @@ class VisualPreparationSubtree {
             for ($i = 0; $i < count($this->visualRoots); $i++) {
                 $root = $this->visualRoots[$i];
                 $root->setY($rootsOffset + $i*$nodeHeight);
-                Logger::statusLog('y = '.$root->getTopY().' for '.$root->getName());
+                Logger::statusLog('y = '.$root->getY().' for '.$root->getName());
             }
         }
 
@@ -218,7 +219,7 @@ class VisualPreparationSubtree {
         }
         $firstSuccessor = $this->successors[0];
         $firstSuccessorRoot = $firstSuccessor->getRoots()[0];
-        return min($firstSuccessorRoot->getTopY(), $firstSuccessor->getHighestSuccessorYCoordinate());
+        return min($firstSuccessorRoot->getY(), $firstSuccessor->getHighestSuccessorYCoordinate());
     }
 
     private function getLowestSuccessorYCoordinate (): int {

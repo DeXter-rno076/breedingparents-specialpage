@@ -132,7 +132,7 @@ class VisualPreparationNode extends Pkmn {
         $this->y = $y;
     }
 
-    public function getTopY (): int {
+    public function getY (): int {
         return $this->y;
     }
 
