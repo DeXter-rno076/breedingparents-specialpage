@@ -1,4 +1,6 @@
 # intro
+This documentation is primarily intended to explain how this special page works and make it far easier for you to change this software. It's not meant as usage/setup documentation. At some points this maybe went a bit too much from pure explanation to telling the short story how the approach came into being, but the development of an approach increases naturally in complexity and stories in general are easier to read and memorize, so hopefully it's all right.
+
 The BreedingChains specialpage has the goal to display the possible breeding chains for a Pokémon to get a certain move in the most practical way. This also means that the built breeding trees are explicitly *NOT* complete. Often you can have massive chains of breeding, sometimes even infinitely long ones when you manage to build closed loops. For smaller grafics and faster computing this specialpage uses some rules to ignore unnecessarily long breeding paths.
 
 # context
@@ -88,9 +90,6 @@ In the last step the visual structure is translated into a concrete and small ex
 (little side note about the move from SVG to JSON: at first the grafics were built and displayed as SVGs, but building zooming and moving myself was difficulter than expected and then I heard of leaflet that basically did all of that far better and I switched to it; at first I just used the SVG grafic as a background in leaflet and added some popups and so on via JS, but this was quite tricky because of imo. unintuitive coordinate systems (yes, multiple different ones) of leaflet; so instead of a background I rebuilt the entire grafic in leaflet in JS with the SVG as the basis that was display:noned, but this was quite slow, some extreme cases took about 2s on my PC, so I separated general visualization logic from SVG logic (this would have been generally a todo) and added a JSON translation, changing the exchange format massively boostet performance (these extreme cases were pushed to about 200ms on my PC) and shrinked the data size a lot)
 
 ## creating the raw breeding tree (includes/tree_creation)
-
-todo: Subtrees with multiple roots
-
 In this building step we look for all shortest successful breeding paths. That is done by trying all possibilities and adding them on success.
 
 First some general thougts:
@@ -138,6 +137,25 @@ Here is a pseudocode version:
     return failure
 ```
 
+### fighting redundancies
+In the beginning there were many visually identical subtrees that bloated the breeding trees and this still happens quite often.
+So we have many subtrees that only differ in their roots. It would be very nice if we could have identical part only once and compactly connect the roots to this single piece.
+
+To partly tackle this issue I first created the entire complicated system with subtrees and nodes and the annoying need of fancy grafics to really understand this stuff (at first everything consisted of nice friendly little nodes doing their stuff and no abstract structural things that sometimes do nothing and other times do everything).
+I didn't want to give up trees, because graphs would mean so many more unnecessary problems and far far more complex algorithms everywhere. So I decided to cheat a bit on the idea of trees and made trees with a root that actually consists of multiple entities. On the structural layer you have subtrees with one abstract root and many subtree successors, but on the concrete layer you have multiple nodes (in most cases called roots) building the root of the subtree.
+
+One of the main aspects is how to detect identical subtrees efficient. This was the key question that kept this waiting for quite some time until I got the idea that a breeding subtree can be declared not only by its members but also by its factors that determine what selection of Pokémon this subtree starts with and who is not allowed to take part, i. e. its targeted egg group and blacklisted egg groups. The next idea to build hashes from these factors made the idea that just uses all members far more practical, so the previous idea wasn't so crucial anymore, but the start-subtractors concept has an important advantage that is explained very soon.
+
+In general we give every breeding subtree a partly unique hash. If two subtrees have the same hash, their successors are identical -> the subtrees can be fused together, i. e. the root of one tree can be added to the other.
+
+However one problem appears with this: nodes not only have connections to their successors but also to their root. If we wildly fuse subtrees all around the whole structure we'll get a jungle of connections jumping around, crossing other subtrees and a graph like connection chaos that's quite hard to clear.
+
+I solved this problem with the following extremely ingenious und complex algorithm: .... I made sure this never happens. (jokes aside, I tried to solve this with optimazion algorithms that consisted of sorting parts and recalculating optimazion measurements in between each sorting iteration and crazy ideas about a vertical track manager that would coordinate creating the node connections without lines laying on top of each other, but this was such a huge mountain of problems to solve that I decided to make this redundancie tackling a bit weaker while don't having to worry about this very complex problems).
+
+All tree algorithms use the fact that subtrees stay in their subtree and don't affect any subtree that's not part of themselves. Therefore we can use recursion very elegantly and keep the algorithms simple. The main problem with the crazy connection chaos is that we break this separation of subtrees. We can't just move a subtree freely around because it could be connectied to another one. But most redundancies will happen inside a subtree because there many factors deciding what Pokémon are viable options are the same. So, I decided to limit this redundancy avoiding to the borders of a subtree.
+
+This situation is rather simple to implement. When the current node can inherit the targeted move, i. e. could get a tree that doesn't just contain this node and nothing else, we look if its subtree hash already exists. If it does we add the node to the roots of that node and stop, otherwise we continue with the default algorithm (note that this additionally adds some kind of memoization, i. e. a potential performance increase as a side effect). Then all further algorithms that work on the tree structures have to bear multiple roots and we're done.
+
 ### classes
 #### `BreedingSubtree`
 Resembles a subtree with one or more roots and 0 or more successors. This is the most abstract building block of the raw breeding tree structure. Everything from the entire tree to the single path ends is a BreedingSubtree.
@@ -146,7 +164,7 @@ But it's only a structural entity. The concrete nodes are BreedingTreeNode insta
 
 BreedingSubtrees however are created by BreedingTreeNodes. It's like the nodes calculate the breeding chains, throw their successors in their BreedingSubtree and then jump themselves into it, forgetting the connections and existing alone until the next building step.
 
-todo: add a neat drawing about BreedingSubtrees and BreedingTreeNodes
+![a visual example was supposed to be here :(](SubtreeVsNode.svg)
 
 #### `BreedingRootSubtree`
 A BreedingSubtree version that is meant for the wanted Pokémon/the root of roots, so the most outer layer of Subtrees. It has exactly one root and 0 or more successors.
@@ -229,14 +247,15 @@ Because of our index selection at the start we always end up at index -1. Here w
 
 After that we have a sorted as wanted list of successors.
 
-todo: add neat grafic for this algorithm
+![a visual example was supposed to be here :(](SortingSuccessors.svg)
 
 ### calculating y coordinates
 The y coordinates like most algorithms in this step are calculated recursively.
 
 Each subtree gets an vertical offset as a parameter which is basically the vertical starting point of this subtree (the y coordinate at which the highest/lowest node will appear).
 
-First: Single roots calculate it like it's shown in this TODO neat grafic:
+First: Single roots calculate it like it's shown in this neat grafic:
+![a visual example was supposed to be here :(](SingleNodeYCalculation.svg)
 
 Then: Each successor subtree calculates its y coordinates recursively. For that an initial offset is calculated like in this neat TODO grafic:
 and then after the first successor, the next offset is just the last one with the height of the last successor on top.
@@ -266,7 +285,7 @@ The node class does everything that doesn't require other nodes. Here the icons 
 The coordinates have three different types: default, middle and bottom.
 Default means the upper left corner of the node, the other two mean what their name implies.
 
-## translating it into usable data exchange format (includes/visual_cretion)
+## translating it into usable data exchange format (includes/visual_creation)
 Most of the logic of this step happens in the Visual<Item>.php classes. The JSON and SVG classes just do the last step of converting the finished visual structures in the corresponding formats.
 
 todo
@@ -321,21 +340,21 @@ In the leaflet map creation the map is created and the JSON structure from the l
 
 The zoom doesn't work by just using mouse wheel events because these have strange differences across browsers. Instead 60px are taken is an estimate for one mouse wheel step. With this estimate and the wanted zoom step size, a wheel pixel amount per zoom level is calculated and set in leaflet.
 
-## external data and manual_data folder
+# external data and manual_data folder
 To avoid the bottleneck of one or few server administrators in updating the special page, most of the needed data is saved in pages in the MediaWiki namespace in the wiki so that normal administrators can edit them as well. For example when an error is found, this is helpful.
 
 However some few JSON files are stored in the manual_data folder because those will only have to change when new games are released and then the specialpage will have to be updated nonetheless.
 
-## external json scheme
-### Pokémon
-### egg groups
+# external json scheme
+## Pokémon
+## egg groups
 ```ts
 interface EggGroups {
     [eggGroupName: string]: string[];
 }
 ```
 
-### Pokémon
+## Pokémon
 Pokémon data is separated in commons for each gen and diffs for each game. In the commons files are properties that don't and won't change across games in a gen, in the diffs files are the properties that do change and might change in the future across games in one gen.
 Learnsets are stretched across both file types to shrink file sizes.
 
@@ -406,3 +425,62 @@ interface Pkmn {
 
 }
 ```
+
+# exec_path folder
+The exec_path folder contains the classes that build the order of actions of the specialpage. It consists of many sections of doing something (tracks) and many sections of checking the current state for an early stop (checkpoints). At first this was done by one long central method in the SpecialBreedingChains class, but I was unhappy with it, so I created this checkpoints and tracks system.
+
+In a track the state of the current execution is changed. For example the constants are initialized or the breeding chains structure is calculated. In a checkpoint the current state is checked for certain states that cause an early finish. For example whether the breeding chains calculation returned an empty tree, meaning the Pokémon can't learn the move, or testing the form inputs for invalid data.
+
+Tracks and checkpoints are connected by a call chain of the passOn method that every part must have. This method contains the basic action and returns a termination code. 
+If a checkpoint detects such a special early abort state it reacts to it and returns its own termination code, otherwise it calls the passOn method of the next step and returns the code from this call.
+
+The current order:
+1. FormValidationCheckpoint
+2. ConstantsInitializationTrack
+3. PreDataLoadingCheckPoint
+4. EasterEggCheckpoint
+5. ExternalDataLoadingTrack
+6. PreBreedingTreeCreationCheckpoint
+7. BreedingTreeCreationTrack
+8. PostBreedingTreeCreationCheckpoint
+9. FrontendTreeCreationTrack (just as SVGCreationTrack this name is an inaccurate old leftover)
+10. SVGCreationTrack (todo: this name is still a leftover of very old states of the visual structures creation)
+
+# exceptions folder
+## AttributeNotFoundException
+This exception is thrown in the creation of PkmnData instances if an external JSON object misses a must have property.
+
+## FileNotFoundException
+This exception is thrown in the loading of Pokémon icon files when no file could be found. This happens most of the time when a Pokémon icon is missing (e. g. the special page is run on a local server and special form icons are missing).
+
+## InvalidStateException
+This exception is thrown when some unintended structure was encountered, like a subtree with multiple roots but no successors (a subtree with a root but no successor is in almost all cases the end of a breeding chain -> the root can learn the move directly -> the step of checking and adding a Pokémon to other subtrees isn't reached -> shouldn't be able to appear). This exception is the newest and very rarely used currently.
+
+# top level classes in the includes folder
+## Constants
+Has constants and a few little util function that are initialized in the ConstantsInitializationTrack and then used in the entire application.
+
+## HTMLElement
+A class first intended as small wrapper around the basic HTML tag building functions of MediaWiki's Html class with added string cleaning for tag contents (Html only has cleaning for opening and ending tags, not the text content/slot) that additionally got some handy functios for HTML tag building and displaying.
+
+## Logger
+Group of static functions for logging status, error and warning messages.
+These are collected in arrays and get printed after the exec_path parts have finished.
+
+## Pkmn
+This class is the most upper abstract class of most node like elements of the trees. Its name is one of the last leftovers of when the trees were focused on Pokémon. Something like "Node" or "TreeNode" would be better (todo)
+
+## SpecialBreedingChains
+This is the entry point of this special page. Here everything is started.
+
+It does following things:
+
+1. Sets some constants that only this instance can set (like the constant containing the reference to this instance)
+2. sets headers (no idea what actually happens here but this seems like a must have for specialpages)
+3. adds loading bar (it would probably be the same if this was done at the and because as it seems the backend just does its things and then the page is loaded and stuff is added to it)
+4. adds the form container div
+5. starts the exec_path i. e. the special page background magic
+6. adds the CSS and JS
+
+# folder output_messages
+This folder contains classes for basic message boxes. The outputOnce methods were originally needed when the form was built via the HTMLForm class. Currently they are probably unused.
