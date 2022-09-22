@@ -88,6 +88,9 @@ In the last step the visual structure is translated into a concrete and small ex
 (little side note about the move from SVG to JSON: at first the grafics were built and displayed as SVGs, but building zooming and moving myself was difficulter than expected and then I heard of leaflet that basically did all of that far better and I switched to it; at first I just used the SVG grafic as a background in leaflet and added some popups and so on via JS, but this was quite tricky because of imo. unintuitive coordinate systems (yes, multiple different ones) of leaflet; so instead of a background I rebuilt the entire grafic in leaflet in JS with the SVG as the basis that was display:noned, but this was quite slow, some extreme cases took about 2s on my PC, so I separated general visualization logic from SVG logic (this would have been generally a todo) and added a JSON translation, changing the exchange format massively boostet performance (these extreme cases were pushed to about 200ms on my PC) and shrinked the data size a lot)
 
 ## creating the raw breeding tree (includes/tree_creation)
+
+todo: Subtrees with multiple roots
+
 In this building step we look for all shortest successful breeding paths. That is done by trying all possibilities and adding them on success.
 
 First some general thougts:
@@ -194,8 +197,212 @@ All female-only Pokémon that are not an evolution of the current node Pokémon 
 A mixer that directly inserts tree entities by adding an entity as a successful successor. This is currently only used for the Volt Tackle special case, where a Light Orb node is inserted.
 
 ## creating a structure for visualization (includes/visual_creation)
+In this step everything needed for general visualization is calculated. Icons are loaded, sub tree widths and coordinates are calculated and successors get ordered.
+
+### loading icons
+This step needs by far the most time of the general visualization and in many cases of the entire backend.
+
+Via the MediaWikiServices class the icon file for each node is loaded. Then the file url is extracted from that data and set in the visual preparation instance.
+
+### calculating subtree heights
+Here "height" means the height in our rotated visual scenario. Technically it's the width of a tree.
+
+Each subtree calculates the heights of its roots and its subtree successors and takes the greater one as its own height.
+
+The roots' heigh and successors' height are calculated by adding the individual heights together.
+
+Long story short: Each subtree recursively calculates its height + the extra addition for our special subtrees with multiple roots.
+
+### ordering successors
+It's more handier for users to have the shortest paths closest to their viewpoints. To manage that, the successors of each subtree are ordered by height, with the smaller the closer to the middle.
+
+Subtrees with 1 or no successors are skipped in this step.
+
+First the successors are ordered by height ascending.
+
+For the next step we have to react to an even or uneven amount of successors at some point. I chose to do this right at the beginning to keep the loop later on smaller.
+
+With an even amount the second last successor index is taken, otherwise the last one, so we start at the end of the list.
+
+Now we hop to the start with 2 indices per jump and add each encountered successor to our new successor list.
+Because of our index selection at the start we always end up at index -1. Here we do a little correcting step to index 0 (add this successor to the list) and then hop in opposite direction, to the end, again with 2 indices per jump and add each encountered successor to the new list.
+
+After that we have a sorted as wanted list of successors.
+
+todo: add neat grafic for this algorithm
+
+### calculating y coordinates
+The y coordinates like most algorithms in this step are calculated recursively.
+
+Each subtree gets an vertical offset as a parameter which is basically the vertical starting point of this subtree (the y coordinate at which the highest/lowest node will appear).
+
+First: Single roots calculate it like it's shown in this TODO neat grafic:
+
+Then: Each successor subtree calculates its y coordinates recursively. For that an initial offset is calculated like in this neat TODO grafic:
+and then after the first successor, the next offset is just the last one with the height of the last successor on top.
+
+In the end: For multiple roots, we first need the upper and lower borders for our roots. Both the roots and the successors can be the taller part so we have to handle that not always these borders are aquivalent to the highest and lowest point of the subtree.
+
+First, the top: If roots are wider, we just take the original offset, otherwise we take the highest successor's y coordinate.
+
+Then the bottom: Same scheme as with the top: If roots are wider we take the original offset + the roots' height, otherwise the lowest successor's y coordinate.
+
+Then we calculate the starting point of the roots like this TODO neat grafic shows:
+
+and then just calculate each roots y coordinate by adding the last root's height to the last offset.
+
+Little note: This algorithm took several bug fixes to work correctly. If something appears odd about the display of multiple roots of a subtree, the bug is probably somewhere here.
+
+### calculating x coordinates
+This is rather simple. Every subtree gets its deepness (how far to the right it is) as a parameter, each root sets its x coordinate by multiplying the deepness with the visual node horizontal margin constant, and then each successor does the same with incremented deepness.
+
+### classes
+#### VisualPreparationSubtree
+This step uses the same subtree system as the breeding chain calculation. However here most of the logic happens in the subtree while the nodes just give and get values for the calculations.
+
+#### VisualPreparationNode
+The node class does everything that doesn't require other nodes. Here the icons are loaded, values are given on demand and new values are taken and set.
+
+The coordinates have three different types: default, middle and bottom.
+Default means the upper left corner of the node, the other two mean what their name implies.
+
 ## translating it into usable data exchange format (includes/visual_cretion)
+Most of the logic of this step happens in the Visual<Item>.php classes. The JSON and SVG classes just do the last step of converting the finished visual structures in the corresponding formats.
+
+todo
 
 # frontend
 ## form
+The form is built using the OOUI package from MediaWiki. This can be used with JS and php, but its capabilities with php are far smaller and especially far worse documented -> The loading bar is created in the backend so that it instantly appears, the entire form is built in JS.
+
+Little note: Maybe at some point, building the form can be outsourced to the backend. This is one of the two big performance problems (the other one is building the leaflet grafic) and should be solved if possible.
+
+The form has three standard text inputs and three checkboxes for debug outputs that are only displayed for people of the group "voting". They are only hidden, these three options aren't checked again with the user groups anywhere, because I don't see a problem with random users seeing the debug outputs. It's just irrelevant for almost everyone and makes the form bigger.
+
+Every text input updates its warnings on input change. The errors are only set when trying to submit the form.
+
+### game input
+The game input has one set of options and updates the other two inputs (i. e. options and errors+warnings) when its input changes.
+
+### Pokémon input
+The Pokémon suggestions are dynamically created by filtering out those Pokémon that don't have breeding learnsets in the selected game.
+Changing this input updates the move input.
+
+### move input
+The move suggestions are the breeding learnsets of the selected Pokémon in the selected game. Changing this input only updates its warnings but nothing else.
+
+### submit button
+Currently the submit function only checks for empty fields and sets errors and stops if that's the case. Otherwise it builds the targeted url and opens it in the current tab.
+
+### changes to OOUI
+Because the default OOUI would have some critical problems for the specialpage I inserted one method chain and changed two existing methods.
+All 3 changes are just little deletions. But still this is very unclean. Maybe these changes can be suggested to the OOUI team at some point.
+
+These changes are added in the `addCustomMethods` function.
+
+#### massive performance increase of setting options
+The Pokémon suggestions are updated every time the game input has a new valid value. This means that a few hundred items have to be set.
+
+The first change is that the option objects are created in the form JS itself and directly put into the OOUI core. By doing that they don't have to be created every single time, which is I think quite a big impact on performance because option objects contain multiple document element instances.
+
+However this isn't enough by far. By throwing around some time logging in the OOUI core, I found that two event emits in the final method that actually sets or moves the options have a very heavy performance impact. Because I don't need events that say "this has been added/moved" I just removed these emits, which shortened the needed time for large Pokémon amounts on my PC from about 2s to 200ms.
+
+Little note: When I targeted this problem I didn't manage to do this change asynchronously. However I accidently accomplished it while trying to get something else asynchronous. So should this performance increase break at some point and can't get fixed, it can just get removed and wouldn't cause the original massive problem.
+
+#### custom dropdown button action
+By default the text input is automatically selected when clicking the dropdown button. On touch devices this results in tapping the button, the text input is focused, the touch keyboard opens and the dropdown closes -> annoying af, so I just removed the method call that focuses the text input
+
+#### dropdown unwantedly reacting to small heights
+The suggestions dropdowns choose a direction (up/down) on their own if the dropdown doesn't fit on the screen with initial zoom. The problem with this is, that on most mobile devices this causes the dropdown to display on top of the text input, directly in the logobar which has a higher z-index -> a large part of the dropdown is unreachable.
+To solve this I removed the part that checks whether the dropdown would have enough space and reacts to it, so the dropdown is always displayed in the set direction, even if it would be only one nanometer big.
+
 ## leaflet
+In the leaflet map creation the map is created and the JSON structure from the last backend build step is run through and based on it the corresponding leaflet elements are created.
+
+The zoom doesn't work by just using mouse wheel events because these have strange differences across browsers. Instead 60px are taken is an estimate for one mouse wheel step. With this estimate and the wanted zoom step size, a wheel pixel amount per zoom level is calculated and set in leaflet.
+
+## external data and manual_data folder
+To avoid the bottleneck of one or few server administrators in updating the special page, most of the needed data is saved in pages in the MediaWiki namespace in the wiki so that normal administrators can edit them as well. For example when an error is found, this is helpful.
+
+However some few JSON files are stored in the manual_data folder because those will only have to change when new games are released and then the specialpage will have to be updated nonetheless.
+
+## external json scheme
+### Pokémon
+### egg groups
+```ts
+interface EggGroups {
+    [eggGroupName: string]: string[];
+}
+```
+
+### Pokémon
+Pokémon data is separated in commons for each gen and diffs for each game. In the commons files are properties that don't and won't change across games in a gen, in the diffs files are the properties that do change and might change in the future across games in one gen.
+Learnsets are stretched across both file types to shrink file sizes.
+
+```ts
+interface Pkmn {
+    /**
+     * Pokémon number as it's used in PokéWiki
+     * e. g. 025 for Pikachu and 025g1 for Giga-Pikachu
+     */
+    id: string,
+    /**
+     * the targeted game
+     */
+    game: string,
+    /**
+     * whether this Pokémon exists in the targeted game
+     */
+    exists: boolean,
+    /**
+     * all property names of the big external JSOn objects are lower case to be able to efficiently ignore character casing of move input 
+     * but when the Pokémon name is output to the user, we want the correct casing
+     */
+    correctlyWrittenName: string,
+    /**
+     * the base name of the learnset subpage
+     * For specialcases this is the name of the normal form
+     * todo this can be outsourced to a file in manual_data folder that lists all specialforms and their normal form
+     */
+    subpageLinkName: string,
+    /**
+     * first egg group, should always have a non empty string
+     */
+    eggGroup1: string,
+    /**
+     * second egg group, if the Pokémon doesn't have one, this is set to ""
+     */
+    eggGroup2: string,
+    gender: 'male' | 'female' | 'both' | 'unknown',
+    /**
+     * the lowest evolution of the evolution line of this Pokémon
+     * e. g. Pikachu would have set "Pichu"
+     * 
+     * Is needed for evo connections and SuccessorFilter
+     */
+    lowestEvo: string,
+    /**
+     * all higher evolutions of this Pokémon
+     */
+    evolutions: string[],
+    /**
+     * whether this Pokémon can get children
+     */
+    unpairable: boolean,
+    /**
+     * whether this Pokémon can be born directly
+     */
+    unbreedable: boolean,
+    /**
+     * level up, TMTR/TMHM and Tutor learnsets
+     */
+    directLearnsets: string[],
+    breedingLearnsets: string[],
+    eventLearnsets: string[],
+    /**
+     * directLearnsets from older games
+     */
+    oldGenLearnsets: string[],
+
+}
+```
