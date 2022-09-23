@@ -1,5 +1,23 @@
+# toc
+1. [intro](#intro)
+2. [context](#content)
+3. [terms/names](#termsnames)
+4. [tree building steps](#tree-building-steps)
+   1. [creating the raw breeding tree](#creating-the-raw-breeding-tree)
+   2. [creating a structure for visualization](#creating-a-structure-for-visualization)
+   3. [translating it into usable data exchange format](#translating-it-into-usable-data-exchange-format)
+5. [frontend](#frontend)
+   1. [form](#form)
+   2. [leaflet](#leaflet)
+6. [external data and manual data folder](#external-data-and-manual-data-folder)
+7. [external json schemes](#external-json-schemes)
+8. [exec path](#exec-path-folder)
+9. [exceptions](#exceptions-folder)
+10. [top level classes in the includes folder](#top-level-classes-in-the-includes-folder)
+11. [output messages](#output-messages-folder)
+
 # intro
-This documentation is primarily intended to explain how this special page works and make it far easier for you to change this software. It's not meant as usage/setup documentation. At some points this maybe went a bit too much from pure explanation to telling the short story how the approach came into being, but the development of an approach increases naturally in complexity and stories in general are easier to read and memorize, so hopefully it's all right.
+This documentation is primarily intended to explain how this special page works and make it far easier for you to change this software. It's not meant as usage/setup documentation. It's also not meant as a complete standalone definition of this specialpage, meaning it explains the algorithms and design choices but generally not the concrete code. At some points this maybe went a bit too much from pure explanation to telling the short story how the approach came into being, but the development of an approach increases naturally in complexity and stories in general are easier to read and memorize, so hopefully it's all right.
 
 The BreedingChains specialpage has the goal to display the possible breeding chains for a Pokémon to get a certain move in the most practical way. This also means that the built breeding trees are explicitly *NOT* complete. Often you can have massive chains of breeding, sometimes even infinitely long ones when you manage to build closed loops. For smaller grafics and faster computing this specialpage uses some rules to ignore unnecessarily long breeding paths.
 
@@ -89,7 +107,9 @@ In the last step the visual structure is translated into a concrete and small ex
 
 (little side note about the move from SVG to JSON: at first the grafics were built and displayed as SVGs, but building zooming and moving myself was difficulter than expected and then I heard of leaflet that basically did all of that far better and I switched to it; at first I just used the SVG grafic as a background in leaflet and added some popups and so on via JS, but this was quite tricky because of imo. unintuitive coordinate systems (yes, multiple different ones) of leaflet; so instead of a background I rebuilt the entire grafic in leaflet in JS with the SVG as the basis that was display:noned, but this was quite slow, some extreme cases took about 2s on my PC, so I separated general visualization logic from SVG logic (this would have been generally a todo) and added a JSON translation, changing the exchange format massively boostet performance (these extreme cases were pushed to about 200ms on my PC) and shrinked the data size a lot)
 
-## creating the raw breeding tree (includes/tree_creation)
+## creating the raw breeding tree
+Folder: `includes/tree_creation`
+
 In this building step we look for all shortest successful breeding paths. That is done by trying all possibilities and adding them on success.
 
 First some general thougts:
@@ -214,7 +234,9 @@ All female-only Pokémon that are not an evolution of the current node Pokémon 
 #### `SuccessorMixer`
 A mixer that directly inserts tree entities by adding an entity as a successful successor. This is currently only used for the Volt Tackle special case, where a Light Orb node is inserted.
 
-## creating a structure for visualization (includes/visual_creation)
+## creating a structure for visualization
+Folder: `includes/visual_creation`
+
 In this step everything needed for general visualization is calculated. Icons are loaded, sub tree widths and coordinates are calculated and successors get ordered.
 
 ### loading icons
@@ -256,9 +278,9 @@ Each subtree gets an vertical offset as a parameter which is basically the verti
 
 First: Single roots calculate it like it's shown in this neat grafic:
 ![a visual example was supposed to be here :(](SingleNodeYCalculation.svg)
+This is btw. the general calculation pattern used here for getting y coordinates of centered objects.
 
-Then: Each successor subtree calculates its y coordinates recursively. For that an initial offset is calculated like in this neat TODO grafic:
-and then after the first successor, the next offset is just the last one with the height of the last successor on top.
+Then: Each successor subtree calculates its y coordinates recursively. For that an initial offset is calculated. This happens very similiar like the first step, but here imagine that the node in the calculation actually consists of multiple roots. You have to get the sum of the height of multiple entities but after that the calculation is pretty much the same. And then after the first successor, the next offset is just the last one with the height of the last successor on top.
 
 In the end: For multiple roots, we first need the upper and lower borders for our roots. Both the roots and the successors can be the taller part so we have to handle that not always these borders are aquivalent to the highest and lowest point of the subtree.
 
@@ -266,7 +288,7 @@ First, the top: If roots are wider, we just take the original offset, otherwise 
 
 Then the bottom: Same scheme as with the top: If roots are wider we take the original offset + the roots' height, otherwise the lowest successor's y coordinate.
 
-Then we calculate the starting point of the roots like this TODO neat grafic shows:
+Then we calculate the starting point of the roots, again with the calculation scheme showed in the grafic above.
 
 and then just calculate each roots y coordinate by adding the last root's height to the last offset.
 
@@ -285,10 +307,17 @@ The node class does everything that doesn't require other nodes. Here the icons 
 The coordinates have three different types: default, middle and bottom.
 Default means the upper left corner of the node, the other two mean what their name implies.
 
-## translating it into usable data exchange format (includes/visual_creation)
-Most of the logic of this step happens in the Visual<Item>.php classes. The JSON and SVG classes just do the last step of converting the finished visual structures in the corresponding formats.
+## translating it into usable data exchange format
+Folder: `includes/visual_creation`
 
-todo
+In this step the concrete grafical items for visualization are created. Like lines, circles, icons and so on.
+
+Most of the logic of this step happens in the abstract Visual<Item>.php classes. The JSON and SVG classes just do the last step of converting the finished visual structures in the corresponding formats.
+
+Similiar to the previous one, this build step works mostly on the subtree layer while the nodes get and give values.
+First the roots' icons are created. Then the connection/line structure between the current roots and successor is built. Then this is recursively done again for all successors.
+
+In the end the compile method is called on the top level root and the final data structure is recursively created. In this step the circles are created and added. Todo: This is a bit out of place here: It would be more consistent to create them with the icons and lines.
 
 # frontend
 ## form
@@ -340,12 +369,12 @@ In the leaflet map creation the map is created and the JSON structure from the l
 
 The zoom doesn't work by just using mouse wheel events because these have strange differences across browsers. Instead 60px are taken is an estimate for one mouse wheel step. With this estimate and the wanted zoom step size, a wheel pixel amount per zoom level is calculated and set in leaflet.
 
-# external data and manual_data folder
+# external data and manual data folder
 To avoid the bottleneck of one or few server administrators in updating the special page, most of the needed data is saved in pages in the MediaWiki namespace in the wiki so that normal administrators can edit them as well. For example when an error is found, this is helpful.
 
 However some few JSON files are stored in the manual_data folder because those will only have to change when new games are released and then the specialpage will have to be updated nonetheless.
 
-# external json scheme
+# external json schemes
 ## Pokémon
 ## egg groups
 ```ts
@@ -426,7 +455,7 @@ interface Pkmn {
 }
 ```
 
-# exec_path folder
+# exec path folder
 The exec_path folder contains the classes that build the order of actions of the specialpage. It consists of many sections of doing something (tracks) and many sections of checking the current state for an early stop (checkpoints). At first this was done by one long central method in the SpecialBreedingChains class, but I was unhappy with it, so I created this checkpoints and tracks system.
 
 In a track the state of the current execution is changed. For example the constants are initialized or the breeding chains structure is calculated. In a checkpoint the current state is checked for certain states that cause an early finish. For example whether the breeding chains calculation returned an empty tree, meaning the Pokémon can't learn the move, or testing the form inputs for invalid data.
@@ -482,5 +511,5 @@ It does following things:
 5. starts the exec_path i. e. the special page background magic
 6. adds the CSS and JS
 
-# folder output_messages
+# output messages folder
 This folder contains classes for basic message boxes. The outputOnce methods were originally needed when the form was built via the HTMLForm class. Currently they are probably unused.
